@@ -1,25 +1,33 @@
 ===================================
-beproudbot
+Haro
 ===================================
 
-beproudbot
+Haro is slackbot <https://github.com/lins05/slackbot> based beproud bot system.
+
 
 事前準備
 ===================================
 
-virtualenvwapper にて環境を構築する。
+Requirements
+-----------------
+
+- Python 3.5.2 or later.
 
 .. code-block:: bash
 
-   $ hg clone https://github.com/beproud/beproudbot
+   $ python3 -m venv env
+   $ git clone git@github.com:beproud/beproudbot.git
    $ cd beproudbot
-   $ mkvirtualenv beproudbot
-   $ pip install -r beproudbot/requirements.txt
+   $ source /path/env/bin/activate
+   (env)$ cp slackbot_settings.py.sample slackbot_settings.py
+   (env)$ vi slackbot_settings.py
+   (env)$ pip install -r beproudbot/requirements.txt
 
-起動
-===================================
+
+起動方法
+==================
 
 .. code-block:: bash
 
-   $ cd beproudbot
-   $ python run.py
+   $ source /path/env/bin/activate
+   (env)$ python run.py
