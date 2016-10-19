@@ -4,3 +4,7 @@ Unreleased
 Release Notes - 2016-10-18
 --------------------------
 - [#50458] 新beproudbotのbaseのコードを追加
+
+Release Notes - 2016-10-20
+--------------------------
+- [#50509] Haro: sampleのpluginを追加

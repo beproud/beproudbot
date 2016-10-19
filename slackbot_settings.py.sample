@@ -7,7 +7,10 @@ API_TOKEN = ''
 default_reply = 'コマンドが不明です。'
 
 # 読み込むpluginのリスト
-PLUGINS = []
+PLUGINS = [
+	'beproudbot.plugins.misc',
+
+]
 
 # コマンドの接頭語
 ALIASES = '$'
