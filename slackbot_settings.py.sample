@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # SlackのAPIトークン
 API_TOKEN = ''
