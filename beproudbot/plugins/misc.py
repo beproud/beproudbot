@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import random
 from slackbot.bot import respond_to
 
