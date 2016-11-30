@@ -2,13 +2,8 @@ from __future__ import with_statement
 import os
 import sys
 from alembic import context
-from sqlalchemy import engine_from_config, pool, MetaData
+from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
-
-# beproudbotのrootパス
-root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-# beproudbotのmodelを呼び出すのでsys.pathに追加
-sys.path.append(root)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,25 +13,17 @@ config = context.config
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
-
-def combine_metadata(*args):
-    """alembicで復数のModelに対応するようにする関数
-    - http://liuhongjiang.github.io/hexotech/2015/10/14/alembic-support-multiple-model-files/
-    """
-    m = MetaData()
-    for metadata in args:
-        for t in metadata.tables.values():
-            t.tometadata(m)
-    return m
+# Baseをimportするのでbeproudbotのrootパスを追加
+root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(root)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-# metadatas = create_model_class_metadatas()
+from db import Base
 
-# beproudbotでmodelを定義した際はcombine_metadataの引数としてModelのmetadataを追加していく
-target_metadata = combine_metadata()
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
