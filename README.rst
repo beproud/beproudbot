@@ -27,11 +27,11 @@ Requirements
 起動方法
 ==================
 
+
 .. code-block:: bash
 
    $ source /path/env/bin/activate
-   (env)$ python run.py
-
+   (env)$ python run.py --settings [env]
 
 
 Command
