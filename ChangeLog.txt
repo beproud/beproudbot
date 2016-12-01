@@ -3,7 +3,7 @@ Unreleased
 
 Release Notes - 2016-12-01
 --------------------------
-- [#10] alembicでmaigrationを行う設定
+- [#10] alembicでmaigrationを行うコードを追加
 
 Release Notes - 2016-10-24
 --------------------------
