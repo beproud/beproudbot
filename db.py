@@ -6,7 +6,8 @@ from sqlalchemy.ext.declarative import declarative_base
 Session = sessionmaker()
 Base = declarative_base()
 
-# Modelを追加した場合、Baseに紐付けるためModelをimportしてください
+# beproudbotでModelを追加した場合、
+# alembicでimportしているBaseに紐付けるためModelをimportしてください
 # [例]:from beproudbot.plugins.user_models import User # noqa
 
 
