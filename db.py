@@ -11,16 +11,16 @@ Base = declarative_base()
 # [例]:from beproudbot.plugins.user_models import User # noqa
 
 
-def init_dbsession(settings, prefix='sqlalchemy.'):
+def init_dbsession(config, prefix='sqlalchemy.'):
     """Initialize with setting value so that DB can be used
-    :param settings: Dictionary generated from config file
+    :param config: Dictionary generated from config file
     :param prefix: Prefix to match and then strip from keys
-        in 'configuration'.
+        in 'config'.
     :type settings: dict
     :type prefix: str
     :return: `~sqlalchemy.orm.session.Session` instance
     """
-    engine = engine_from_config(settings, prefix)
+    engine = engine_from_config(config, prefix)
     Session.configure(bind=engine)
     Base.metadata.bind = engine
     return Session
