@@ -35,7 +35,7 @@ def main():
     parser = get_argparser()
     args = parser.parse_args()
     config_path = os.path.join(os.path.dirname(__file__),
-                               'conf/%s.ini' % args.config_name)
+                               'conf', '%s.ini' % args.config_name)
 
     if os.path.isfile(config_path):
         conf = ConfigParser()
