@@ -12,7 +12,13 @@ Base = declarative_base()
 
 
 def init_dbsession(settings, prefix='sqlalchemy.'):
-    """beproudbotのModelとDBの紐付けを行う
+    """Initialize with setting value so that DB can be used
+    :param settings: Dictionary generated from config file
+    :param prefix: Prefix to match and then strip from keys
+        in 'configuration'.
+    :type settings: dict
+    :type prefix: str
+    :return: `~sqlalchemy.orm.session.Session` instance
     """
     engine = engine_from_config(settings, prefix)
     Session.configure(bind=engine)

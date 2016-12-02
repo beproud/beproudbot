@@ -1,5 +1,7 @@
+import os
 import argparse
-from importlib import import_module
+from textwrap import dedent
+from configparser import ConfigParser
 
 from slackbot.bot import Bot
 from db import init_dbsession
@@ -8,31 +10,45 @@ from db import init_dbsession
 def get_argparser():
 
     parser = argparse.ArgumentParser(
-        usage='python run.py [-s | --settings] [settings filename]',
-    )
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=dedent('''\
+            Description:
+            Start slackbot process after loading the beproudbot config file'''))
 
-    parser.add_argument('-s', '--settings',
-                        nargs='?',
+    parser.add_argument('-c', '--config',
                         type=str,
-                        dest='settings_name',
-                        help='set `local` or `production`')
+                        required=True,
+                        dest='config_name',
+                        help='set the config filename')
 
     return parser
 
 
 def main():
+    """Load parsed config file and start beproudbot
+    1. Check existence of config file
+    2. Check if the necessary value is set in the config file
+    3. Initialize with setting value so that DB can be used
+    4. Start slackbot process
+    """
+
     parser = get_argparser()
     args = parser.parse_args()
-    if args.settings_name:
-        try:
-            settings = import_module('settings.%s' % args.settings_name)
-            init_dbsession(settings.DATABASE_CONFIG)
+    config_path = os.path.join(os.path.dirname(__file__),
+                               'conf/%s.ini' % args.config_name)
+
+    if os.path.isfile(config_path):
+        conf = ConfigParser()
+        conf.read(config_path)
+        if conf.has_option('alembic', 'sqlalchemy.url'):
+            init_dbsession(conf._sections['alembic'])
             bot = Bot()
             bot.run()
-        except ImportError as e:
-            print(e)
+        else:
+            print('alembic section or sqlalchemy.url option is not\
+                   set in the config file')
     else:
-        print('--settings options not set')
+        print('No such config file :%s.ini' % args.config_name)
 
 
 if __name__ == "__main__":

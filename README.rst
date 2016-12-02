@@ -31,7 +31,8 @@ Requirements
 .. code-block:: bash
 
    $ source /path/env/bin/activate
-   (env)$ python run.py --settings [env]
+   # config_nameには `beproudbot/conf` ディレクトリ内に作成した*.iniのファイル名を指定します
+   (env)$ python run.py --config config_name
 
 
 Command
