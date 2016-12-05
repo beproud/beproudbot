@@ -1,6 +1,10 @@
 Unreleased
 ----------
 
+Release Notes - 2016-12-01
+--------------------------
+- [#10] alembicでmaigrationを行うコードを追加
+
 Release Notes - 2016-10-24
 --------------------------
 - [#50509] sampleのpluginを追加
