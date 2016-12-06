@@ -1,7 +1,7 @@
 Unreleased
 ----------
 
-Release Notes - 2016-12-01
+Release Notes - 2016-12-06
 --------------------------
 - [#10] alembicでmaigrationを行うコードを追加
 

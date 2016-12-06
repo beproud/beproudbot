@@ -31,8 +31,8 @@ Requirements
 .. code-block:: bash
 
    $ source /path/env/bin/activate
-   # config_nameには設定ファイルのパスを指定します
-   (env)$ python run.py --config config_name
+   # configには設定ファイルのファイルパスを指定します
+   (env)$ python run.py --config config
 
 
 Command

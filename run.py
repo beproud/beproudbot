@@ -12,24 +12,24 @@ def get_argparser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent('''\
-            Description:
-            Start slackbot process after loading the beproudbot config file'''))
+            説明:
+            beproudbotの設定ファイルを読み込んだ後にslackbotを起動します'''))
 
     parser.add_argument('-c', '--config',
                         type=argparse.FileType('r'),
                         required=True,
-                        help='Specify config file')
+                        help='ini形式のファイルをファイルパスで指定します')
 
     return parser
 
 
 def main():
-    """Load parsed config file and start beproudbot
+    """設定ファイルをparseして、slackbotを起動します
 
-    1. Check existence of config file
-    2. Check if the necessary value is set in the config file
-    3. Initialize with config value so that DB can be used
-    4. Start slackbot process
+    1. configparserで読み込めるファイルかチェック
+    2. 設定ファイルに必須の設定項目が設定されているかチェック
+    3. 1. 2.のチェックで問題なければ設定ファイルの情報でDB周りの設定を初期化
+    4. slackbotの処理を開始
     """
 
     parser = get_argparser()
@@ -42,8 +42,8 @@ def main():
         sys.exit(e)
 
     if not conf.has_option('alembic', 'sqlalchemy.url'):
-        sys.exit('alembic section or sqlalchemy.url'
-                 ' option is not set in the config file')
+        sys.exit('設定ファイルにalembicセクション及び、'
+                 'sqlalchemy.urlオプションの項目が存在していません')
 
     init_dbsession(conf['alembic'])
     bot = Bot()

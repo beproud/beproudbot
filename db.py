@@ -12,11 +12,11 @@ Base = declarative_base()
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):
-    """Initialize with cinfig value so that DB can be used
+    """configに設定した値でDBの設定情報を初期化
 
-    :param dict config: Dictionary generated from config file
-    :param str prefix: Prefix to match and then strip from keys in 'config'.
-    :return: `~sqlalchemy.orm.session.Session` instance
+    :param dict config: configから生成したdictの設定値
+    :param str prefix: configのoption名から取り除く接頭辞
+    :return: `~sqlalchemy.orm.session.Session` インスタンス
     """
     engine = engine_from_config(config, prefix)
     Session.configure(bind=engine)
