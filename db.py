@@ -12,12 +12,10 @@ Base = declarative_base()
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):
-    """Initialize with setting value so that DB can be used
-    :param config: Dictionary generated from config file
-    :param prefix: Prefix to match and then strip from keys
-        in 'config'.
-    :type settings: dict
-    :type prefix: str
+    """Initialize with cinfig value so that DB can be used
+
+    :param dict config: Dictionary generated from config file
+    :param str prefix: Prefix to match and then strip from keys in 'config'.
     :return: `~sqlalchemy.orm.session.Session` instance
     """
     engine = engine_from_config(config, prefix)
