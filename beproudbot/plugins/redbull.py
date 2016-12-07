@@ -52,7 +52,7 @@ def manage_redbull_stock(message, delta):
 
 
 @respond_to('^redbull\s+history$')
-def show_user_redbull_history(message):
+def show_redbull_user_history(message):
     """RedBullのUserごとの消費履歴を返すコマンド
     """
     user_name = get_user_name(message.body['user'])
@@ -158,5 +158,6 @@ def show_help_redbull_commands(message):
     $redbull clear        : RedBullのDBデータを削除する為の認証tokenを表示する
     $redbull clear token  : tokenが合っていればRedBull履歴データを削除する
     $redbull csv          : RedBullの月単位の消費履歴をCSV形式で表示する
+
     ```''')
     message.send(help_text)
