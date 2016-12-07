@@ -1,7 +1,6 @@
-import sys
 import argparse
 from textwrap import dedent
-from configparser import ConfigParser, Error
+from configparser import ConfigParser, NoSectionError
 
 from slackbot.bot import Bot
 from db import init_dbsession
@@ -26,24 +25,19 @@ def get_argparser():
 def main():
     """設定ファイルをparseして、slackbotを起動します
 
-    1. configparserで読み込めるファイルかチェック
-    2. 設定ファイルに必須の設定項目が設定されているかチェック
-    3. 1. 2.のチェックで問題なければ設定ファイルの情報でDB周りの設定を初期化
+    1. configparserで設定ファイルを読み込む
+    2. 設定ファイルに `alembic` セクションが設定されているかチェック
+    3. 設定ファイルの情報でDB周りの設定を初期化
     4. slackbotの処理を開始
     """
 
     parser = get_argparser()
     args = parser.parse_args()
     conf = ConfigParser()
+    conf.read_file(args.config)
 
-    try:
-        conf.read_file(args.config)
-    except Error as e:
-        sys.exit(e)
-
-    if not conf.has_option('alembic', 'sqlalchemy.url'):
-        sys.exit('設定ファイルにalembicセクション及び、'
-                 'sqlalchemy.urlオプションの項目が存在していません')
+    if not conf.has_section('alembic'):
+        raise NoSectionError('alembic')
 
     init_dbsession(conf['alembic'])
     bot = Bot()
