@@ -1,6 +1,7 @@
 ## Settings for slackbot
 
 # SlackのAPIトークン
+# https://my.slack.com/services/new/bot で生成
 API_TOKEN = ''
 
 # 該当するコマンドが存在しない時に表示する文言
