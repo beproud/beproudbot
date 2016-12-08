@@ -27,11 +27,12 @@ Requirements
 起動方法
 ==================
 
+
 .. code-block:: bash
 
    $ source /path/env/bin/activate
-   (env)$ python run.py
-
+   # configには設定ファイルのファイルパスを指定します
+   (env)$ python run.py --config config
 
 
 Command
