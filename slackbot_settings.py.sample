@@ -14,3 +14,9 @@ PLUGINS = [
 
 # コマンドの接頭語
 ALIASES = '$'
+
+# デバッグモードにするとログが出るので、開発時には便利
+# DEBUG = True
+#
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
