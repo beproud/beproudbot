@@ -1,6 +1,6 @@
 チケットURL
 
-- https://project.beproud.jp/redmine/issues/99999
+- #XX
 
 このレビューで確認してほしい点
 
