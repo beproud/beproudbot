@@ -8,7 +8,9 @@ Base = declarative_base()
 
 # beproudbotでModelを追加した場合、
 # alembicでimportしているBaseに紐付けるためModelをimportしてください
-# [例]:from beproudbot.plugins.user_models import User # noqa
+# [例]:from beproudbot.plugins.user_models import User  # noqa
+
+from beproudbot.plugins.redbull_models import RedbullHistory  # noqa
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):

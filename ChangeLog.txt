@@ -1,6 +1,10 @@
 Unreleased
 ----------
 
+Release Notes - 2016-12-XX
+--------------------------
+- [#7] redbull pluginの実装
+
 Release Notes - 2016-12-12
 --------------------------
 - [#14] randomコマンドを追加
