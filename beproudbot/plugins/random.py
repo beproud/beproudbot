@@ -5,6 +5,11 @@ from slackbot import settings
 import slacker
 
 
+HELP = '''- `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
+- `$random active`: チャンネルにいるactiveなメンバーからランダムに一人を選ぶ
+- `$random help`: randomコマンドの使い方を返す
+'''
+
 @respond_to('^random$')
 @respond_to('^random\s+(active|help)$')
 def random_command(message, subcommand=None):
@@ -17,9 +22,7 @@ def random_command(message, subcommand=None):
     """
 
     if subcommand == 'help':
-        message.send('''- `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
-- `$random active`: チャンネルにいるactiveなメンバーからランダムに一人を選ぶ
-''')
+        message.send(HELP)
         return
 
     # チャンネルのメンバー一覧を取得
