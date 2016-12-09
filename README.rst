@@ -54,3 +54,9 @@ misc plugin
    $shuffle spam ham eggs
    # 指定された単語から一つをランダムに選んで返す
    $choice spam ham eggs
+
+random plugin
+-------------
+- `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
+- `$random active`: チャンネルにいるactiveなメンバーからランダムに一人を選ぶ
+- `$random help`: randomコマンドの使い方を返す
