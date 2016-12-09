@@ -36,15 +36,17 @@ def random_command(message, subcommand=None):
     members.remove(bot_id)
 
     member_id = None
-    while not member_id:
-        # メンバー一覧からランダムに選んで返す
+
+    if subcommand != 'active':
         member_id = random.choice(members)
-        if subcommand == 'active':
-            # active が指定されている場合は presence を確認する
+    else:
+        # active が指定されている場合は presence を確認する
+        random.shuffle(members)
+        for member in members:
             presence = webapi.users.get_presence(member_id)
-            if presence.body['presence'] == 'away':
-                members.remove(member_id)
-                member_id = None
+            if presence.body['presence'] == 'active':
+                member_id = member
+                break
 
     user_info = webapi.users.info(member_id)
     name = user_info.body['user']['name']
