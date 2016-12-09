@@ -8,6 +8,14 @@ Haro is slackbot <https://github.com/lins05/slackbot> based beproud bot system.
 事前準備
 ===================================
 
+APIトークンの取得
+-----------------
+- https://my.slack.com/services/new/bot にアクセス
+- botの名前を適当に指定して「Add bot integration」ボタンをクリックする
+- 「Save Integration」ボタンをクリックして保存する
+
+  - API Token(``xoxb-XXXXXXX-XXXXXXX``)をこのあと使用するので、コピーしておく
+
 Requirements
 -----------------
 
@@ -20,7 +28,7 @@ Requirements
    $ cd beproudbot
    $ source /path/env/bin/activate
    (env)$ cp slackbot_settings.py.sample slackbot_settings.py
-   (env)$ vi slackbot_settings.py
+   (env)$ vi slackbot_settings.py # API Token を記入する
    (env)$ pip install -r beproudbot/requirements.txt
 
 
@@ -32,8 +40,7 @@ Requirements
 
    $ source /path/env/bin/activate
    # configには設定ファイルのファイルパスを指定します
-   (env)$ python run.py --config config
-
+   (env)$ python run.py --config conf/local.ini
 
 Command
 ===================
