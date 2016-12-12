@@ -11,6 +11,7 @@ HELP = '''
 - `$random help`: randomコマンドの使い方を返す
 '''
 
+
 @respond_to('^random$')
 @respond_to('^random\s+(active|help)$')
 def random_command(message, subcommand=None):
