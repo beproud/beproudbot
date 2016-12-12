@@ -5,7 +5,8 @@ from slackbot import settings
 import slacker
 
 
-HELP = '''- `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
+HELP = '''
+- `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
 - `$random active`: チャンネルにいるactiveなメンバーからランダムに一人を選ぶ
 - `$random help`: randomコマンドの使い方を返す
 '''

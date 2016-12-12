@@ -48,12 +48,8 @@ Command
 misc plugin
 ------------------
 
-.. code-block:: bash
-
-   # 指定された単語をシャッフルした結果を返す
-   $shuffle spam ham eggs
-   # 指定された単語から一つをランダムに選んで返す
-   $choice spam ham eggs
+- `$shuffle spam ham eggs`: 指定された単語をシャッフルした結果を返す
+- `$choice spam ham eggs`: 指定された単語から一つをランダムに選んで返す
 
 random plugin
 -------------
