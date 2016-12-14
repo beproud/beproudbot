@@ -1,5 +1,6 @@
 import os
 import csv
+import traceback
 from datetime import datetime
 from random import choice
 from itertools import groupby
@@ -127,10 +128,12 @@ def show_redbull_history_csv(message):
                           params=param,
                           files={'file': f})
         except RequestException as e:
-            message.send('%s' % e)
-
-    if os.path.isfile(csv_filepath):
-        os.remove(csv_filepath)
+            message.send('```例外が発生しました(%s)\n%s```' % (
+                e.__class__.__name__,
+                traceback.format_exc()))
+        finally:
+            if os.path.isfile(csv_filepath):
+                os.remove(csv_filepath)
 
 
 @respond_to('^redbull\s+clear$')
