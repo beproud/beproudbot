@@ -2,12 +2,14 @@ import os
 import csv
 from datetime import datetime
 from random import choice
-from textwrap import dedent
 from itertools import groupby
+
 import requests
+from requests.exceptions import RequestException
 from slackbot import settings
 from slackbot.bot import respond_to
 from sqlalchemy import func
+
 from db import Session
 from utils import get_user_name
 from beproudbot.plugins.redbull_models import RedbullHistory
@@ -16,6 +18,17 @@ from beproudbot.plugins.redbull_models import RedbullHistory
 ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 _cache = {'token': None}
+
+
+HELP_TEXT = """
+- `$redbull count`: RedBullの残り本数を表示する
+- `$redbull (num)`: numの数だけRedBullの本数を減らす
+- `$redbull -(num)`: numの数だけRedBullの本数を増やす
+- `$redbull history`: 自分のRedBullの消費履歴を表示する
+- `$redbull clear`: RedBullのDBデータを削除するtoken付きのコマンドを表示する
+- `$redbull csv`: RedBullの月単位の消費履歴をCSV形式で表示する
+- `$redbull help`: redbullコマンドの使い方を返す
+"""
 
 
 @respond_to('^redbull\s+count$')
@@ -63,8 +76,8 @@ def show_user_redbull_history(message):
           .order_by(RedbullHistory.id.asc()))
     tmp = []
     for line in qs:
-        _created_at = line.created_at.strftime('%Y年%m月%d日 %H:%M:%S')
-        tmp.append('[%s]  %s本' % (_created_at, -line.delta))
+        created_at = line.created_at.strftime('%Y年%m月%d日')
+        tmp.append('[%s]  %s本' % (created_at, -line.delta))
 
     ret = '消費履歴はありません'
     if tmp:
@@ -107,11 +120,14 @@ def show_redbull_history_csv(message):
         param = {
             'token': settings.API_TOKEN,
             'channels': message.body['channel'],
-            'title': 'RedBull Consume History'
+            'title': 'RedBull History Check'
         }
-        requests.post(settings.FILE_UPLOAD_URL,
-                      params=param,
-                      files={'file': f})
+        try:
+            requests.post(settings.FILE_UPLOAD_URL,
+                          params=param,
+                          files={'file': f})
+        except RequestException as e:
+            message.send('%s' % e)
 
     if os.path.isfile(csv_filepath):
         os.remove(csv_filepath)
@@ -123,7 +139,7 @@ def clear_redbull_history(message, token=None):
     """RedBullの履歴データを削除するコマンド
 
     `$redbull clear` のみだと削除するためのトークンを生成して表示する
-    `$redbull clear 表示されたトークン` をPOSTすると
+    `$redbull clear <表示されたトークン>` をPOSTすると
         redbull_historyテーブルのレコード全削除を行う
 
     :param str token: `$redbull clear` の後に入力されたトークン
@@ -149,14 +165,4 @@ def clear_redbull_history(message, token=None):
 def show_help_redbull_commands(message):
     """RedBullコマンドのhelpを表示
     """
-    help_text = dedent('''\
-    ```
-    $redbull count        : RedBullの残り本数を表示する
-    $redbull (num)        : numの数だけRedBullの本数を減らす
-    $redbull -(num)       : numの数だけRedBullの本数を増やす
-    $redbull history      : 自分のRedBullの消費履歴を表示する
-    $redbull clear        : RedBullのDBデータを削除する為の認証tokenを表示する
-    $redbull clear token  : tokenが合っていればRedBull履歴データを削除する
-    $redbull csv          : RedBullの月単位の消費履歴をCSV形式で表示する
-    ```''')
-    message.send(help_text)
+    message.send(HELP_TEXT)

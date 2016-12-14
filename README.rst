@@ -53,6 +53,19 @@ misc plugin
 
 random plugin
 -------------
+
 - `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
 - `$random active`: チャンネルにいるactiveなメンバーからランダムに一人を選ぶ
 - `$random help`: randomコマンドの使い方を返す
+
+
+redbull plugin
+--------------------
+
+- `$redbull count`: RedBullの残り本数を表示する
+- `$redbull (num)`: numの数だけRedBullの本数を減らす
+- `$redbull -(num)`: numの数だけRedBullの本数を増やす
+- `$redbull history`: 自分のRedBullの消費履歴を表示する
+- `$redbull clear`: RedBullのDBデータを削除するtoken付きのコマンドを表示する
+- `$redbull csv`: RedBullの月単位の消費履歴をCSV形式で表示する
+- `$redbull help`: redbullコマンドの使い方を返す
