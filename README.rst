@@ -63,8 +63,7 @@ redbull plugin
 --------------------
 
 - `$redbull count`: RedBullの残り本数を表示する
-- `$redbull (num)`: numの数だけRedBullの本数を減らす
-- `$redbull -(num)`: numの数だけRedBullの本数を増やす
+- `$redbull num`: numの数だけRedBullの本数を減らす(負数の場合、増やす)
 - `$redbull history`: 自分のRedBullの消費履歴を表示する
 - `$redbull clear`: RedBullのDBデータを削除するtoken付きのコマンドを表示する
 - `$redbull csv`: RedBullの月単位の消費履歴をCSV形式で表示する

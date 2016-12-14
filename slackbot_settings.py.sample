@@ -1,10 +1,4 @@
 ## Settings for slackbot
-import os
-
-# ルートディレクトリパス
-BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-# tmpディレクトリパス
-TMP_PATH = os.path.join(BASE_PATH, 'tmp')
 
 # SlackのAPIトークン
 # https://my.slack.com/services/new/bot で生成

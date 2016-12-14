@@ -4,6 +4,7 @@ from slackbot import settings
 
 def get_user_name(user_id):
     """指定された Slack の user_id に対応する username を返す
+
     Slacker で users.list API を呼び出す
     - https://github.com/os/slacker
     - https://api.slack.com/methods/users.info
