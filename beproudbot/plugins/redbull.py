@@ -21,7 +21,7 @@ ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 _cache = {'token': None}
 
 
-HELP_TEXT = """
+HELP = """
 - `$redbull count`: RedBullの残り本数を表示する
 - `$redbull (num)`: numの数だけRedBullの本数を減らす
 - `$redbull -(num)`: numの数だけRedBullの本数を増やす
@@ -168,4 +168,4 @@ def clear_redbull_history(message, token=None):
 def show_help_redbull_commands(message):
     """RedBullコマンドのhelpを表示
     """
-    message.send(HELP_TEXT)
+    message.send(HELP)
