@@ -1,6 +1,10 @@
 Unreleased
 ----------
 
+Release Notes - 2016-12-XX
+--------------------------
+- [#15] waterのpluginの追加
+
 Release Notes - 2016-12-12
 --------------------------
 - [#14] randomコマンドを追加

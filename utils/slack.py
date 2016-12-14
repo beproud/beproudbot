@@ -7,7 +7,6 @@ def get_user_name(user_id):
     Slacker で users.list API を呼び出す
     - https://github.com/os/slacker
     - https://api.slack.com/methods/users.info
-
     :prams str user_id: SlackのユーザーID
     :return str: Slackのユーザー名
     """
