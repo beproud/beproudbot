@@ -26,11 +26,11 @@ def count_water_stock(message):
               .filter(WaterHistory.delta > 0)
               .order_by(WaterHistory.id.desc())).first()
 
-    created_at = latest.created_at.strftime('%Y年%m月%d日')
-
-    if total_delta is None:
-        total_delta = 0
-    message.send('残数: {}本 ({} 追加)'.format(total_delta, created_at))
+    if total_delta:
+        created_at = latest.created_at.strftime('%Y年%m月%d日')
+        message.send('残数: {}本 ({} 追加)'.format(total_delta, created_at))
+    else:
+        message.send('管理履歴はありません')
 
 
 @respond_to('^water\s+([-]?[0-9]+)$')
@@ -50,15 +50,15 @@ def manage_water_stock(message, delta):
     q = s.query(func.sum(WaterHistory.delta).label('total_delta'))
     total_delta = q.one().total_delta
 
-    if delta > 0:
-        message.send('ウォーターサーバーのボトルが{}本追加されました。(残数: {}本)'
-                     .format(delta, total_delta))
-    else:
+    if delta < 0:
         message.send('ウォーターサーバーのボトルを{}本取りかえました。(残数: {}本)'
+                     .format(-delta, total_delta))
+    else:
+        message.send('ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)'
                      .format(delta, total_delta))
 
 
-@respond_to('^water\s+history(\s+[0-9])?$')
+@respond_to('^water\s+history(\s+[0-9]+)?$')
 def show_water_history(message, limit):
     """水の管理履歴を返すコマンド
 
