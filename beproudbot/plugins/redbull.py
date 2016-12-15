@@ -103,11 +103,11 @@ def show_redbull_history_csv(message):
 
     ret = []
     for ((year, month), items) in groupby(consume_hisotry, grouper):
-        count = -sum([int(item.delta) for item in items])
-        ret.append([year + '/' + month, str(count)])
+        count = -sum(item.delta for item in items)
+        ret.append(['{}/{}'.format(year, month), str(count)])
 
     output = StringIO()
-    w = csv.writer(output, quoting=csv.QUOTE_ALL)
+    w = csv.writer(output)
     w.writerows(ret)
 
     param = {
