@@ -27,13 +27,13 @@ def count_water_stock(message):
               .order_by(WaterHistory.id.desc())).first()
 
     if total_delta:
-        created_at = latest.created_at.strftime('%Y年%m月%d日')
-        message.send('残数: {}本 ({} 追加)'.format(total_delta, created_at))
+        message.send('残数: {}本 ({:%Y年%m月%d日} 追加)'
+                     .format(total_delta, latest.created_at))
     else:
         message.send('管理履歴はありません')
 
 
-@respond_to('^water\s+([-]?[0-9]+)$')
+@respond_to('^water\s+(-?[1-9]+\d*)$')
 def manage_water_stock(message, delta):
     """水の本数の増減を行うコマンド
 
@@ -58,7 +58,7 @@ def manage_water_stock(message, delta):
                      .format(delta, total_delta))
 
 
-@respond_to('^water\s+history(\s+[0-9]+)?$')
+@respond_to('^water\s+history(\s+[1-9]+\d*)?$')
 def show_water_history(message, limit):
     """水の管理履歴を返すコマンド
 
@@ -74,11 +74,12 @@ def show_water_history(message, limit):
 
     tmp = []
     for line in qs:
-        created_at = line.created_at.strftime('%Y年%m月%d日')
         if line.delta > 0:
-            tmp.append('[{}]  {}本 追加'.format(created_at, line.delta))
+            tmp.append('[{:%Y年%m月%d日}]  {}本 追加'
+                       .format(line.created_at, line.delta))
         else:
-            tmp.append('[{}]  {}本 取替'.format(created_at, -line.delta))
+            tmp.append('[{:%Y年%m月%d日}]  {}本 取替'
+                       .format(line.created_at, -line.delta))
 
     ret = '管理履歴はありません'
     if tmp:
