@@ -39,7 +39,7 @@ def count_redbull_stock(message):
     message.send('レッドブル残り {} 本'.format(total_delta))
 
 
-@respond_to('^redbull\s+([-]?[0-9]+)$')
+@respond_to('^redbull\s+(-?[1-9]+\d*)$')
 def manage_redbull_stock(message, delta):
     """RedBullの本数の増減を行うコマンド
 
@@ -75,8 +75,8 @@ def show_user_redbull_history(message):
           .order_by(RedbullHistory.id.asc()))
     tmp = []
     for line in qs:
-        created_at = line.created_at.strftime('%Y年%m月%d日')
-        tmp.append('[{}]  {}本'.format(created_at, -line.delta))
+        tmp.append('[{:%Y年%m月%d日}]  {}本'.format(line.created_at,
+                                                        -line.delta))
 
     ret = '消費履歴はありません'
     if tmp:
@@ -121,7 +121,7 @@ def show_redbull_history_csv(message):
 
 
 @respond_to('^redbull\s+clear$')
-@respond_to('^redbull\s+clear\s+([a-zA-Z]+)$')
+@respond_to('^redbull\s+clear\s+(\w+)$')
 def clear_redbull_history(message, token=None):
     """RedBullの履歴データを削除するコマンド
 
@@ -135,11 +135,12 @@ def clear_redbull_history(message, token=None):
     if token is None:
         _cache['token'] = ''.join(choice(ascii_letters) for i in range(16))
         message.send('履歴をDBからすべてクリアします。'
-                     '続けるには\n$redbull clear {}\nと書いてください'
+                     '続けるには\n`$redbull clear {}`\nと書いてください'
                      .format(_cache['token']))
         return
 
     if token == _cache['token']:
+        _cache['token'] = None
         s = Session()
         s.query(RedbullHistory).delete()
         s.commit()
