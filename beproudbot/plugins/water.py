@@ -1,5 +1,6 @@
 from slackbot.bot import respond_to
-from sqlalchemy import func
+from sqlalchemy import func, case
+
 
 from db import Session
 from utils.slack import get_user_name
@@ -20,20 +21,21 @@ def count_water_stock(message):
     :param message: slackbotの各種パラメータを保持したclass
     """
     s = Session()
-    q = s.query(func.sum(WaterHistory.delta).label('total_delta'))
-    total_delta = q.one().total_delta
-    latest = (s.query(WaterHistory)
-              .filter(WaterHistory.delta > 0)
-              .order_by(WaterHistory.id.desc())).first()
+    stock_number, latest_ctime = (
+        s.query(func.sum(WaterHistory.delta),
+                func.max(case(whens=((
+                    WaterHistory.delta > 0,
+                    WaterHistory.ctime),), else_=None))).first()
+    )
 
-    if total_delta:
+    if stock_number:
         message.send('残数: {}本 ({:%Y年%m月%d日} 追加)'
-                     .format(total_delta, latest.created_at))
+                     .format(stock_number, latest_ctime))
     else:
         message.send('管理履歴はありません')
 
 
-@respond_to('^water\s+(-?[1-9]+\d*)$')
+@respond_to('^water\s+(-?\d+)$')
 def manage_water_stock(message, delta):
     """水の本数の増減を行うコマンド
 
@@ -47,19 +49,19 @@ def manage_water_stock(message, delta):
     s.add(WaterHistory(who=user_name, delta=delta))
     s.commit()
 
-    q = s.query(func.sum(WaterHistory.delta).label('total_delta'))
-    total_delta = q.one().total_delta
+    q = s.query(func.sum(WaterHistory.delta).label('stock'))
+    stock = q.one().stock
 
     if delta < 0:
         message.send('ウォーターサーバーのボトルを{}本取りかえました。(残数: {}本)'
-                     .format(-delta, total_delta))
+                     .format(-delta, stock))
     else:
         message.send('ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)'
-                     .format(delta, total_delta))
+                     .format(delta, stock))
 
 
-@respond_to('^water\s+history(\s+[1-9]+\d*)?$')
-def show_water_history(message, limit):
+@respond_to('^water\s+history(\s+(\d+))?$')
+def show_water_history(message, _dummy, limit):
     """水の管理履歴を返すコマンド
 
     :param message: slackbotの各種パラメータを保持したclass
@@ -76,10 +78,10 @@ def show_water_history(message, limit):
     for line in qs:
         if line.delta > 0:
             tmp.append('[{:%Y年%m月%d日}]  {}本 追加'
-                       .format(line.created_at, line.delta))
+                       .format(line.ctime, line.delta))
         else:
             tmp.append('[{:%Y年%m月%d日}]  {}本 取替'
-                       .format(line.created_at, -line.delta))
+                       .format(line.ctime, -line.delta))
 
     ret = '管理履歴はありません'
     if tmp:
