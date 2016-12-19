@@ -56,3 +56,10 @@ random plugin
 - `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
 - `$random active`: チャンネルにいるactiveなメンバーからランダムに一人を選ぶ
 - `$random help`: randomコマンドの使い方を返す
+
+kintai plugin
+-------------
+
+- `$勤怠`: 自分の勤怠一覧を40日分表示する
+- `$勤怠 export <month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当月)
+- `$勤怠 help`: 勤怠コマンドの使い方を返す
