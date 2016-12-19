@@ -32,11 +32,11 @@ def count_redbull_stock(message):
     :param message: slackbotの各種パラメータを保持したclass
     """
     s = Session()
-    q = s.query(func.sum(RedbullHistory.delta).label('total_delta'))
-    total_delta = q.one().total_delta
-    if total_delta is None:
-        total_delta = 0
-    message.send('レッドブル残り {} 本'.format(total_delta))
+    q = s.query(func.sum(RedbullHistory.delta).label('stock_number'))
+    stock_number = q.one().stock_number
+    if stock_number is None:
+        stock_number = 0
+    message.send('レッドブル残り {} 本'.format(stock_number))
 
 
 @respond_to('^redbull\s+(-?\d+)$')
@@ -46,7 +46,7 @@ def manage_redbull_stock(message, delta):
     :param message: slackbotの各種パラメータを保持したclass
     :param str delta: POSTされた増減する本数
         UserからPOSTされるdeltaの値は投入の場合は負数、消費の場合は正数
-        DBには負数を正数に、消費の場合は正数を負数に変換して記録する
+        DBは投入の場合正数、消費の場合は負数を記録する
     """
     delta = -int(delta)
     user_name = get_user_name(message.body['user'])
