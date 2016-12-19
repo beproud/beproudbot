@@ -39,12 +39,14 @@ def count_redbull_stock(message):
     message.send('レッドブル残り {} 本'.format(total_delta))
 
 
-@respond_to('^redbull\s+(-?[1-9]+\d*)$')
+@respond_to('^redbull\s+(-?\d+)$')
 def manage_redbull_stock(message, delta):
     """RedBullの本数の増減を行うコマンド
 
     :param message: slackbotの各種パラメータを保持したclass
     :param str delta: POSTされた増減する本数
+        UserからPOSTされるdeltaの値は投入の場合は負数、消費の場合は正数
+        DBには負数を正数に、消費の場合は正数を負数に変換して記録する
     """
     delta = -int(delta)
     user_name = get_user_name(message.body['user'])
@@ -75,7 +77,7 @@ def show_user_redbull_history(message):
           .order_by(RedbullHistory.id.asc()))
     tmp = []
     for line in qs:
-        tmp.append('[{:%Y年%m月%d日}]  {}本'.format(line.created_at,
+        tmp.append('[{:%Y年%m月%d日}]  {}本'.format(line.ctime,
                                                         -line.delta))
 
     ret = '消費履歴はありません'
@@ -99,7 +101,7 @@ def show_redbull_history_csv(message):
     # func.month関数を使って月ごとでgroupby count書けるが、
     # SQLiteにはMONTH()関数がないので月集計はPythonで処理する
     def grouper(item):
-        return item.created_at.year, item.created_at.month
+        return item.ctime.year, item.ctime.month
 
     ret = []
     for ((year, month), items) in groupby(consume_hisotry, grouper):
