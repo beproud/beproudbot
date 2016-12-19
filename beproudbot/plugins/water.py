@@ -41,6 +41,8 @@ def manage_water_stock(message, delta):
 
     :param message: slackbotの各種パラメータを保持したclass
     :param str delta: POSTされた増減する本数
+        UserからPOSTされるdeltaの値は追加の場合は負数、取替の場合は正数
+        DBは追加の場合正数、取替の場合は負数を記録する
     """
     delta = -int(delta)
     user_name = get_user_name(message.body['user'])
