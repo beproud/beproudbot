@@ -1,6 +1,10 @@
 Unreleased
 ----------
 
+Release Notes - 2016-12-19
+--------------------------
+- [#25] README.rst を README.md に変更
+
 Release Notes - 2016-12-12
 --------------------------
 - [#14] randomコマンドを追加
