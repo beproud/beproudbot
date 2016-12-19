@@ -51,15 +51,15 @@ def manage_water_stock(message, delta):
     s.add(WaterHistory(who=user_name, delta=delta))
     s.commit()
 
-    q = s.query(func.sum(WaterHistory.delta).label('stock'))
-    stock = q.one().stock
+    q = s.query(func.sum(WaterHistory.delta).label('stock_number'))
+    stock_number = q.one().stock_number
 
     if delta < 0:
         message.send('ウォーターサーバーのボトルを{}本取りかえました。(残数: {}本)'
-                     .format(-delta, stock))
+                     .format(-delta, stock_number))
     else:
         message.send('ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)'
-                     .format(delta, stock))
+                     .format(delta, stock_number))
 
 
 @respond_to('^water\s+history(\s+(\d+))?$')
