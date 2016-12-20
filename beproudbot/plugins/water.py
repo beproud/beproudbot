@@ -62,19 +62,17 @@ def manage_water_stock(message, delta):
                      .format(delta, stock_number))
 
 
-@respond_to('^water\s+history(\s+(\d+))?$')
-def show_water_history(message, _dummy, limit):
+@respond_to('^water\s+history$')
+@respond_to('^water\s+history\s+(\d+)$')
+def show_water_history(message, limit='10'):
     """水の管理履歴を返すコマンド
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    v = 10
-    if limit is not None:
-        v = limit
     s = Session()
     qs = (s.query(WaterHistory)
           .order_by(WaterHistory.id.asc())
-          .limit(v))
+          .limit(limit))
 
     tmp = []
     for line in qs:
