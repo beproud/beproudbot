@@ -1,5 +1,5 @@
-Unreleased
-----------
+Release Notes - 2016-12-21
+--------------------------
 - [#7] redbullコマンドを追加
 
 Release Notes - 2016-12-19
