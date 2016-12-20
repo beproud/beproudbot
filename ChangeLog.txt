@@ -1,5 +1,5 @@
-Unreleased
-----------
+Release Notes - 2016-12-21
+--------------------------
 - [#15] waterコマンドを追加
 
 Release Notes - 2016-12-19
