@@ -2,6 +2,14 @@ Release Notes - 2016-12-21
 --------------------------
 - [#15] waterコマンドを追加
 
+Release Notes - 2016-12-21
+--------------------------
+- [#7] redbullコマンドを追加
+
+Release Notes - 2016-12-19
+--------------------------
+- [#25] README.rst を README.md に変更
+
 Release Notes - 2016-12-19
 --------------------------
 - [#25] README.rst を README.md に変更
