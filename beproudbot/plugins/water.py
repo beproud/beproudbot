@@ -71,7 +71,7 @@ def show_water_history(message, limit='10'):
     """
     s = Session()
     qs = (s.query(WaterHistory)
-          .order_by(WaterHistory.id.asc())
+          .order_by(WaterHistory.id.desc())
           .limit(limit))
 
     tmp = []
