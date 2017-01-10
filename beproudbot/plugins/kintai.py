@@ -7,7 +7,7 @@ from collections import defaultdict, OrderedDict
 import requests
 from slackbot import settings
 from slackbot.bot import respond_to, listen_to
-from sqlalchemy import func
+from sqlalchemy import func, Date, cast
 
 from db import Session
 from utils.slack import get_user_name
@@ -18,8 +18,8 @@ from beproudbot.plugins.kintai_models import KintaiHistory
 HELP = """
 - `$勤怠`: 自分の勤怠一覧を40日分表示する
 - `$勤怠 csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
-- `おはよう`、`お早う`, `出社しました`: 出社時刻を記録します
-- `帰ります`、`かえります`、`退社します`: 退社時刻を記録します
+- `おはよう` ・ `お早う` ・ `出社しました`: 出社時刻を記録します
+- `帰ります` ・ `かえります` ・ `退社します`: 退社時刻を記録します
 - `$勤怠 help`: 勤怠コマンドの使い方を返す
 """
 
@@ -42,9 +42,17 @@ def register_workon_time(message):
     :param message: slackbotの各種パラメータを保持したclass
     """
     user_name = get_user_name(message.body['user'])
+    today = datetime.date.today()
 
     s = Session()
-    s.add(KintaiHistory(who=user_name))
+    record = (s.query(KintaiHistory)
+               .filter(cast(KintaiHistory.registered_at, Date) == today)
+               .filter(KintaiHistory.who == user_name)
+               .first())
+    if record:
+        record.registered_at = datetime.datetime.now()
+    else:
+        s.add(KintaiHistory(who=user_name))
     s.commit()
 
     message.reply('おはようございます')
@@ -57,9 +65,18 @@ def register_workoff_time(message):
     :param message: slackbotの各種パラメータを保持したclass
     """
     user_name = get_user_name(message.body['user'])
+    today = datetime.date.today()
 
     s = Session()
-    s.add(KintaiHistory(who=user_name, is_workon=False))
+    record = (s.query(KintaiHistory)
+               .filter(cast(KintaiHistory.registered_at, Date) == today)
+               .filter(KintaiHistory.who == user_name)
+               .filter(KintaiHistory.is_workon.is_(False))
+               .first())
+    if record:
+        record.registered_at = datetime.datetime.now()
+    else:
+        s.add(KintaiHistory(who=user_name, is_workon=False))
     s.commit()
 
     message.reply('お疲れ様でした')
@@ -84,7 +101,7 @@ def show_kintai_history(message):
         day_of_week = DAY_OF_WEEK_MAP[q.registered_at.date().isoweekday()]
         prefix_day = '{:%Y年%m月%d日}({})'.format(q.registered_at,
                                                      day_of_week)
-        registered_at = '{:%I:%M:%s}'.format(q.registered_at)
+        registered_at = '{:%I:%M:%S}'.format(q.registered_at)
         kind = {0: '退社', 1: '出社'}.get(q.is_workon)
         tmp.setdefault(prefix_day, []).append('{}:{}'.format(kind,
                                                              registered_at))
@@ -112,21 +129,20 @@ def show_kintai_history_csv(message, time=None):
     year, month = now.strftime('%Y'), now.strftime('%m')
     if time:
         year, month = time.split('/')
-        if month > 12:
-            message.send('指定した対象月が12以上の数字です')
+        if int(month) > 12:
+            message.send('指定した対象月が12以上です')
             return
 
     s = Session()
     qs = (s.query(KintaiHistory)
           .filter(func.extract('year', KintaiHistory.registered_at) == year)
-          .filter(func.extract('month', KintaiHistory.registered_at) == month)
-          .order_by(KintaiHistory.registered_at.asc()))
+          .filter(func.extract('month', KintaiHistory.registered_at) == month))
 
     tmp = defaultdict(list)
     for q in qs:
         registered_at = q.registered_at.strftime('%Y-%m-%d')
         tmp[registered_at].append((q.is_workon,
-                                   '{:%I:%M:%s}'.format(q.registered_at)))
+                                   '{:%I:%M:%S}'.format(q.registered_at)))
 
     ret = []
     for day in [i + 1 for i in range(monthrange(int(year), int(month))[1])]:
