@@ -16,7 +16,7 @@ from beproudbot.plugins.kintai_models import KintaiHistory
 
 
 HELP = """
-- `$勤怠`: 自分の勤怠一覧を40日分表示する
+- `$勤怠`: 自分の勤怠一覧を直近40日分表示する
 - `$勤怠 csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
 - `おはよう` ・ `お早う` ・ `出社しました`: 出社時刻を記録します
 - `帰ります` ・ `かえります` ・ `退社します`: 退社時刻を記録します
@@ -84,27 +84,28 @@ def register_workoff_time(message):
 
 @respond_to('^勤怠$')
 def show_kintai_history(message):
-    """40日分の勤怠記録を表示します
+    """直近40日分の勤怠記録を表示します
 
     :param message: slackbotの各種パラメータを保持したclass
     """
     user_name = get_user_name(message.body['user'])
+    today = datetime.date.today()
+    target_day = today - datetime.timedelta(days=40)
 
     s = Session()
     qs = (s.query(KintaiHistory)
           .filter(KintaiHistory.who == user_name)
-          .order_by(KintaiHistory.registered_at.desc())
-          .limit(40))
+          .filter(KintaiHistory.registered_at >= target_day)
+          .order_by(KintaiHistory.registered_at.asc()))
 
     tmp = OrderedDict()
     for q in qs:
         day_of_week = DAY_OF_WEEK_MAP[q.registered_at.date().isoweekday()]
-        prefix_day = '{:%Y年%m月%d日}({})'.format(q.registered_at,
-                                                     day_of_week)
+        prefix_day = '{:%Y年%m月%d日}({})'.format(q.registered_at, day_of_week)
         registered_at = '{:%I:%M:%S}'.format(q.registered_at)
         kind = {0: '退社', 1: '出社'}.get(q.is_workon)
-        tmp.setdefault(prefix_day, []).append('{}:{}'.format(kind,
-                                                             registered_at))
+        tmp.setdefault(prefix_day, []).append('{}  {}'.format(kind,
+                                                              registered_at))
 
     ret = []
     for prefix, registered_ats in tmp.items():
