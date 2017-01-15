@@ -23,16 +23,7 @@ HELP = """
 - `$勤怠 help`: 勤怠コマンドの使い方を返す
 """
 
-
-DAY_OF_WEEK_MAP = {
-    1: '月',
-    2: '火',
-    3: '水',
-    4: '木',
-    5: '金',
-    6: '土',
-    7: '日',
-}
+DAY_OF_WEEK = '月火水木金土日'
 
 
 @listen_to('おはよう|お早う|出社しました')
@@ -41,20 +32,8 @@ def register_workon_time(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    user_name = get_user_name(message.body['user'])
-    today = datetime.date.today()
-
-    s = Session()
-    record = (s.query(KintaiHistory)
-               .filter(cast(KintaiHistory.registered_at, Date) == today)
-               .filter(KintaiHistory.who == user_name)
-               .first())
-    if record:
-        record.registered_at = datetime.datetime.now()
-    else:
-        s.add(KintaiHistory(who=user_name))
-    s.commit()
-
+    user_id = message.body['user']
+    register_worktime(user_id)
     message.reply('おはようございます')
 
 
@@ -64,22 +43,30 @@ def register_workoff_time(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    user_name = get_user_name(message.body['user'])
-    today = datetime.date.today()
+    user_id = message.body['user']
+    register_worktime(user_id, is_workon=False)
+    message.reply('お疲れ様でした')
 
+
+def register_worktime(user_id, is_workon=True):
+    """出社、退社時間をDBに登録する
+
+    :param str user_id: Slackのuser_id
+    :param bool is_workon: 出社か退社かのフラグ、defaltは出社
+    """
+    today = datetime.date.today()
     s = Session()
+    # SQLiteを使用している場合、castできないのでMySQLでdebugする事
     record = (s.query(KintaiHistory)
-               .filter(cast(KintaiHistory.registered_at, Date) == today)
-               .filter(KintaiHistory.who == user_name)
-               .filter(KintaiHistory.is_workon.is_(False))
-               .first())
+              .filter(cast(KintaiHistory.registered_at, Date) == today)
+              .filter(KintaiHistory.user_id == user_id)
+              .filter(KintaiHistory.is_workon.is_(is_workon))
+              .one_or_none())
     if record:
         record.registered_at = datetime.datetime.now()
     else:
-        s.add(KintaiHistory(who=user_name, is_workon=False))
+        s.add(KintaiHistory(user_id=user_id, is_workon=is_workon))
     s.commit()
-
-    message.reply('お疲れ様でした')
 
 
 @respond_to('^勤怠$')
@@ -88,34 +75,35 @@ def show_kintai_history(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    user_name = get_user_name(message.body['user'])
+    user_id = message.body['user']
     today = datetime.date.today()
     target_day = today - datetime.timedelta(days=40)
 
     s = Session()
     qs = (s.query(KintaiHistory)
-          .filter(KintaiHistory.who == user_name)
+          .filter(KintaiHistory.user_id == user_id)
           .filter(KintaiHistory.registered_at >= target_day)
           .order_by(KintaiHistory.registered_at.asc()))
 
-    tmp = OrderedDict()
+    kintai = OrderedDict()
     for q in qs:
-        day_of_week = DAY_OF_WEEK_MAP[q.registered_at.date().isoweekday()]
+        day_of_week = DAY_OF_WEEK[q.registered_at.date().weekday()]
         prefix_day = '{:%Y年%m月%d日}({})'.format(q.registered_at, day_of_week)
         registered_at = '{:%I:%M:%S}'.format(q.registered_at)
-        kind = {0: '退社', 1: '出社'}.get(q.is_workon)
-        tmp.setdefault(prefix_day, []).append('{}  {}'.format(kind,
-                                                              registered_at))
+        kind = '出社' if q.is_workon else '退社'
+        kintai.setdefault(prefix_day, []).append('{}  {}'.format(kind,
+                                                                 registered_at))
 
-    ret = []
-    for prefix, registered_ats in tmp.items():
+    rows = []
+    for prefix, registered_ats in kintai.items():
         sorted_times = ' '.join(sorted(registered_ats))
-        ret.append('{} {}'.format(prefix, sorted_times))
+        rows.append('{} {}'.format(prefix, sorted_times))
 
-    if not ret:
-        ret = ['勤怠記録はありません']
+    if not rows:
+        rows = ['勤怠記録はありません']
 
-    message.send('{}の勤怠:\n{}'.format(user_name, '\n'.join(ret)))
+    user_name = get_user_name(user_id)
+    message.send('{}の勤怠:\n{}'.format(user_name, '\n'.join(rows)))
 
 
 @respond_to('^勤怠\s+csv$')
@@ -126,39 +114,41 @@ def show_kintai_history_csv(message, time=None):
     :param message: slackbotの各種パラメータを保持したclass
     :param str time: `/` 区切りの年月(例: 2016/1)
     """
+    user_id = message.body['user']
     now = datetime.datetime.now()
     year, month = now.strftime('%Y'), now.strftime('%m')
     if time:
         year, month = time.split('/')
         if int(month) > 12:
-            message.send('指定した対象月が12以上です')
+            message.send('指定した対象月が12を超えています')
             return
 
     s = Session()
     qs = (s.query(KintaiHistory)
+          .filter(KintaiHistory.user_id == user_id)
           .filter(func.extract('year', KintaiHistory.registered_at) == year)
           .filter(func.extract('month', KintaiHistory.registered_at) == month))
 
-    tmp = defaultdict(list)
+    kintai = defaultdict(list)
     for q in qs:
         registered_at = q.registered_at.strftime('%Y-%m-%d')
-        tmp[registered_at].append((q.is_workon,
-                                   '{:%I:%M:%S}'.format(q.registered_at)))
+        kintai[registered_at].append((q.is_workon,
+                                      '{:%I:%M:%S}'.format(q.registered_at)))
 
-    ret = []
+    rows = []
     for day in [i + 1 for i in range(monthrange(int(year), int(month))[1])]:
         aligin_date = '{}-{:02d}-{:02d}'.format(year, int(month), day)
         workon, workoff = '', ''
-        for d in sorted(tmp.get(aligin_date, [])):
-            if d[0] == 1:
+        for d in sorted(kintai[aligin_date]):
+            if d[0]:
                 workon = d[1]
-            elif d[0] == 0:
+            else:
                 workoff = d[1]
-        ret.append([aligin_date, workon, workoff])
+        rows.append([aligin_date, workon, workoff])
 
     output = StringIO()
     w = csv.writer(output)
-    w.writerows(ret)
+    w.writerows(rows)
 
     param = {
         'token': settings.API_TOKEN,
