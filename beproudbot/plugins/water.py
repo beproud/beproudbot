@@ -3,7 +3,6 @@ from sqlalchemy import func, case
 
 
 from db import Session
-from utils.slack import get_user_name
 from beproudbot.plugins.water_models import WaterHistory
 
 HELP = '''
@@ -45,10 +44,10 @@ def manage_water_stock(message, delta):
         DBは追加の場合正数、取替の場合は負数を記録する
     """
     delta = -int(delta)
-    user_name = get_user_name(message.body['user'])
+    user_id = message.body['user']
 
     s = Session()
-    s.add(WaterHistory(who=user_name, delta=delta))
+    s.add(WaterHistory(user_id=user_id, delta=delta))
     s.commit()
 
     q = s.query(func.sum(WaterHistory.delta).label('stock_number'))

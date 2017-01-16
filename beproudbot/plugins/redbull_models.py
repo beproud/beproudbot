@@ -12,6 +12,6 @@ class RedbullHistory(Base):
     __tablename__ = 'redbull_history'
 
     id = Column(Integer, primary_key=True)
-    who = Column(Unicode(100))
+    user_id = Column(Unicode(100), unique=True)
     delta = Column(Integer, default=0)
     ctime = Column(DateTime, default=datetime.datetime.utcnow)

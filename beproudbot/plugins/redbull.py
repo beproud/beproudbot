@@ -49,10 +49,11 @@ def manage_redbull_stock(message, delta):
         DBは投入の場合正数、消費の場合は負数を記録する
     """
     delta = -int(delta)
-    user_name = get_user_name(message.body['user'])
+    user_id = message.body['user']
+    user_name = get_user_name(user_id)
 
     s = Session()
-    s.add(RedbullHistory(who=user_name, delta=delta))
+    s.add(RedbullHistory(user_id=user_id, delta=delta))
     s.commit()
 
     if delta > 0:
@@ -69,10 +70,11 @@ def show_user_redbull_history(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    user_name = get_user_name(message.body['user'])
+    user_id = message.body['user']
+    user_name = get_user_name(user_id)
     s = Session()
     qs = (s.query(RedbullHistory)
-          .filter(RedbullHistory.who == user_name,
+          .filter(RedbullHistory.user_id == user_id,
                   RedbullHistory.delta < 0)
           .order_by(RedbullHistory.id.asc()))
     tmp = []
