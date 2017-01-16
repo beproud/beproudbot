@@ -116,12 +116,13 @@ def show_kintai_history_csv(message, time=None):
     """
     user_id = message.body['user']
     now = datetime.datetime.now()
-    year, month = now.strftime('%Y'), now.strftime('%m')
+    year_str, month_str = now.strftime('%Y'), now.strftime('%m')
     if time:
-        year, month = time.split('/')
-        if int(month) > 12:
-            message.send('指定した対象月が12を超えています')
+        year_str, month_str = time.split('/')
+        if int(month_str) not in range(1, 13):
+            message.send('指定した対象月は存在しません')
             return
+    year, month = int(year_str), int(month_str)
 
     s = Session()
     qs = (s.query(KintaiHistory)
@@ -136,8 +137,8 @@ def show_kintai_history_csv(message, time=None):
                                       '{:%I:%M:%S}'.format(q.registered_at)))
 
     rows = []
-    for day in [i + 1 for i in range(monthrange(int(year), int(month))[1])]:
-        aligin_date = '{}-{:02d}-{:02d}'.format(year, int(month), day)
+    for day in range(1, monthrange(year, month)[1] + 1):
+        aligin_date = '{}-{:02d}-{:02d}'.format(year, month, day)
         workon, workoff = '', ''
         for d in sorted(kintai[aligin_date]):
             if d[0]:
