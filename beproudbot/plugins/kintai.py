@@ -115,14 +115,16 @@ def show_kintai_history_csv(message, time=None):
     :param str time: `/` 区切りの年月(例: 2016/1)
     """
     user_id = message.body['user']
-    now = datetime.datetime.now()
-    year_str, month_str = now.strftime('%Y'), now.strftime('%m')
     if time:
         year_str, month_str = time.split('/')
-        if int(month_str) not in range(1, 13):
-            message.send('指定した対象月は存在しません')
-            return
+    else:
+        now = datetime.datetime.now()
+        year_str, month_str = now.strftime('%Y'), now.strftime('%m')
     year, month = int(year_str), int(month_str)
+
+    if not 1 <= month <= 12:
+        message.send('指定した対象月は存在しません')
+        return
 
     s = Session()
     qs = (s.query(KintaiHistory)
