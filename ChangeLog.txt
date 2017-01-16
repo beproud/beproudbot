@@ -1,5 +1,8 @@
 Unreleased
 ----------
+
+Release Notes - 2017-01-16
+--------------------------
 - [#8] kintaiコマンドを追加
 
 Release Notes - 2016-12-21
