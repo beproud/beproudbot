@@ -14,4 +14,4 @@ class RedbullHistory(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Unicode(100), unique=True, nullable=False)
     delta = Column(Integer, default=0, nullable=False)
-    ctime = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
