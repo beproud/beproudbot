@@ -1,3 +1,4 @@
+import datetime
 from slackbot.bot import respond_to
 from sqlalchemy import func, case
 
@@ -26,6 +27,7 @@ def count_water_stock(message):
                     WaterHistory.delta > 0,
                     WaterHistory.ctime),), else_=None))).first()
     )
+    latest_ctime = datetime.datetime.strptime(latest_ctime, "%Y-%m-%d %H:%M:%S")
 
     if stock_number:
         message.send('残数: {}本 ({:%Y年%m月%d日} 追加)'

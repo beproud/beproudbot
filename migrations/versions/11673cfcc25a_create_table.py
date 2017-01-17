@@ -1,8 +1,8 @@
 """create table
 
-Revision ID: c466ac3b25a8
+Revision ID: 11673cfcc25a
 Revises: 
-Create Date: 2017-01-16 10:42:49.835545
+Create Date: 2017-01-17 21:08:35.664728
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c466ac3b25a8'
+revision = '11673cfcc25a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,24 +22,21 @@ def upgrade():
     sa.Column('user_id', sa.Unicode(length=100), nullable=False),
     sa.Column('is_workon', sa.Boolean(), nullable=True),
     sa.Column('registered_at', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('redbull_history',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Unicode(length=100), nullable=False),
     sa.Column('delta', sa.Integer(), nullable=False),
     sa.Column('ctime', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('water_history',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Unicode(length=100), nullable=False),
     sa.Column('delta', sa.Integer(), nullable=False),
     sa.Column('ctime', sa.DateTime(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
+    sa.PrimaryKeyConstraint('id')
     )
     ### end Alembic commands ###
 
