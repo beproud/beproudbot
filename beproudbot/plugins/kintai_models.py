@@ -12,6 +12,8 @@ class KintaiHistory(Base):
     __tablename__ = 'kintai_history'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Unicode(100))
+    user_id = Column(Unicode(100), nullable=False)
     is_workon = Column(Boolean, default=True)
-    registered_at = Column(DateTime, default=datetime.datetime.now)
+    registered_at = Column(DateTime,
+                           default=datetime.datetime.now,
+                           nullable=False)
