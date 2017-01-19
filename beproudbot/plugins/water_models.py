@@ -12,6 +12,6 @@ class WaterHistory(Base):
     __tablename__ = 'water_history'
 
     id = Column(Integer, primary_key=True)
-    who = Column(Unicode(100))
-    delta = Column(Integer, default=0)
-    ctime = Column(DateTime, default=datetime.datetime.utcnow)
+    user_id = Column(Unicode(100), nullable=False)
+    delta = Column(Integer, default=0, nullable=False)
+    ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
