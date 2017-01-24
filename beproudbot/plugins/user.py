@@ -6,11 +6,11 @@ from db import Session
 from beproudbot.plugins.user_models import User, UserAliasName
 
 HELP = """
-- `$user list`: Slack ユーザーIDに紐づく名前を一覧表示
+- `$user list`: Slackのユーザー情報を一覧表示
 - `$user add <user_name>`: 指定したユーザー名のSlackのuser_idを追加
 - `$user del <slack_user_id>`: 指定したSlackのuser_idを削除
 - `$user alias <alias_name> <user_name>`: 指定したエイリアス名をユーザー名に紐付ける
-- `$user unalias <alias_name> <user_name>`: 指定したエイリアス名をユーザー名から紐付けを解除する
+- `$user unalias <alias_name> <user_name>`: 指定したエイリアス名とユーザー名の紐付けを解除する
 - `$user slack_id <user_name>`: 指定したユーザー名のSlackのuser_idを返します
 - `$user help`: userコマンドの使い方を返す
 """
@@ -51,8 +51,7 @@ def add_user_id(message, user_name):
     """
     user_id = get_slack_id_by_name(user_name)
     if not user_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(
-            user_name))
+        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
         return
 
     s = Session()
@@ -74,8 +73,7 @@ def delete_user_id(message, user_name):
     """
     user_id = get_slack_id_by_name(user_name)
     if not user_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(
-            user_name))
+        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
         return
 
     s = Session()
@@ -90,7 +88,7 @@ def delete_user_id(message, user_name):
 
 @respond_to('^user\s+alias\s(.*)\s(.*)$')
 def alias_user_name(message, alias_name, user_name):
-    """エイリアス名をSlackのユーザー名に紐付ける
+    """エイリアス名をユーザー名に紐付ける
 
     :param message: slackbotの各種パラメータを保持したclass
     :param str alias_name: ユーザー名に紐付けるエイリアス名
@@ -98,31 +96,27 @@ def alias_user_name(message, alias_name, user_name):
     """
     user_id = get_slack_id_by_name(user_name)
     if not user_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(
-            user_name))
+        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
         return
 
     s = Session()
-    alias_user_name = (s.query(UserAliasName)
-                       .filter(UserAliasName.alias_name == alias_name))
+    alias_user_name = s.query(UserAliasName).filter(UserAliasName.alias_name == alias_name)
     if s.query(alias_user_name.exists()).scalar():
-        message.send('エイリアス名「{}」は既に登録されています'.format(
-            alias_name))
+        message.send('エイリアス名 `{}` は既に登録されています'.format(alias_name))
         return
 
     user = s.query(User).filter(User.slack_id == user_id).one_or_none()
     if user:
         s.add(UserAliasName(user=user.id, alias_name=alias_name))
         s.commit()
-        message.send('{}のエイリアス名に「{}」を追加しました'.format(
-            user_name, alias_name))
+        message.send('{}のエイリアス名に `{}` を追加しました'.format(user_name, alias_name))
     else:
         message.send('{}はuserとして登録されていません'.format(user_name))
 
 
 @respond_to('^user\s+unalias\s(.*)\s(.*)$')
 def unalias_user_name(message, alias_name, user_name):
-    """Slackのユーザー名に紐づくエイリアス名を削除する
+    """ユーザー名に紐づくエイリアス名を削除する
 
     :param message: slackbotの各種パラメータを保持したclass
     :param str alias_name: 削除するエイリアス名
@@ -130,15 +124,13 @@ def unalias_user_name(message, alias_name, user_name):
     """
     user_id = get_slack_id_by_name(user_name)
     if not user_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(
-            user_name))
+        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
         return
 
     s = Session()
-    alias_user_name = (s.query(UserAliasName)
-                       .filter(UserAliasName.alias_name == alias_name))
+    alias_user_name = (s.query(UserAliasName).filter(UserAliasName.alias_name == alias_name))
     if not s.query(alias_user_name.exists()).scalar():
-        message.send('エイリアス名「{}」は登録されていません'.format(
+        message.send('エイリアス名 `{}` は登録されていません'.format(
             alias_name))
         return
 
@@ -151,23 +143,20 @@ def unalias_user_name(message, alias_name, user_name):
     if name:
         s.delete(name)
         s.commit()
-        message.send('{}のエイリアス名から「{}」を削除しました'.format(
-            user_name, alias_name))
+        message.send('{}のエイリアス名から `{}` を削除しました'.format(user_name, alias_name))
     else:
-        message.send('{}のエイリアス名「{}」は登録されていません'.format(
-            user_name, alias_name))
+        message.send('{}のエイリアス名 `{}` は登録されていません'.format(user_name, alias_name))
 
 
 @respond_to('^user\s+slack_id\s(.*)$')
 def show_slack_id(message, user_name):
-    """user_nameに紐づくslack_idを返す
+    """指定したユーザーのSlackのuser_idを返す
 
     :param message: slackbotの各種パラメータを保持したclass
     :param str user_name: Slackのユーザー名
     """
     user_id = get_slack_id_by_name(user_name)
     if user_id:
-        message.send('{}のSlackのuser_idは{}です'.format(
-            user_name, user_id))
+        message.send('{}のSlackのuser_idは `{}` です'.format(user_name, user_id))
     else:
         message.send('{}のSlackのuser_idは存在しません'.format(user_name))
