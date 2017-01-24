@@ -15,21 +15,20 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     slack_id = Column(Unicode(100), unique=True, nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    user_name_alias = relationship('UserNameAlias')
+    user_name_alias = relationship('UserAliasName',
+                                   cascade='all, delete-orphan')
 
 
-class UserNameAlias(Base):
+class UserAliasName(Base):
     """Slackのuser_idに紐づく名前を管理するモデル
 
     :param Base: `sqlalchemy.ext.declarative.api.DeclarativeMeta` を
         継承したclass
     """
-    __tablename__ = 'user_name_alias'
+    __tablename__ = 'user_alias_name'
 
     id = Column(Integer, primary_key=True)
-    alias_name = Column(Unicode(100), nullable=False)
+    alias_name = Column(Unicode(100), nullable=False, unique=True)
     user = Column(Integer,
-                  ForeignKey('user.id',
-                             onupdate='CASCADE',
-                             ondelete="CASCADE"))
+                  ForeignKey('user.id'))
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)

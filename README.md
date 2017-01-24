@@ -69,3 +69,13 @@ $ source /path/env/bin/activate
 - `おはよう`・`お早う`・`出社しました`: 出社時刻を記録します
 - `帰ります`・`かえります`・`退社します`: 退社時刻を記録します
 - `$勤怠 help`: 勤怠コマンドの使い方を返す
+
+### user plugin
+
+- `$user list`: Slack ユーザーIDに紐づく名前を一覧表示
+- `$user add <user_name>`: 指定したユーザー名のSlackのuser_idを追加
+- `$user del <slack_user_id>`: 指定したSlackのuser_idを削除
+- `$user alias <alias_name> <user_name>`: 指定したエイリアス名をユーザー名に紐付ける
+- `$user unalias <alias_name> <user_name>`: 指定したエイリアス名をユーザー名から紐付けを解除する
+- `$user slack_id <user_name>`: 指定したユーザー名のSlackのuser_idを返します
+- `$user help`: userコマンドの使い方を返す
