@@ -56,17 +56,13 @@ def add_user_id(message, user_name):
 
 
 @respond_to('^user\s+del\s(.*)$')
-def delete_user_id(message, user_name):
+def delete_user_id(message, user_id):
     """Slackのuser_idをUserテーブルから削除
 
     :param message: slackbotの各種パラメータを保持したclass
-    :param str user_name: 削除するslackのユーザー名
+    :param str user_name: 削除するslackのuser_id
     """
-    user_id = get_slack_id_by_name(user_name)
-    if not user_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
-        return
-
+    user_name = get_user_name(user_id)
     s = Session()
     user = s.query(User).filter(User.slack_id == user_id).one_or_none()
     if user:
@@ -74,7 +70,7 @@ def delete_user_id(message, user_name):
         s.commit()
         message.send('{}のuser_idを削除しました'.format(user_name))
     else:
-        message.send('{}は登録されていません'.format(user_name))
+        message.send('`{}` は登録されていません'.format(user_id))
 
 
 @respond_to('^user\s+alias\s(.*)\s(.*)$')

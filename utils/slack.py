@@ -13,10 +13,10 @@ def get_user_name(user_id):
     :return str: Slackのユーザー名
     """
     webapi = slacker.Slacker(settings.API_TOKEN)
-    response = webapi.users.info(user_id)
-    if response.body['ok']:
+    try:
+        response = webapi.users.info(user_id)
         return response.body['user']['name']
-    else:
+    except slacker.Error:
         return ''
 
 
