@@ -16,15 +16,6 @@ HELP = """
 """
 
 
-@respond_to('^user\s+help$')
-def show_help_user_commands(message):
-    """Userコマンドのhelpを表示
-
-    :param message: slackbotの各種パラメータを保持したclass
-    """
-    message.send(HELP)
-
-
 @respond_to('^user\s+list$')
 def show_user_list(message):
     """User一覧を表示
@@ -87,7 +78,7 @@ def delete_user_id(message, user_name):
 
 
 @respond_to('^user\s+alias\s(.*)\s(.*)$')
-def alias_user_name(message, alias_name, user_name):
+def alias_name(message, alias_name, user_name):
     """エイリアス名をユーザー名に紐付ける
 
     :param message: slackbotの各種パラメータを保持したclass
@@ -115,7 +106,7 @@ def alias_user_name(message, alias_name, user_name):
 
 
 @respond_to('^user\s+unalias\s(.*)\s(.*)$')
-def unalias_user_name(message, alias_name, user_name):
+def unalias_name(message, alias_name, user_name):
     """ユーザー名に紐づくエイリアス名を削除する
 
     :param message: slackbotの各種パラメータを保持したclass
@@ -130,8 +121,7 @@ def unalias_user_name(message, alias_name, user_name):
     s = Session()
     alias_user_name = (s.query(UserAliasName).filter(UserAliasName.alias_name == alias_name))
     if not s.query(alias_user_name.exists()).scalar():
-        message.send('エイリアス名 `{}` は登録されていません'.format(
-            alias_name))
+        message.send('エイリアス名 `{}` は登録されていません'.format(alias_name))
         return
 
     name = (s.query(UserAliasName)
@@ -160,3 +150,12 @@ def show_slack_id(message, user_name):
         message.send('{}のSlackのuser_idは `{}` です'.format(user_name, user_id))
     else:
         message.send('{}のSlackのuser_idは存在しません'.format(user_name))
+
+
+@respond_to('^user\s+help$')
+def show_help_user_commands(message):
+    """Userコマンドのhelpを表示
+
+    :param message: slackbotの各種パラメータを保持したclass
+    """
+    message.send(HELP)
