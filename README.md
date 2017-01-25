@@ -73,9 +73,6 @@ $ source /path/env/bin/activate
 ### user plugin
 
 - `$user list`: Slackのユーザー情報を一覧表示
-- `$user add <user_name>`: 指定したユーザー名のSlackのuser_idを追加
-- `$user del <slack_user_id>`: 指定したSlackのuser_idを削除
-- `$user alias <alias_name> <user_name>`: 指定したエイリアス名をユーザー名に紐付ける
-- `$user unalias <alias_name> <user_name>`: 指定したエイリアス名とユーザー名の紐付けを解除する
-- `$user slack_id <user_name>`: 指定したユーザー名のSlackのuser_idを返します
+- `$user alias <user_name> <alias_name>`: Slackのユーザーに指定したエイリアス名を紐づける
+- `$user unalias <user_name> <alias_name>`: Slackのユーザーから指定したエイリアス名との紐付けを解除する
 - `$user help`: userコマンドの使い方を返す
