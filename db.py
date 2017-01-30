@@ -12,7 +12,7 @@ Base = declarative_base()
 from beproudbot.plugins.water_models import WaterHistory  # noqa
 from beproudbot.plugins.redbull_models import RedbullHistory  # noqa
 from beproudbot.plugins.kintai_models import KintaiHistory  # noqa
-from beproudbot.plugins.user_models import UserAliasName  # noqa
+from beproudbot.plugins.alias_models import UserAliasName  # noqa
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):
