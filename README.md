@@ -77,3 +77,15 @@ $ source /path/env/bin/activate
 - `$alias del [user_name] <alias_name>`: Slackのユーザーに紐づくエイリアス名を削除する
 - `$alias help`: aliasコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
+
+
+### cleaning plugin
+
+- `$cleaning list`: 掃除当番の一覧を表示する
+- `$cleaning today`: 今日の掃除当番を表示する
+- `$cleaning add <user_name> <day_of_week>`: 掃除当番を追加する
+- `$cleaning del <user_name> <day_of_week>`: 掃除当番から削除する
+- `$cleaning <day_of_week>`: 指定された曜日の掃除当番を表示する
+- `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
+- `$cleaning move <user_name> <day_of_week>`: 掃除当番の曜日を入れ替える
+- `$cleaning help`: 掃除の内容を表示する
