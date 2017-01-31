@@ -6,7 +6,8 @@ from beproudbot.plugins.alias_models import UserAliasName
 
 HELP = """
 - `$alias show [user_name]`: Slackのユーザーに紐づいているエイリアス名一覧を表示する
-- `$alias add/del [user_name] <alias_name>`: Slackのユーザーに紐づくエイリアス名を更新する
+- `$alias add [user_name] <alias_name>`: Slackのユーザーに紐づくエイリアス名を登録する
+- `$alias del [user_name] <alias_name>`: Slackのユーザーに紐づくエイリアス名を削除する
 - `$alias help`: aliasコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
 """
@@ -53,8 +54,10 @@ def alias_name(message, user_name, alias_name=None):
        上記の場合user_nameは投稿者となる
     """
     if alias_name:
+        # ユーザー名とエイリアス名が指定されているパターン
         slack_id = get_slack_id_by_name(user_name)
     else:
+        # 投稿者のエイリアス名を更新するパターン
         alias_name = user_name
         slack_id = message.body['user']
         user_name = get_user_name(slack_id)
@@ -92,8 +95,10 @@ def unalias_name(message, user_name, alias_name=None):
        上記の場合user_nameは投稿者となる
     """
     if alias_name:
+        # ユーザー名とエイリアス名が指定されているパターン
         slack_id = get_slack_id_by_name(user_name)
     else:
+        # 投稿者のエイリアス名を更新するパターン
         alias_name = user_name
         slack_id = message.body['user']
         user_name = get_user_name(slack_id)

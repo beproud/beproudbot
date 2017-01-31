@@ -1,5 +1,8 @@
 Unreleased
 ----------
+
+Release Notes - 2017-01-31
+--------------------------
 - [#16] aliasコマンドを追加
 
 Release Notes - 2017-01-16
