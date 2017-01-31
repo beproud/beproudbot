@@ -69,3 +69,11 @@ $ source /path/env/bin/activate
 - `おはよう`・`お早う`・`出社しました`: 出社時刻を記録します
 - `帰ります`・`かえります`・`退社します`: 退社時刻を記録します
 - `$勤怠 help`: 勤怠コマンドの使い方を返す
+
+### alias plugin
+
+- `$alias show [user_name]`: Slackのユーザーに紐づいているエイリアス名一覧を表示する
+- `$alias add [user_name] <alias_name>`: Slackのユーザーに紐づくエイリアス名を登録する
+- `$alias del [user_name] <alias_name>`: Slackのユーザーに紐づくエイリアス名を削除する
+- `$alias help`: aliasコマンドの使い方を返す
+- ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
