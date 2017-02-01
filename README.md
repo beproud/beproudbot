@@ -83,9 +83,12 @@ $ source /path/env/bin/activate
 
 - `$cleaning list`: 掃除当番の一覧を表示する
 - `$cleaning today`: 今日の掃除当番を表示する
+- `$cleaning <day_of_week>`: 指定された曜日の掃除当番を表示する
 - `$cleaning add <user_name> <day_of_week>`: 掃除当番を追加する
 - `$cleaning del <user_name> <day_of_week>`: 掃除当番から削除する
-- `$cleaning <day_of_week>`: 指定された曜日の掃除当番を表示する
 - `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
 - `$cleaning move <user_name> <day_of_week>`: 掃除当番の曜日を入れ替える
-- `$cleaning help`: 掃除の内容を表示する
+- `$cleaning task`: 掃除の作業内容を表示する
+- `$cleaning add task <task_name>` 掃除の作業内容を追加する
+- `$cleaning del task <task_name>` 掃除の作業内容を削除する
+- `$cleaning help`: cleaningコマンドの使い方を返す
