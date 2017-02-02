@@ -5,9 +5,6 @@ from db import Base
 
 class UserAliasName(Base):
     """Slackのuser_idに紐づく名前を管理するモデル
-
-    :param Base: `sqlalchemy.ext.declarative.api.DeclarativeMeta` を
-        継承したclass
     """
     __tablename__ = 'user_alias_name'
 
@@ -15,3 +12,10 @@ class UserAliasName(Base):
     slack_id = Column(Unicode(100), nullable=False)
     alias_name = Column(Unicode(100), nullable=False, unique=True)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
+
+    @classmethod
+    def get_or_none_by_alias_name(cls, session, user_name):
+        user_alias_name = (session.query(cls)
+                           .filter(cls.alias_name == user_name)
+                           .one_or_none())
+        return user_alias_name
