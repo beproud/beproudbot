@@ -23,12 +23,12 @@ HELP = """
 """
 
 CLEANING_TASKS = [
-    'ゴミ集め(各机, シュレッダー)'
+    'ゴミ集め(各机, シュレッダー) 火曜・金曜'
     '机拭き: bar, showroom, 窓際, おやつ, スタンディング',
     'フリーアドレス席の汚れている机拭き',
     'barのディスプレイから出てるケーブルを後ろ側にある取っ手にかける',
     '空気清浄機のフル稼働',
-    '加湿器の注水＆フル稼働(消し忘れ防止のためにタイマーで設定しましょう)',
+    '加湿器の注水＆フル稼働(消し忘れ防止のためにタイマーで設定しましょう) 冬場のみ',
 ]
 
 DAY_OF_WEEK = '月火水木金土日'
@@ -50,7 +50,7 @@ def show_cleaning_task(message):
     :param message: slackbot.dispatcher.Message
     """
     formatted = '\n'.join(['- [] {}'.format(row) for row in CLEANING_TASKS])
-    message.send(message, '掃除でやることリスト\n%s' % formatted)
+    message.send('掃除でやることリスト\n{}'.format(formatted))
 
 
 @respond_to('^cleaning\s+list$')
@@ -65,7 +65,7 @@ def show_cleaning_duty(message):
         user = get_user_name(c.slack_id)
         dow2users.setdefault(c.day_of_week, []).append(user)
 
-    pt = PrettyTable(['曜日', '当番'])
+    pt = PrettyTable(['day of week', 'username'])
     for day_of_week, users in dow2users.items():
         dow = DAY_OF_WEEK[day_of_week]
         str_users = ','.join(users)
@@ -74,24 +74,16 @@ def show_cleaning_duty(message):
 
 
 @respond_to('^cleaning\s+today$')
-@respond_to('^cleaning\s+(\S+)$')
-def show_today_cleaning_duty(message, day_of_week=None):
-    """曜日を指定して掃除当番を表示する
+def show_today_cleaning_duty(message):
+    """今日の掃除当番を表示する
 
     :param message: slackbot.dispatcher.Message
-    :param str day_of_week: 掃除当番を表示する曜日
     """
-    if day_of_week is None:
-        dow = datetime.datetime.today.isoweek()
-    elif day_of_week and day_of_week in DAY_OF_WEEK:
-        dow = DAY_OF_WEEK.index(day_of_week)
-    else:
-        message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
-        return
+    dow = datetime.datetime.today().weekday()
 
     s = Session()
     users = [get_user_name(c.slack_id) for
-             c in s.query(Cleaning).fitler(Cleaning.day_of_week == dow)]
+             c in s.query(Cleaning).filter(Cleaning.day_of_week == dow)]
     message.send('今日の掃除当番は{}です'.format('、'.join(users)))
 
 
@@ -109,7 +101,7 @@ def cleaning_add(message, user_name, day_of_week):
 
     slack_id = get_slack_id_by_name(user_name)
     s = Session()
-    user_alias_name = UserAliasName.get_or_none_by_alias_nam(s, user_name)
+    user_alias_name = UserAliasName.get_or_none_by_alias_name(s, user_name)
 
     if user_alias_name:
         slack_id = user_alias_name.slack_id
@@ -117,8 +109,13 @@ def cleaning_add(message, user_name, day_of_week):
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
+    q = s.query(Cleaning).filter(Cleaning.slack_id == slack_id)
+    if s.query(q.exists()).scalar():
+        message.send('{}は既に登録されています'.format(user_name, day_of_week))
+        return
+
     s.add(Cleaning(slack_id=slack_id, day_of_week=DAY_OF_WEEK.index(day_of_week)))
-    s.commit
+    s.commit()
     message.send('{}を{}曜日の掃除当番に登録しました'.format(user_name, day_of_week))
 
 
@@ -136,7 +133,7 @@ def cleaning_del(message, user_name, day_of_week):
 
     slack_id = get_slack_id_by_name(user_name)
     s = Session()
-    user_alias_name = UserAliasName.get_or_none_by_alias_nam(s, user_name)
+    user_alias_name = UserAliasName.get_or_none_by_alias_name(s, user_name)
 
     if user_alias_name:
         slack_id = user_alias_name.slack_id
@@ -145,8 +142,8 @@ def cleaning_del(message, user_name, day_of_week):
         return
 
     cleaning_user = (s.query(Cleaning)
-                     .filter(slack_id == slack_id)
-                     .filter(day_of_week == DAY_OF_WEEK.index(day_of_week))
+                     .filter(Cleaning.slack_id == slack_id)
+                     .filter(Cleaning.day_of_week == DAY_OF_WEEK.index(day_of_week))
                      .one_or_none())
 
     if cleaning_user:
@@ -154,7 +151,7 @@ def cleaning_del(message, user_name, day_of_week):
         s.commit()
         message.send('{}を{}曜日の掃除当番から削除しました'.format(user_name, day_of_week))
     else:
-        message.send('{}は{}曜日の掃除当番び登録されていません'.format(user_name, day_of_week))
+        message.send('{}は{}曜日の掃除当番に登録されていません'.format(user_name, day_of_week))
 
 
 @respond_to('^cleaning\s+swap\s+(\S+)\s+(\S+)$')
@@ -170,7 +167,7 @@ def cleaning_swap(message, user_name1, user_name2):
 
     s = Session()
     user_alias_name = (s.query(UserAliasName)
-                       .filter(UserAliasName.alias_name._in([user_name1, user_name2]))
+                       .filter(UserAliasName.alias_name.in_([user_name1, user_name2]))
                        .all())
 
     for alias in user_alias_name:
@@ -192,15 +189,14 @@ def cleaning_swap(message, user_name1, user_name2):
     cleaning_user1 = (s.query(Cleaning)
                       .filter(Cleaning.slack_id == slack_id1)
                       .one_or_none())
-
     cleaning_user2 = (s.query(Cleaning)
                       .filter(Cleaning.slack_id == slack_id2)
                       .one_or_none())
 
-    if cleaning_user1:
+    if not cleaning_user1:
         message.send('{}は掃除当番に登録されていません'.format(user_name1))
         return
-    if cleaning_user2:
+    if not cleaning_user2:
         message.send('{}は掃除当番に登録されていません'.format(user_name2))
         return
 
@@ -224,7 +220,7 @@ def cleaning_move(message, user_name, day_of_week):
 
     slack_id = get_slack_id_by_name(user_name)
     s = Session()
-    user_alias_name = UserAliasName.get_or_none_by_alias_nam(s, user_name)
+    user_alias_name = UserAliasName.get_or_none_by_alias_name(s, user_name)
     if user_alias_name:
         slack_id = user_alias_name.slack_id
 
@@ -236,7 +232,7 @@ def cleaning_move(message, user_name, day_of_week):
                      .filter(Cleaning.slack_id == slack_id)
                      .one_or_none())
 
-    if cleaning_user:
+    if not cleaning_user:
         message.send('{}は掃除当番に登録されていません'.format(user_name))
         return
 

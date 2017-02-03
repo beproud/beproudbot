@@ -14,8 +14,13 @@ class UserAliasName(Base):
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
 
     @classmethod
-    def get_or_none_by_alias_name(cls, session, user_name):
+    def get_or_none_by_alias_name(cls, session, name):
+        """指定したユーザー名のSlackのuser_idを返す
+
+        :params session: sqlalchemy.orm.Session
+        :params str name: ユーザーのエイリアス名
+        """
         user_alias_name = (session.query(cls)
-                           .filter(cls.alias_name == user_name)
+                           .filter(cls.alias_name == name)
                            .one_or_none())
         return user_alias_name
