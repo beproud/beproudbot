@@ -3,9 +3,9 @@ import datetime
 from prettytable import PrettyTable
 
 from slackbot.bot import respond_to
-from utils.slack import get_user_name, get_slack_id_by_name
+from utils.slack import get_user_name
+from utils.user_name_alias import get_slack_id
 from db import Session
-from beproudbot.plugins.alias_models import UserAliasName
 from beproudbot.plugins.cleaning_models import Cleaning
 
 
@@ -13,11 +13,10 @@ HELP = """
 - `$cleaning task`: 掃除作業の一覧を表示する
 - `$cleaning list`: 掃除当番の一覧を表示する
 - `$cleaning today`: 今日の掃除当番を表示する
-- `$cleaning <day_of_week>`: 指定された曜日の掃除当番を表示する
 - `$cleaning add <user_name> <day_of_week>`: 掃除当番を追加する
 - `$cleaning del <user_name> <day_of_week>`: 掃除当番から削除する
-- `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
 - `$cleaning move <user_name> <day_of_week>`: 掃除当番の曜日を移動する
+- `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
 - `$cleaning help`: cleaningコマンドの使い方を返す
 - ※<day_of_week> は月、火、水、木、金が指定可能です
 """
@@ -31,7 +30,7 @@ CLEANING_TASKS = [
     '加湿器の注水＆フル稼働(消し忘れ防止のためにタイマーで設定しましょう) 冬場のみ',
 ]
 
-DAY_OF_WEEK = '月火水木金土日'
+DAY_OF_WEEK = '月火水木金'
 
 
 @respond_to('^cleaning\s+help$')
@@ -54,7 +53,7 @@ def show_cleaning_task(message):
 
 
 @respond_to('^cleaning\s+list$')
-def show_cleaning_duty(message):
+def show_cleaning_list(message):
     """掃除当番の一覧を表示する
 
     :param message: slackbot.dispatcher.Message
@@ -68,13 +67,13 @@ def show_cleaning_duty(message):
     pt = PrettyTable(['day of week', 'username'])
     for day_of_week, users in dow2users.items():
         dow = DAY_OF_WEEK[day_of_week]
-        str_users = ','.join(users)
+        str_users = ', '.join(users)
         pt.add_row([dow, str_users])
     message.send('```{}```'.format(pt))
 
 
 @respond_to('^cleaning\s+today$')
-def show_today_cleaning_duty(message):
+def show_today_cleaning_list(message):
     """今日の掃除当番を表示する
 
     :param message: slackbot.dispatcher.Message
@@ -99,12 +98,8 @@ def cleaning_add(message, user_name, day_of_week):
         message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
         return
 
-    slack_id = get_slack_id_by_name(user_name)
     s = Session()
-    user_alias_name = UserAliasName.get_or_none_by_alias_name(s, user_name)
-
-    if user_alias_name:
-        slack_id = user_alias_name.slack_id
+    slack_id = get_slack_id(s, user_name)
     if not slack_id:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
@@ -131,12 +126,8 @@ def cleaning_del(message, user_name, day_of_week):
         message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
         return
 
-    slack_id = get_slack_id_by_name(user_name)
     s = Session()
-    user_alias_name = UserAliasName.get_or_none_by_alias_name(s, user_name)
-
-    if user_alias_name:
-        slack_id = user_alias_name.slack_id
+    slack_id = get_slack_id(s, user_name)
     if not slack_id:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
@@ -162,19 +153,10 @@ def cleaning_swap(message, user_name1, user_name2):
     :param str user_name1: 掃除当番の曜日を交換するユーザー名
     :param str user_name2: 掃除当番の曜日を交換するユーザー名
     """
-    slack_id1 = get_slack_id_by_name(user_name1)
-    slack_id2 = get_slack_id_by_name(user_name2)
 
     s = Session()
-    user_alias_name = (s.query(UserAliasName)
-                       .filter(UserAliasName.alias_name.in_([user_name1, user_name2]))
-                       .all())
-
-    for alias in user_alias_name:
-        if alias.alias_name == user_name1:
-            slack_id1 = alias.slack_id
-        if alias.alias_name == user_name2:
-            slack_id2 = alias.slack_id
+    slack_id1 = get_slack_id(s, user_name1)
+    slack_id2 = get_slack_id(s, user_name2)
 
     if slack_id1 is None:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name1))
@@ -218,12 +200,8 @@ def cleaning_move(message, user_name, day_of_week):
         message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
         return
 
-    slack_id = get_slack_id_by_name(user_name)
     s = Session()
-    user_alias_name = UserAliasName.get_or_none_by_alias_name(s, user_name)
-    if user_alias_name:
-        slack_id = user_alias_name.slack_id
-
+    slack_id = get_slack_id(s, user_name)
     if slack_id is None:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
