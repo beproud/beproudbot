@@ -4,7 +4,7 @@ from prettytable import PrettyTable
 
 from slackbot.bot import respond_to
 from utils.slack import get_user_name
-from utils.user_name_alias import get_slack_id
+from utils.alias import get_slack_id
 from db import Session
 from beproudbot.plugins.cleaning_models import Cleaning
 
