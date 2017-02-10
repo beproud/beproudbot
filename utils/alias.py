@@ -1,4 +1,4 @@
-from utils.slack import get_slack_id_by_name
+from .slack import get_slack_id_by_name
 from beproudbot.plugins.alias_models import UserAliasName
 
 
