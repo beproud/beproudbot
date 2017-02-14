@@ -1,7 +1,10 @@
+import logging
 from functools import lru_cache
 
 import slacker
 from slackbot import settings
+
+logger = logging.getLogger(__name__)
 
 
 @lru_cache()
@@ -20,7 +23,7 @@ def get_users_info():
         for d in webapi.users.list().body['members']:
             users[d['id']] = d['name']
     except slacker.Error:
-        pass
+        logger.error('Cannot connect to Slack')
     return users
 
 
