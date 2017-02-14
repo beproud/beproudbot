@@ -2,7 +2,7 @@ import argparse
 from textwrap import dedent
 from configparser import ConfigParser, NoSectionError
 
-from slackbot.bot import Bot
+from slackbot.bot import Bot, default_reply
 from db import init_dbsession
 
 
@@ -20,6 +20,15 @@ def get_argparser():
                         help='ini形式のファイルをファイルパスで指定します')
 
     return parser
+
+
+@default_reply
+def beproudbot_default_replay(message):
+    """コマンドを間違えた時に表示する文字列を返す
+
+    :param message: slackbot.dispatcher.Message
+    """
+    message.send('コマンドが不明です')
 
 
 def main():
