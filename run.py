@@ -23,12 +23,12 @@ def get_argparser():
 
 
 @default_reply
-def beproudbot_default_replay(messsage):
+def beproudbot_default_replay(message):
     """コマンドを間違えた時に表示する文字列を返す
 
     :param message: slackbot.dispatcher.Message
     """
-    messsage.send('コマンドが不明です')
+    message.send('コマンドが不明です')
 
 
 def main():
