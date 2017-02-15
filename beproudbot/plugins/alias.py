@@ -36,7 +36,7 @@ def show_user_alias_name(message, user_name=None):
                    s.query(UserAliasName)
                    .filter(UserAliasName.slack_id == slack_id)]
 
-    pt = PrettyTable(['user_name', 'slack_id', 'alias_name'])
+    pt = PrettyTable(['ユーザー名', 'Slack ID', 'エイリアス名'])
     alias_name = ','.join(alias_names)
     pt.add_row([user_name, slack_id, alias_name])
     message.send('```{}```'.format(pt))
