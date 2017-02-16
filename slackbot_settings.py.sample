@@ -4,9 +4,6 @@
 # https://my.slack.com/services/new/bot で生成
 API_TOKEN = ''
 
-# 該当するコマンドが存在しない時に表示する文言
-default_reply = 'コマンドが不明です。'
-
 # 読み込むpluginのリスト
 PLUGINS = [
 	'beproudbot.plugins',
