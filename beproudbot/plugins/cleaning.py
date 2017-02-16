@@ -6,7 +6,6 @@ from prettytable import PrettyTable
 from slackbot.bot import respond_to
 from utils.slack import get_user_name
 from utils.alias import get_slack_id
-from core.validators import Validation
 from db import Session
 from beproudbot.plugins.cleaning_models import Cleaning
 
@@ -37,19 +36,6 @@ FORMATTED_CLEANING_TASKS = ('掃除でやることリスト\n'
                             '\n'.join(['- [] {}'.format(row) for row in CLEANING_TASKS]))
 
 DAY_OF_WEEK = '月火水木金'
-
-
-class cleaning_validator(Validation):
-
-    def validate_day_of_week(self, day_of_week):
-        if day_of_week not in DAY_OF_WEEK:
-            return '曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください'
-
-    def validate_user_name(self, user_name):
-        s = Session()
-        slack_id = get_slack_id(s, user_name)
-        if not slack_id:
-            return '{}はSlackのユーザーとして存在しません'.format(user_name)
 
 
 @respond_to('^cleaning\s+help$')
@@ -106,7 +92,6 @@ def show_today_cleaning_list(message):
 
 
 @respond_to('^cleaning\s+add\s+(\S+)\s+(\S+)$')
-@cleaning_validator('user_name', 'day_of_week')
 def cleaning_add(message, user_name, day_of_week):
     """指定した曜日の掃除当番にユーザーを追加する
 
@@ -114,8 +99,16 @@ def cleaning_add(message, user_name, day_of_week):
     :param str user_name: 掃除当番に登録するユーザー名
     :param str day_of_week: 追加する掃除曜日
     """
+    if day_of_week not in DAY_OF_WEEK:
+        message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
+        return
+
     s = Session()
     slack_id = get_slack_id(s, user_name)
+    if not slack_id:
+        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        return
+
     q = s.query(Cleaning).filter(Cleaning.slack_id == slack_id)
     if s.query(q.exists()).scalar():
         message.send('{}は既に登録されています'.format(user_name, day_of_week))
@@ -127,7 +120,6 @@ def cleaning_add(message, user_name, day_of_week):
 
 
 @respond_to('^cleaning\s+del\s+(\S+)\s+(\S+)$')
-@cleaning_validator('user_name', 'day_of_week')
 def cleaning_del(message, user_name, day_of_week):
     """指定した曜日の掃除当番からユーザーを削除する
 
@@ -135,8 +127,16 @@ def cleaning_del(message, user_name, day_of_week):
     :param str user_name: 掃除当番から削除するユーザー名
     :param str day_of_week: 削除する掃除当番が登録されている曜日
     """
+    if day_of_week not in DAY_OF_WEEK:
+        message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
+        return
+
     s = Session()
     slack_id = get_slack_id(s, user_name)
+    if not slack_id:
+        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        return
+
     cleaning_user = (s.query(Cleaning)
                      .filter(Cleaning.slack_id == slack_id)
                      .filter(Cleaning.day_of_week == DAY_OF_WEEK.index(day_of_week))
@@ -194,7 +194,6 @@ def cleaning_swap(message, user_name1, user_name2):
 
 
 @respond_to('^cleaning\s+move\s+(\S+)\s+(\S+)$')
-@cleaning_validator('user_name', 'day_of_week')
 def cleaning_move(message, user_name, day_of_week):
     """登録された掃除当番のユーザーの掃除曜日を移動させる
 
@@ -202,8 +201,16 @@ def cleaning_move(message, user_name, day_of_week):
     :param str user_name: 掃除当番の曜日を移動させるユーザー名
     :param str day_of_week: 移動先の曜日名
     """
+    if day_of_week not in DAY_OF_WEEK:
+        message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
+        return
+
     s = Session()
     slack_id = get_slack_id(s, user_name)
+    if slack_id is None:
+        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        return
+
     cleaning_user = (s.query(Cleaning)
                      .filter(Cleaning.slack_id == slack_id)
                      .one_or_none())
