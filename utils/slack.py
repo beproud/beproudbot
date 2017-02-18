@@ -1,13 +1,13 @@
 import logging
-from functools import lru_cache
 
+from cachetools.func import ttl_cache
 import slacker
 from slackbot import settings
 
 logger = logging.getLogger(__name__)
 
 
-@lru_cache()
+@ttl_cache(ttl=60 * 60 * 10)
 def get_users_info():
     """SlackAPIのusersAPIをキャッシュする
 
