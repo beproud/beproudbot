@@ -32,6 +32,7 @@ CLEANING_TASKS = [
     '加湿器の注水＆フル稼働(消し忘れ防止のためにタイマーで設定しましょう) 冬場のみ',
 ]
 
+# 掃除作業を表示用に整形した文字列
 FORMATTED_CLEANING_TASKS = ('掃除でやることリスト\n'
                             '\n'.join(['- [] {}'.format(row) for row in CLEANING_TASKS]))
 
@@ -49,7 +50,7 @@ def show_help_cleaning_commands(message):
 
 @respond_to('^cleaning\s+task$')
 def show_cleaning_task(message):
-    """Cleaningコマンドのhelpを表示
+    """掃除作業一覧を表示
 
     :param message: slackbot.dispatcher.Message
     """
