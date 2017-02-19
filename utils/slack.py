@@ -7,7 +7,7 @@ from slackbot import settings
 logger = logging.getLogger(__name__)
 
 
-@ttl_cache(ttl=60 * 60 * 10)
+@ttl_cache(ttl=60 * 60 * 4)
 def get_users_info():
     """SlackAPIのusersAPIをキャッシュする
 
