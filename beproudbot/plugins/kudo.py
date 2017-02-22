@@ -1,11 +1,12 @@
 from slackbot.bot import respond_to
-from utils.slack import get_user_name, get_slack_id_by_name
+from utils.slack import get_user_name
+from utils.alias import get_slack_id
 from db import Session
 from beproudbot.plugins.kudo_models import KudoHistory
 
 HELP = """
-- `$<name>++`: 指定された名前に対して +1 カウントします
-- `$<name>--`: 指定された名前に対して -1 カウントします
+- `$<name>++`: 指定された名前に対して +1 します
+- `$<name>--`: 指定された名前に対して -1 します
 - `$kudo rank_to <name>`: nameが++/--した対象をranking形式で表示する
 - `$kudo rank_from <name>`: nameが++/--された対象をranking形式表示する
 - `$kudo help`: kudoコマンドの使い方を返す
@@ -35,10 +36,12 @@ def update_kudo(message, name, action):
             .one_or_none())
 
     if kudo is None:
+        # name ×from_user_id の組み合わせが存在していない -> 追加
         s.add(KudoHistory(name=name, from_user_id=slack_id, delta=delta))
         s.commit()
         message.send('({}: 通算 {})'.format(name, delta))
     else:
+        # name ×from_user_id の組み合わせが存在 -> 更新
         kudo.delta = kudo.delta + delta
         s.commit()
         message.send('({}: 通算 {})'.format(kudo.name, kudo.delta))
@@ -46,24 +49,25 @@ def update_kudo(message, name, action):
 
 @respond_to('^kudo\s+rank_to\s+(\S+)$')
 def show_kudo_rank_to(message, user_name):
-    """nameが++/--した対象をRanking形式で表示する
+    """指定したユーザーが++/--した対象をRanking形式で表示する
+
+    :param message: slackbot.dispatcher.Message
+    :param str user_name: ++/--を行ったユーザー名
     """
-    slack_id = get_slack_id_by_name(user_name)
+    slack_id = get_slack_id(user_name)
+    if not slack_id:
+        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        return
+
     s = Session()
     kudo = (s.query(KudoHistory)
             .filter(KudoHistory.from_user_id == slack_id)
             .order_by(KudoHistory.delta.desc()))
 
-    msg = ['{}からの評価'.format(user_name)]
     if kudo:
-        rank_list = [(k.name, k.delta) for k in kudo]
-        upper = rank_list[:20]
-        lower = rank_list[-20:]
-        for name, delta in upper:
-            msg.append('{} : {}'.format(name, delta))
-        msg.append('~' * 30)
-        for name, delta in lower:
-            msg.append('{} : {}'.format(name, delta))
+        msg = ['{}からの評価'.format(user_name)]
+        for k in kudo:
+            msg.append('{:+d} : {}'.format(k.delta, k.name))
         message.send('\n'.join(msg))
     else:
         message.send('{}が++/--した記録はありません'.format(user_name))
@@ -71,7 +75,10 @@ def show_kudo_rank_to(message, user_name):
 
 @respond_to('^kudo\s+rank_from\s+(\S+)$')
 def show_kudo_rank_from(message, name):
-    """nameが++/--された対象をRanking形式で表示する
+    """指定したユーザーが++/--された対象をRanking形式で表示する
+
+    :param message: slackbot.dispatcher.Message
+    :param str name: ++/--された対象名
     """
     s = Session()
     kudo = (s.query(KudoHistory)
@@ -80,14 +87,18 @@ def show_kudo_rank_from(message, name):
 
     msg = ['{}への評価'.format(name)]
     if kudo:
-        rank_list = [(get_user_name(k.from_user_id), k.delta) for k in kudo]
-        upper = rank_list[:20]
-        lower = rank_list[-20:]
-        for user_name, delta in upper:
-            msg.append('{} : {}'.format(user_name, delta))
-        msg.append('~' * 30)
-        for user_name, delta in lower:
-            msg.append('{} : {}'.format(user_name, delta))
+        rank_list = [(k.delta, get_user_name(k.from_user_id)) for k in kudo]
+        if len(rank_list) > 40:
+            upper = rank_list[:20]
+            lower = rank_list[-20:]
+            for user_name, delta in upper:
+                msg.append('{:+d} : {}'.format(delta, user_name))
+            msg.append('~' * 30)
+            for user_name, delta in lower:
+                msg.append('{:+d} : {}'.format(delta, user_name))
+        else:
+            for user_name, delta in rank_list:
+                msg.append('{:+d} : {}'.format(delta, user_name))
         message.send('\n'.join(msg))
     else:
         message.send('{}が++/--された記録はありません'.format(name))

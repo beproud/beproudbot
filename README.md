@@ -90,3 +90,11 @@ $ source /path/env/bin/activate
 - `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
 - `$cleaning help`: cleaningコマンドの使い方を返す
 - ※<day_of_week> は月、火、水、木、金が指定可能です
+
+### kudo plugin
+
+- `$<name>++`: 指定された名前に対して +1 します
+- `$<name>--`: 指定された名前に対して -1 します
+- `$kudo rank_to <name>`: nameが++/--した対象をranking形式で表示する
+- `$kudo rank_from <name>`: nameが++/--された対象をranking形式表示する
+- `$kudo help`: kudoコマンドの使い方を返す
