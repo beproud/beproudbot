@@ -54,23 +54,23 @@ def show_kudo_rank_to(message, user_name):
     :param message: slackbot.dispatcher.Message
     :param str user_name: ++/--を行ったユーザー名
     """
-    slack_id = get_slack_id(user_name)
+    s = Session()
+    slack_id = get_slack_id(s, user_name)
     if not slack_id:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
-    s = Session()
     kudo = (s.query(KudoHistory)
             .filter(KudoHistory.from_user_id == slack_id)
             .order_by(KudoHistory.delta.desc()))
 
-    if kudo:
-        msg = ['{}からの評価'.format(user_name)]
+    if s.query(kudo.exists()).scalar():
+        msg = ['`{}` からの評価'.format(user_name)]
         for k in kudo:
             msg.append('{:+d} : {}'.format(k.delta, k.name))
         message.send('\n'.join(msg))
     else:
-        message.send('{}が++/--した記録はありません'.format(user_name))
+        message.send('`{}` が++/--した記録はありません'.format(user_name))
 
 
 @respond_to('^kudo\s+rank_from\s+(\S+)$')
@@ -85,8 +85,8 @@ def show_kudo_rank_from(message, name):
             .filter(KudoHistory.name == name)
             .order_by(KudoHistory.delta.desc()))
 
-    msg = ['{}への評価'.format(name)]
-    if kudo:
+    if s.query(kudo.exists()).scalar():
+        msg = ['`{}` への評価'.format(name)]
         rank_list = [(k.delta, get_user_name(k.from_user_id)) for k in kudo]
         if len(rank_list) > 40:
             upper = rank_list[:20]
@@ -97,11 +97,11 @@ def show_kudo_rank_from(message, name):
             for user_name, delta in lower:
                 msg.append('{:+d} : {}'.format(delta, user_name))
         else:
-            for user_name, delta in rank_list:
+            for delta, user_name in rank_list:
                 msg.append('{:+d} : {}'.format(delta, user_name))
         message.send('\n'.join(msg))
     else:
-        message.send('{}が++/--された記録はありません'.format(name))
+        message.send('`{}` が++/--された記録はありません'.format(name))
 
 
 @respond_to('^kudo\s+help$')
