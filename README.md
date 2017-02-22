@@ -78,7 +78,6 @@ $ source /path/env/bin/activate
 - `$alias help`: aliasコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
 
-
 ### cleaning plugin
 
 - `$cleaning task`: 掃除作業の一覧を表示する
@@ -90,3 +89,13 @@ $ source /path/env/bin/activate
 - `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
 - `$cleaning help`: cleaningコマンドの使い方を返す
 - ※<day_of_week> は月、火、水、木、金が指定可能です
+
+## テスト
+
+```bash
+$ pip install tox
+$ tox
+```
+
+- tox の install はアプリケーションの virtualenv と同じである必要はありません
+- `$ tox` は `tox.ini` と同じディレクトリで実行してください
