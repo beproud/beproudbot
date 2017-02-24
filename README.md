@@ -78,6 +78,7 @@ $ source /path/env/bin/activate
 - `$alias help`: aliasコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
 
+
 ### cleaning plugin
 
 - `$cleaning task`: 掃除作業の一覧を表示する
