@@ -28,10 +28,10 @@ def update_thx(message, user_name, word):
     :param str word: GJの内容
     """
     from_user_id = message.body['user']
-    channel_id = message.body['channel_id']
-    user_id = get_slack_id(user_name)
-
+    channel_id = message.body['channel']
     s = Session()
+    user_id = get_slack_id(s, user_name)
+
     s.add(ThxHistory(
         user_id=user_id,
         from_user_id=from_user_id,
@@ -45,7 +45,7 @@ def update_thx(message, user_name, word):
 
 
 @respond_to('^thx\s+from$')
-@respond_to('^thx\s+from\S+(\S+)$')
+@respond_to('^thx\s+from\s+(\S+)$')
 def show_thx_from(message, user_name=None):
     """誰からGJされたか表示します
 
@@ -54,12 +54,14 @@ def show_thx_from(message, user_name=None):
     """
     channel_id = message.body['channel']
     s = Session()
+    if not user_name:
+        user_name = get_user_name(message.body['user'])
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
-    rows = ['GJしたユーザー', 'GJ']
+    rows = [['GJしたユーザー', 'GJ内容']]
     thx = (s.query(ThxHistory)
             .filter(ThxHistory.user_id == slack_id)
             .filter(ThxHistory.channel_id == channel_id))
@@ -88,13 +90,15 @@ def show_thx_to(message, user_name=None):
     :param str user_name:  GJしたユーザー名
     """
     channel_id = message.body['channel']
+    if not user_name:
+        user_name = get_user_name(message.body['user'])
     s = Session()
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
-    rows = ['GJされたユーザー', 'GJ']
+    rows = [['GJされたユーザー', 'GJ内容']]
     thx = (s.query(ThxHistory)
             .filter(ThxHistory.from_user_id == slack_id)
             .filter(ThxHistory.channel_id == channel_id))

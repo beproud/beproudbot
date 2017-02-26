@@ -35,18 +35,18 @@ $ source /path/env/bin/activate
 
 ## Command
 
-### misc plugin
+### misc コマンド
 
 - `$shuffle spam ham eggs`: 指定された単語をシャッフルした結果を返す
 - `$choice spam ham eggs`: 指定された単語から一つをランダムに選んで返す
 
-### random plugin
+### random コマンド
 
 - `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
 - `$random active`: チャンネルにいるactiveなメンバーからランダムに一人を選ぶ
 - `$random help`: randomコマンドの使い方を返す
 
-### redbull plugin
+### redbull コマンド
 
 - `$redbull count`: RedBullの残り本数を表示する
 - `$redbull num`: numの数だけRedBullの本数を減らす(負数の場合、増やす)
@@ -55,14 +55,14 @@ $ source /path/env/bin/activate
 - `$redbull csv`: RedBullの月単位の消費履歴をCSV形式で表示する
 - `$redbull help`: redbullコマンドの使い方を返す
 
-### water plugin
+### water コマンド
 
 - `$water count`: 現在の残数を返す
 - `$water num`: 水を取り替えた時に使用。指定した数だけ残数を減らす(numが負数の場合、増やす)
 - `$water hitsory <num>`: 指定した件数分の履歴を返す(default=10)
 - `$water help`: このコマンドの使い方を返す
 
-### kintai plugin
+### kintai コマンド
 
 - `$勤怠`: 自分の勤怠一覧を直近40日分表示する
 - `$勤怠 csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
@@ -70,7 +70,7 @@ $ source /path/env/bin/activate
 - `帰ります`・`かえります`・`退社します`: 退社時刻を記録します
 - `$勤怠 help`: 勤怠コマンドの使い方を返す
 
-### alias plugin
+### alias コマンド
 
 - `$alias show [user_name]`: Slackのユーザーに紐づいているエイリアス名一覧を表示する
 - `$alias add [user_name] <alias_name>`: Slackのユーザーに紐づくエイリアス名を登録する
@@ -79,7 +79,7 @@ $ source /path/env/bin/activate
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
 
 
-### cleaning plugin
+### cleaning コマンド
 
 - `$cleaning task`: 掃除作業の一覧を表示する
 - `$cleaning list`: 掃除当番の一覧を表示する
@@ -90,3 +90,11 @@ $ source /path/env/bin/activate
 - `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
 - `$cleaning help`: cleaningコマンドの使い方を返す
 - ※<day_of_week> は月、火、水、木、金が指定可能です
+
+### thx コマンド
+
+- `$[user_name]++ [word]`: 指定したSlackのユーザーにGJする
+- `$thx from <user_name>`: 誰からGJされたかの一覧を表示する
+- `$thx to <user_name>`: 誰にGJしたかの一覧を返す
+- `$thx help`: thxコマンドの使い方を返す
+- ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
