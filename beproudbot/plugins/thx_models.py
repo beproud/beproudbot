@@ -10,7 +10,7 @@ class ThxHistory(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Unicode(100), nullable=False)
-    thx_from_user_id = Column(Unicode(100), nullable=False)
+    from_user_id = Column(Unicode(100), nullable=False)
     word = Column(Unicode(1024), nullable=False)
     channel_id = Column(Unicode(100), nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
