@@ -21,7 +21,7 @@ dependencies:
 
 test:
   override:
-    - tox -e pytest
+    - tox -e py35
     - tox -e flake8
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/pytest
