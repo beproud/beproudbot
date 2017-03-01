@@ -79,8 +79,7 @@ def show_user_redbull_history(message):
           .order_by(RedbullHistory.id.asc()))
     tmp = []
     for line in qs:
-        tmp.append('[{:%Y年%m月%d日}]  {}本'.format(line.ctime,
-                                                        -line.delta))
+        tmp.append('[{:%Y年%m月%d日}]  {}本'.format(line.ctime, -line.delta))
 
     ret = '消費履歴はありません'
     if tmp:
