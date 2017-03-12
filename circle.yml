@@ -1,0 +1,26 @@
+general:
+  artifacts:
+    - "htmlcov/"
+
+machine:
+  pre:
+    # https://discuss.circleci.com/t/speed-up-python-3-5-1-builds/1760/12
+    - wget https://s3.amazonaws.com/circle-downloads/circle-pyenv-python-3.5.1_1.0_amd64.deb
+    - sudo dpkg -i circle-pyenv-python-3.5.1_1.0_amd64.deb
+  python:
+    version: 3.5.1
+
+dependencies:
+  override:
+    - pip install -U pip setuptools tox
+
+  cache_directories:
+    - "~/.cache/pip"
+
+test:
+  override:
+    - tox -e py35 -- --junitxml=junit.xml
+    - tox -e flake8 -- --junitxml=flake8.xml
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/pytest
+    - mv {junit,flake8}.xml $CIRCLE_TEST_REPORTS/pytest/
