@@ -30,17 +30,21 @@ def update_thx(message, user_name, word):
     from_user_id = message.body['user']
     channel_id = message.body['channel']
     s = Session()
-    user_id = get_slack_id(s, user_name)
+    slack_id = get_slack_id(s, user_name)
+    if not slack_id:
+        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        return
 
     s.add(ThxHistory(
-        user_id=user_id,
+        user_id=slack_id,
         from_user_id=from_user_id,
         word=word,
         channel_id=channel_id))
     s.commit()
+
     count = (s.query(ThxHistory)
              .filter(ThxHistory.channel_id == channel_id)
-             .filter(ThxHistory.user_id == user_id)
+             .filter(ThxHistory.user_id == slack_id)
              .count())
     message.send('{}({}: {}GJ)'.format(word, user_name, count))
 
