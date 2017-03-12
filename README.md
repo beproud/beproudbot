@@ -93,7 +93,7 @@ $ source /path/env/bin/activate
 
 ### thx コマンド
 
-- `$[user_name]++ [word]`: 指定したSlackのユーザーにGJする
+- `[user_name]++ [word]`: 指定したSlackのユーザーにGJする
 - `$thx from <user_name>`: 誰からGJされたかの一覧を表示する
 - `$thx to <user_name>`: 誰にGJしたかの一覧を返す
 - `$thx help`: thxコマンドの使い方を返す
