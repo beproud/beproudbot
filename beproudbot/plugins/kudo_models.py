@@ -4,7 +4,7 @@ from db import Base
 
 
 class KudoHistory(Base):
-    """kudoコマンド(++/--)の管理に使用されるModel
+    """kudoコマンドの管理に使用されるModel
     """
     __tablename__ = 'kudo_history'
 

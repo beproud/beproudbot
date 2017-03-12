@@ -1,33 +1,30 @@
-from slackbot.bot import respond_to
-from utils.slack import get_user_name
-from utils.alias import get_slack_id
+from sqlalchemy import func
+
+from slackbot.bot import respond_to, listen_to
 from db import Session
 from beproudbot.plugins.kudo_models import KudoHistory
 
 HELP = """
-- `$<name>++`: 指定された名前に対して +1 します
-- `$<name>--`: 指定された名前に対して -1 します
-- `$kudo rank_to <name>`: nameが++/--した対象をranking形式で表示する
-- `$kudo rank_from <name>`: nameが++/--された対象をranking形式表示する
+- `<name>++`: 指定された名称に対して++します
 - `$kudo help`: kudoコマンドの使い方を返す
 """
 
 
-@respond_to('^(\S*[^\+|\-|\s])\s*(\+\+|\-\-)$')
-def update_kudo(message, name, action):
-    """ 指定された名前に対して ++ または -- する
+@listen_to('^(\S*[^\+|\s])\s*\+\+$')
+def update_kudo(message, name):
+    """ 指定された名前に対して ++ する
 
     OK:
        $name++、$name ++、$name  ++
+
     NG:
-       $name---、$name ---、$name-++
+       $name+ +、$name++hoge
+
 
     :param message: slackbot.dispatcher.Message
-    :param name str: ++ または -- をする対象の名前
-    :param action str: ++を指定した場合+1、--を指定した場合-1
+    :param name str: ++する対象の名前
     """
     slack_id = message.body['user']
-    delta = 1 if action == '++' else -1
 
     s = Session()
     kudo = (s.query(KudoHistory)
@@ -36,72 +33,20 @@ def update_kudo(message, name, action):
             .one_or_none())
 
     if kudo is None:
-        # name ×from_user_id の組み合わせが存在していない -> 追加
-        s.add(KudoHistory(name=name, from_user_id=slack_id, delta=delta))
+        # name ×from_user_id の組み合わせが存在していない -> 新規登録
+        s.add(KudoHistory(name=name, from_user_id=slack_id, delta=1))
         s.commit()
-        message.send('({}: 通算 {})'.format(name, delta))
     else:
         # name ×from_user_id の組み合わせが存在 -> 更新
-        kudo.delta = kudo.delta + delta
+        kudo.delta = kudo.delta + 1
         s.commit()
-        message.send('({}: 通算 {})'.format(kudo.name, kudo.delta))
 
+    q = (s.query(
+        func.sum(KudoHistory.delta).label('total_count'))
+        .filter(KudoHistory.name == name))
+    total_count = q.one().total_count
 
-@respond_to('^kudo\s+rank_to\s+(\S+)$')
-def show_kudo_rank_to(message, user_name):
-    """指定したユーザーが++/--した対象をRanking形式で表示する
-
-    :param message: slackbot.dispatcher.Message
-    :param str user_name: ++/--を行ったユーザー名
-    """
-    s = Session()
-    slack_id = get_slack_id(s, user_name)
-    if not slack_id:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
-        return
-
-    kudo = (s.query(KudoHistory)
-            .filter(KudoHistory.from_user_id == slack_id)
-            .order_by(KudoHistory.delta.desc()))
-
-    if s.query(kudo.exists()).scalar():
-        msg = ['`{}` からの評価'.format(user_name)]
-        for k in kudo:
-            msg.append('{:+d} : {}'.format(k.delta, k.name))
-        message.send('\n'.join(msg))
-    else:
-        message.send('`{}` が++/--した記録はありません'.format(user_name))
-
-
-@respond_to('^kudo\s+rank_from\s+(\S+)$')
-def show_kudo_rank_from(message, name):
-    """指定したユーザーが++/--された対象をRanking形式で表示する
-
-    :param message: slackbot.dispatcher.Message
-    :param str name: ++/--された対象名
-    """
-    s = Session()
-    kudo = (s.query(KudoHistory)
-            .filter(KudoHistory.name == name)
-            .order_by(KudoHistory.delta.desc()))
-
-    if s.query(kudo.exists()).scalar():
-        msg = ['`{}` への評価'.format(name)]
-        rank_list = [(k.delta, get_user_name(k.from_user_id)) for k in kudo]
-        if len(rank_list) > 40:
-            upper = rank_list[:20]
-            lower = rank_list[-20:]
-            for user_name, delta in upper:
-                msg.append('{:+d} : {}'.format(delta, user_name))
-            msg.append('~' * 30)
-            for user_name, delta in lower:
-                msg.append('{:+d} : {}'.format(delta, user_name))
-        else:
-            for delta, user_name in rank_list:
-                msg.append('{:+d} : {}'.format(delta, user_name))
-        message.send('\n'.join(msg))
-    else:
-        message.send('`{}` が++/--された記録はありません'.format(name))
+    message.send('({}: 通算 {})'.format(name, total_count))
 
 
 @respond_to('^kudo\s+help$')

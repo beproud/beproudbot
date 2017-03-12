@@ -93,8 +93,5 @@ $ source /path/env/bin/activate
 
 ### kudo plugin
 
-- `$<name>++`: 指定された名前に対して +1 します
-- `$<name>--`: 指定された名前に対して -1 します
-- `$kudo rank_to <name>`: nameが++/--した対象をranking形式で表示する
-- `$kudo rank_from <name>`: nameが++/--された対象をranking形式表示する
+- `<name>++`: 指定された名称に対して++します
 - `$kudo help`: kudoコマンドの使い方を返す
