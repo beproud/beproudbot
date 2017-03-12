@@ -4,14 +4,14 @@ from io import StringIO
 import requests
 
 from slackbot import settings
-from slackbot.bot import respond_to
+from slackbot.bot import respond_to, listen_to
 from utils.slack import get_user_name
 from utils.alias import get_slack_id
 from db import Session
 from beproudbot.plugins.thx_models import ThxHistory
 
 HELP = """
-- `$[user_name]++ [word]`: 指定したSlackのユーザーにGJする
+- `[user_name]++ [word]`: 指定したSlackのユーザーにGJする
 - `$thx from <user_name>`: 誰からGJされたかの一覧を表示する
 - `$thx to <user_name>`: 誰にGJしたかの一覧を返す
 - `$thx help`: thxコマンドの使い方を返す
@@ -19,7 +19,7 @@ HELP = """
 """
 
 
-@respond_to('^(\S*[^\+|\s])\s*\+\+\s+(\S+)$')
+@listen_to('^(\S*[^\+|\s])\s*\+\+\s+(\S+)$')
 def update_thx(message, user_name, word):
     """指定したSlackのユーザーにGJを行う
 
@@ -40,6 +40,7 @@ def update_thx(message, user_name, word):
     s.commit()
     count = (s.query(ThxHistory)
              .filter(ThxHistory.channel_id == channel_id)
+             .filter(ThxHistory.user_id == user_id)
              .count())
     message.send('{}({}: {}GJ)'.format(word, user_name, count))
 
@@ -65,6 +66,7 @@ def show_thx_from(message, user_name=None):
     thx = (s.query(ThxHistory)
             .filter(ThxHistory.user_id == slack_id)
             .filter(ThxHistory.channel_id == channel_id))
+
     for t in thx:
         rows.append([get_user_name(t.from_user_id), t.word])
     output = StringIO()
