@@ -1,11 +1,12 @@
 import csv
+from difflib import get_close_matches
 from io import StringIO
 
 import requests
 
 from slackbot import settings
 from slackbot.bot import respond_to, listen_to
-from utils.slack import get_user_name
+from utils.slack import get_user_name, get_users_info
 from utils.alias import get_slack_id
 from db import Session
 from beproudbot.plugins.thx_models import ThxHistory
@@ -23,6 +24,17 @@ HELP = """
 def update_thx(message, user_name, word):
     """指定したSlackのユーザーにGJを行う
 
+    OK:
+       user_name++ hoge
+       user_name ++ hoge
+       user_name  ++ hoge
+       @user_name++ hoge
+
+    NG:
+       user_name+ + hoge
+       user_name+++ hoge
+       user_name++hoge
+
     :param message: slackbot.dispatcher.Message
     :param str user_name: ++するユーザー名
     :param str word: GJの内容
@@ -31,13 +43,19 @@ def update_thx(message, user_name, word):
     channel_id = message.body['channel']
 
     s = Session()
+    # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
+    # `<@{slack_id}>` というstr型で渡ってくるので対応
     if user_name.startswith('<@') and get_user_name(user_name[2:11]):
         slack_id = user_name[2:11]
     else:
         slack_id = get_slack_id(s, user_name)
 
     if not slack_id:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        hint = get_close_matches(user_name, get_users_info.values())
+        if hint:
+            message.send('もしかして: `{}`'.format(hint[0]))
+        else:
+            message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
     s.add(ThxHistory(
