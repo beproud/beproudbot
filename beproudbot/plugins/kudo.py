@@ -15,10 +15,10 @@ def update_kudo(message, name):
     """ 指定された名前に対して ++ する
 
     OK:
-       $name++、$name ++、$name  ++
+       name++、name ++、name  ++
 
     NG:
-       $name+ +、$name++hoge
+       name+ +、name++hoge
 
 
     :param message: slackbot.dispatcher.Message
