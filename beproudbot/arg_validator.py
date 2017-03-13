@@ -70,10 +70,12 @@ class BaseArgValidator(object):
         self.errors = {}
 
         for name, given in self.callargs.items():
+            # .skip_args の変数は検証しない
             if name in self.skip_args:
                 self.cleaned_data[name] = given
                 continue
 
+            # clean_xxx メソッドがある場合は呼び出して検証
             f = getattr(self, 'clean_{}'.format(name), None)
             if not f or not callable(f):
                 self.cleaned_data[name] = given
@@ -85,6 +87,7 @@ class BaseArgValidator(object):
             except ValidationError as e:
                 self.errors[name] = e.message
 
+        # 追加フィールドの検証
         for extra_name in self.extras:
             f = getattr(self, 'clean_{}'.format(extra_name))
             try:
