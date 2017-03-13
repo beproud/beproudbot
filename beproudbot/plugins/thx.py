@@ -51,7 +51,7 @@ def update_thx(message, user_name, word):
         slack_id = get_slack_id(s, user_name)
 
     if not slack_id:
-        hint = get_close_matches(user_name, get_users_info.values())
+        hint = get_close_matches(user_name, get_users_info().values())
         if hint:
             message.send('もしかして: `{}`'.format(hint[0]))
         else:
