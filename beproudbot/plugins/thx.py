@@ -29,8 +29,13 @@ def update_thx(message, user_name, word):
     """
     from_user_id = message.body['user']
     channel_id = message.body['channel']
+
     s = Session()
-    slack_id = get_slack_id(s, user_name)
+    if user_name.startswith('<@') and get_user_name(user_name[2:11]):
+        slack_id = user_name[2:11]
+    else:
+        slack_id = get_slack_id(s, user_name)
+
     if not slack_id:
         message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
         return
