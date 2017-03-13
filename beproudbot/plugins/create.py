@@ -1,6 +1,5 @@
 from slackbot.bot import respond_to
 
-from beproudbot.plugins.create_models import CreatedCommand, RegisteredTerm
 
 HELP = """
 - `$create hoge`: hogeコマンドを追加

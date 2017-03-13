@@ -22,7 +22,10 @@ class RegisteredTerm(Base):
     __tablename__ = 'registered_term'
 
     id = Column(Integer, primary_key=True)
-    command = Column(Integer, ForeignKey('created_command.id', onupdate='CASCADE', ondelete='CASCADE'))
+    command = Column(Integer, ForeignKey(
+        'created_command.id',
+        onupdate='CASCADE',
+        ondelete='CASCADE'))
     term = Column(Unicode, nullable=False)
     creator = Column(Unicode(100), nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
