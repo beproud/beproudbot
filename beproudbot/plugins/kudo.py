@@ -1,6 +1,7 @@
 from sqlalchemy import func
 
 from slackbot.bot import respond_to, listen_to
+from utils.slack import get_user_name
 from db import Session
 from beproudbot.plugins.kudo_models import KudoHistory
 
@@ -15,16 +16,20 @@ def update_kudo(message, name):
     """ 指定された名前に対して ++ する
 
     OK:
-       name++、name ++、name  ++
+       name++、name ++、name  ++、@name++
 
     NG:
-       name+ +、name++hoge
+       name+ +、name++hoge、
 
 
     :param message: slackbot.dispatcher.Message
     :param name str: ++する対象の名前
     """
     slack_id = message.body['user']
+    # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
+    # `<@{slack_id}>` というstr型で渡ってくるので対応
+    if name.startswith('<@') and get_user_name(name[2:11]):
+        name = get_user_name(name[2:11])
 
     s = Session()
     kudo = (s.query(KudoHistory)
