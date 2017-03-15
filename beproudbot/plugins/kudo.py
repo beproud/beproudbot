@@ -28,8 +28,8 @@ def update_kudo(message, name):
     slack_id = message.body['user']
     # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
     # `<@{slack_id}>` というstr型で渡ってくるので対応
-    if name.startswith('<@') and get_user_name(name[2:11]):
-        name = get_user_name(name[2:11])
+    if get_user_name(name.lstrip('<@').rstrip('>')):
+        name = get_user_name(name.lstrip('<@').rstrip('>'))
 
     s = Session()
     kudo = (s.query(KudoHistory)
