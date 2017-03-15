@@ -45,8 +45,8 @@ def update_thx(message, user_name, word):
     s = Session()
     # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
     # `<@{slack_id}>` というstr型で渡ってくるので対応
-    if user_name.startswith('<@') and get_user_name(user_name[2:11]):
-        slack_id = user_name[2:11]
+    if get_user_name(user_name.lstrip('<@').rstrip('>')):
+        slack_id = user_name.lstrip('<@').rstrip('>')
     else:
         slack_id = get_slack_id(s, user_name)
 
