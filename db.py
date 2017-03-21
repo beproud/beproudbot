@@ -14,7 +14,7 @@ from beproudbot.plugins.redbull_models import RedbullHistory  # noqa
 from beproudbot.plugins.kintai_models import KintaiHistory  # noqa
 from beproudbot.plugins.alias_models import UserAliasName  # noqa
 from beproudbot.plugins.cleaning_models import Cleaning  # noqa
-from beproudbot.plugins.create_models import CreatedCommand, RegisteredTerm  # noqa
+from beproudbot.plugins.term_models import CreatedCommand, Term  # noqa
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):

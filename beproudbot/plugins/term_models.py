@@ -5,27 +5,27 @@ from db import Base
 
 
 class CreatedCommand(Base):
-    """用語(語録)を登録するコマンドを管理するModel
+    """語録を登録するコマンドを管理するModel
     """
     __tablename__ = 'created_command'
 
     id = Column(Integer, primary_key=True)
-    command = Column(Unicode(100), nullable=False)
+    name = Column(Unicode(100), nullable=False, unique=True)
     creator = Column(Unicode(100), nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    registered_term = relation('RegisteredTerm', backref='created_command', uselist=False)
+    term = relation('', backref='created_commands', uselist=False)
 
 
-class RegisteredTerm(Base):
-    """追加したコマンドに登録する用語(語録)を管理するModel
+class Term(Base):
+    """追加したコマンドに登録する語録を管理するModel
     """
-    __tablename__ = 'registered_term'
+    __tablename__ = 'term'
 
     id = Column(Integer, primary_key=True)
-    command = Column(Integer, ForeignKey(
+    created_command = Column(Integer, ForeignKey(
         'created_command.id',
         onupdate='CASCADE',
         ondelete='CASCADE'))
-    term = Column(Unicode, nullable=False)
+    word = Column(Unicode, nullable=False, unique=True)
     creator = Column(Unicode(100), nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
