@@ -1,10 +1,10 @@
 import random
 
+from sqlalchemy.orm import join
+
 from slackbot.bot import respond_to
 from db import Session
-
-from beproudbot.plugins.term_models import CreatedCommand, Term
-
+from beproudbot.plugins.create_models import CreatedCommand, Term
 from beproudbot.arg_validator import (
     BaseArgValidator,
     ValidationError,
@@ -13,9 +13,9 @@ from beproudbot.arg_validator import (
 
 
 HELP = """
-- `$term add hoge`: hogeコマンドを追加する
-- `$term del hoge`: hogeコマンドを削除する
-- `$term list hoge`: hogeコマンド一覧を表示する
+- `$create add hoge`: hogeコマンドを追加する
+- `$create del hoge`: hogeコマンドを削除する
+- `$create list hoge`: hogeコマンド一覧を表示する
 
 - `$hoge huga`: huga を語録として追加する
 - `$hoge del huga`: hugaを語録から削除する
@@ -23,7 +23,7 @@ HELP = """
 - `$hoge pop`: 最後に追加した用語を削除する
 - `$hoge list`: 語録の一覧を返す
 - `$hoge search <term>`: 語録の一覧からキーワードにマッチするものを返す
-- `create help`  createコマンドの使い方を返す
+- `$create help`: termコマンドの使い方を返す
 """
 
 
@@ -67,7 +67,7 @@ class TermValidator(BaseArgValidator):
             self.callargs['message'].send(err_msg)
 
 
-@respond_to('^term\s+add\s+(\S+)$')
+@respond_to('^create\s+add\s+(\S+)$')
 @register_arg_validator(TermValidator, ['has_command'])
 def add_command(message, command):
     """新たにコマンドを作成する
@@ -80,7 +80,7 @@ def add_command(message, command):
     message.send('`{}`コマンドを登録しました'.format(command))
 
 
-@respond_to('^term\s+del\s+(\S+)$')
+@respond_to('^create\s+del\s+(\S+)$')
 @register_arg_validator(TermValidator)
 def del_command(message, term_command):
     """コマンドを削除する
@@ -104,13 +104,11 @@ def return_response(message, command):
     """
     s = Session()
     created_command = (s.query(CreatedCommand)
-                        .filter(CreatedCommand.name == command)
-                        .one_or_none())
-    if not created_command:
-        return
+                       .filter(CreatedCommand.name == command)
+                       .one_or_none())
 
-    if created_command.term:
-        words = [term.word for term in created_command.term]
+    if created_command.terms:
+        words = [term.word for term in created_command.terms]
         word = random.choice(words)
         message.send(word)
     else:
@@ -159,7 +157,7 @@ def pop_term(message, command):
     """
     name = command.name
     # 応答が登録されていない
-    if not command.term:
+    if not command.terms:
         msg = 'コマンド `${}` には語録が登録されていません\n'.format(name)
         msg += '`${} add (レスポンス)` で語録を登録してください'.format(name)
         message.send(msg)
@@ -172,7 +170,7 @@ def get_term(message, command):
     :param message: slackbot.dispatcher.Message
     """
     name = command.name
-    if command.term:
+    if command.terms:
         pretext = 'コマンド `${}` の語録は {} 件あります\n'.format(
             name, len(command.term))
         data = [t.word for t in command.term]
@@ -208,7 +206,7 @@ def del_term(message, command, word):
     """
     s = Session()
     term = (s.query(Term)
-            .filter(Term.created_command == command)
+            .filter(Term.created_command == command.id)
             .filter(Term.word == word)
             .one_or_none())
 
@@ -220,7 +218,7 @@ def del_term(message, command, word):
     s.delete(term)
     s.commit()
 
-    message.send('コマンド `${}` から「{}」を削除しました'.format(command, word))
+    message.send('コマンド `${}` から「{}」を削除しました'.format(name, word))
 
 
 def add_term(message, command, word):
@@ -230,7 +228,8 @@ def add_term(message, command, word):
     """
     s = Session()
     term = (s.query(Term)
-            .filter(Term.created_command == command)
+            .select_from(join(Term, CreatedCommand))
+            .filter(CreatedCommand.id == command.id)
             .filter(Term.word == word)
             .one_or_none())
 
@@ -238,13 +237,15 @@ def add_term(message, command, word):
     if term:
         message.send('コマンド `${}` に「{}」は登録済みです'.format(name, word))
         return
+    else:
+        message.send('コマンド')
 
-    s.add(Term(created_command=command, creator=message.body['user'], word=word))
+    s.add(Term(created_command=command.id, creator=message.body['user'], word=word))
     s.commit()
     message.send('コマンド `${}` に「{}」を追加しました'.format(name, word))
 
 
-@respond_to('^term\s+help$')
+@respond_to('^create\s+help$')
 def show_help_term_commands(message):
     """termコマンドのhelpを表示
 

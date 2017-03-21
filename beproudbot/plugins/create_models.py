@@ -13,7 +13,7 @@ class CreatedCommand(Base):
     name = Column(Unicode(100), nullable=False, unique=True)
     creator = Column(Unicode(100), nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    term = relation('', backref='created_commands', uselist=False)
+    terms = relation('Term', backref='created_commands')
 
 
 class Term(Base):

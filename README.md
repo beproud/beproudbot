@@ -90,3 +90,18 @@ $ source /path/env/bin/activate
 - `$cleaning swap <user_name> <user_name>`: 掃除当番を入れ替える
 - `$cleaning help`: cleaningコマンドの使い方を返す
 - ※<day_of_week> は月、火、水、木、金が指定可能です
+
+
+### create plugin
+
+- `$create add hoge`: hogeコマンドを追加する
+- `$create del hoge`: hogeコマンドを削除する
+- `$create list hoge`: hogeコマンド一覧を表示する
+
+- `$hoge huga`: huga を語録として追加する
+- `$hoge del huga`: hugaを語録から削除する
+- `$hoge rm huga`: hugaを語録から削除する
+- `$hoge pop`: 最後に追加した用語を削除する
+- `$hoge list`: 語録の一覧を返す
+- `$hoge search <term>`: 語録の一覧からキーワードにマッチするものを返す
+- `$create help`: termコマンドの使い方を返す

@@ -91,7 +91,7 @@ class BaseArgValidator(object):
         for extra_name in self.extras:
             f = getattr(self, 'clean_{}'.format(extra_name))
             try:
-                self.cleaned_data[extra_name] = f()
+                f()
             except ValidationError as e:
                 self.errors[extra_name] = e.message
 
