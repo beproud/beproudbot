@@ -96,12 +96,11 @@ $ source /path/env/bin/activate
 
 - `$create add hoge`: hogeコマンドを追加する
 - `$create del hoge`: hogeコマンドを削除する
-- `$create list hoge`: hogeコマンド一覧を表示する
-
-- `$hoge huga`: huga を語録として追加する
+- `$create list hoge`: createコマンドで登録したコマンド一覧を表示する
+- `$hoge huga`: hugaを語録として追加する
 - `$hoge del huga`: hugaを語録から削除する
 - `$hoge rm huga`: hugaを語録から削除する
-- `$hoge pop`: 最後に追加した用語を削除する
+- `$hoge pop`: 最後に追加した語録を削除する
 - `$hoge list`: 語録の一覧を返す
-- `$hoge search <term>`: 語録の一覧からキーワードにマッチするものを返す
-- `$create help`: termコマンドの使い方を返す
+- `$hoge search <keyword>`: 語録の一覧からキーワードにマッチするものを返す
+- `$create help`: createコマンドの使い方を返す
