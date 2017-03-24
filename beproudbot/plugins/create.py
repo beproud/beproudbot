@@ -4,7 +4,7 @@ from sqlalchemy.orm import join
 
 from slackbot.bot import respond_to
 from db import Session
-from beproudbot.plugins.create_models import CreatedCommand, Term
+from beproudbot.plugins.create_models import CreateCommand, Term
 from beproudbot.arg_validator import (
     BaseArgValidator,
     ValidationError,
@@ -13,21 +13,20 @@ from beproudbot.arg_validator import (
 
 
 HELP = """
-- `$create add hoge`: hogeコマンドを追加する
-- `$create del hoge`: hogeコマンドを削除する
-- `$create list hoge`: createコマンドで登録したコマンド一覧を表示する
-- `$hoge huga`: hugaを語録として追加する
-- `$hoge del huga`: hugaを語録から削除する
-- `$hoge rm huga`: hugaを語録から削除する
-- `$hoge pop`: 最後に追加した語録を削除する
-- `$hoge list`: 語録の一覧を返す
-- `$hoge search <keyword>`: 語録の一覧からキーワードにマッチするものを返す
+- `$create add <command>`: コマンドを追加する
+- `$create del <command>`: コマンドを削除する
+- `$create list`: createコマンドで登録したコマンド一覧を表示する
+- `$<command> <語録>`: 語録を登録する
+- `$<command> del <語録>`: 語録を削除する
+- `$<command> pop`: 最後に自分が登録した語録を削除する
+- `$<command> list`: 登録された語録の一覧を返す
+- `$<command> search <keyword>`: 語録の一覧からキーワードを含むものを返す
 - `$create help`: createコマンドの使い方を返す
 """
 
 
 class TermValidator(BaseArgValidator):
-    skip_args = ['message']
+    skip_args = ['message', 'params']
 
     def clean_command(self, command):
         """指定したコマンド名が実装されているコマンド名だった場合Error
@@ -36,18 +35,18 @@ class TermValidator(BaseArgValidator):
         for deco in ['respond_to', 'listen_to']:
             for re_compile in message._plugins.commands.get(deco):
                 if re_compile.pattern.split('\s')[0].lstrip('^') == command:
-                    raise ValidationError('`{}`は予約語です'.format(command))
+                    raise ValidationError('`${}`は予約語です'.format(command))
         return command
 
     def clean_term_command(self, command):
         """指定したコマンド名が登録されていなかった場合Error
         """
         s = Session()
-        created_command = (s.query(CreatedCommand)
-                            .filter(CreatedCommand.name == command)
-                            .one_or_none())
-        if not created_command:
-            raise ValidationError('`{}`コマンドは登録されていません'.format(command))
+        create_command = (s.query(CreateCommand)
+                          .filter(CreateCommand.name == command)
+                          .one_or_none())
+        if not create_command:
+            raise ValidationError('`${}`コマンドは登録されていません'.format(command))
         return command
 
     def clean_has_command(self):
@@ -55,11 +54,11 @@ class TermValidator(BaseArgValidator):
         """
         command = self.callargs['command']
         s = Session()
-        created_command = (s.query(CreatedCommand)
-                            .filter(CreatedCommand.name == command)
-                            .one_or_none())
-        if created_command:
-            raise ValidationError('`{}`コマンドは既に登録されています'.format(command))
+        create_command = (s.query(CreateCommand)
+                           .filter(CreateCommand.name == command)
+                           .one_or_none())
+        if create_command:
+            raise ValidationError('`${}`コマンドは既に登録されています'.format(command))
 
     def handle_errors(self):
         for err_msg in self.errors.values():
@@ -68,33 +67,33 @@ class TermValidator(BaseArgValidator):
 
 @respond_to('^create\s+add\s+(\S+)$')
 @register_arg_validator(TermValidator, ['has_command'])
-def add_command(message, command):
+def add_command(message, command, has_command=None):
     """新たにコマンドを作成する
 
     :param message: slackbot.dispatcher.Message
     :param str command: 登録するコマンド名
     """
     s = Session()
-    s.add(CreatedCommand(name=command, creator=message.body['user']))
+    s.add(CreateCommand(name=command, creator=message.body['user']))
     s.commit()
-    message.send('`{}`コマンドを登録しました'.format(command))
+    message.send('`${}`コマンドを登録しました'.format(command))
 
 
 @respond_to('^create\s+del\s+(\S+)$')
 @register_arg_validator(TermValidator)
-def del_command(message, created_command):
+def del_command(message, create_command):
     """コマンドを削除する
 
     :param message: slackbot.dispatcher.Message
-    :param str created_command: 削除するコマンド名
+    :param str create_command: 削除するコマンド名
     """
     s = Session()
-    created_command = (s.query(CreatedCommand)
-                        .filter(CreatedCommand.name == created_command)
-                        .one_or_none())
-    s.delete(created_command)
+    create_command = (s.query(CreateCommand)
+                       .filter(CreateCommand.name == create_command)
+                       .one_or_none())
+    s.delete(create_command)
     s.commit()
-    message.send('`{}`コマンドを削除しました'.format(created_command))
+    message.send('`${}`コマンドを削除しました'.format(create_command))
 
 
 @respond_to('^(\S+)$')
@@ -105,16 +104,16 @@ def return_term(message, command):
     :param str command: 語録が登録されているコマンド名
     """
     s = Session()
-    created_command = (s.query(CreatedCommand)
-                       .filter(CreatedCommand.name == command)
+    create_command = (s.query(CreateCommand)
+                       .filter(CreateCommand.name == command)
                        .one_or_none())
 
-    if created_command.terms:
-        words = [term.word for term in created_command.terms]
+    if create_command.terms:
+        words = [term.word for term in create_command.terms]
         word = random.choice(words)
         message.send(word)
     else:
-        message.send('`{}`コマンドにはまだ語録が登録されていません'.format(command))
+        message.send('`${}`コマンドにはまだ語録が登録されていません'.format(command))
 
 
 @respond_to('^create\s+list$')
@@ -124,48 +123,43 @@ def show_create_commands(message):
     :param message: slackbot.dispatcher.Message
     """
     s = Session()
-    msg = ['登録されているコマンド']
-    for command in s.query(CreatedCommand).all():
+    msg = ['登録されているコマンド一覧']
+    for command in s.query(CreateCommand).all().order_by(CreateCommand.name.asc()):
         msg.append('${}'.format(command.name))
 
     message.send('\n'.join(msg))
 
 
 @respond_to('^(\S+)\s+(.+)')
-def retrun(message, command, params):
+@register_arg_validator(TermValidator)
+def retrun(message, term_command, params):
     """登録したコマンドに対して各種操作を行う
 
     :param message: slackbot.dispatcher.Message
     :param str command: 登録済のコマンド名
     :param str params: 操作内容 + 語録
     """
-    s = Session()
-    created_command = (s.query(CreatedCommand)
-                        .filter(CreatedCommand.name == command)
-                        .one_or_none())
-    if not created_command:
-        return
-
     data = params.split(maxsplit=1)
     subcommand = data[0]
+
     if subcommand == 'pop':
         # 最後に登録された語録を削除
-        pop_term(message, created_command)
+        pop_term(message, term_command)
     elif subcommand == 'list':
         # 語録の一覧を返す
-        get_term(message, created_command)
+        get_term(message, term_command)
     elif subcommand == 'search':
         # 語録を検索
-        search_term(message, created_command, data[1])
+        search_term(message, term_command, data[1])
     elif subcommand in ('del', 'delete', 'rm', 'remove'):
         # 語録を削除
-        del_term(message, created_command, data[1])
+        del_term(message, term_command, data[1])
     elif subcommand == 'add':
         # 語録を追加
-        add_term(message, created_command, data[1])
+        add_term(message, term_command, data[1])
     else:
         # サブコマンドが存在しない場合も追加
-        add_term(message, created_command, params)
+        add_term(message, term_command, params)
 
 
 def pop_term(message, command):
@@ -176,7 +170,8 @@ def pop_term(message, command):
     """
     s = Session()
     term = (s.query(Term)
-            .filter(Term.created_command == command.id)
+            .filter(Term.create_command == command.id)
+            .filter(Term.creator == message.body['user'])
             .order_by('-id')
             .first())
 
@@ -186,7 +181,7 @@ def pop_term(message, command):
         s.commit()
         message.send('コマンド `${}` から「{}」を削除しました'.format(name, term.word))
     else:
-        msg = ('コマンド `${}` には語録が登録されていません\n'
+        msg = ('コマンド `${}` にあなたは語録を登録していません\n'
                '`${} add (語録)` で語録を登録してください'.format(name))
         message.send(msg)
 
@@ -211,7 +206,7 @@ def get_term(message, command):
 
 
 def search_term(message, command, keyword):
-    """コマンドに登録されている語録のうち、キーワードにマッチするものを返す
+    """コマンドに登録されている語録のうち、キーワードを含むものを返す
 
     :param message: slackbot.dispatcher.Message
     :param str command: 登録済のコマンド名
@@ -219,7 +214,7 @@ def search_term(message, command, keyword):
     """
     s = Session()
     terms = (s.query(Term)
-             .filter(Term.created_command == command.id)
+             .filter(Term.create_command == command.id)
              .filter(Term.word.like('%' + keyword + '%')))
 
     name = command.name
@@ -243,7 +238,7 @@ def del_term(message, command, word):
     """
     s = Session()
     term = (s.query(Term)
-            .filter(Term.created_command == command.id)
+            .filter(Term.create_command == command.id)
             .filter(Term.word == word)
             .one_or_none())
 
@@ -265,8 +260,8 @@ def add_term(message, command, word):
     """
     s = Session()
     term = (s.query(Term)
-            .select_from(join(Term, CreatedCommand))
-            .filter(CreatedCommand.id == command.id)
+            .select_from(join(Term, CreateCommand))
+            .filter(CreateCommand.id == command.id)
             .filter(Term.word == word)
             .one_or_none())
 
@@ -274,14 +269,14 @@ def add_term(message, command, word):
     if term:
         message.send('コマンド `${}` に「{}」は登録済みです'.format(name, word))
     else:
-        s.add(Term(created_command=command.id, creator=message.body['user'], word=word))
+        s.add(Term(create_command=command.id, creator=message.body['user'], word=word))
         s.commit()
         message.send('コマンド `${}` に「{}」を追加しました'.format(name, word))
 
 
 @respond_to('^create\s+help$')
 def show_help_create_commands(message):
-    """termコマンドのhelpを表示
+    """createコマンドのhelpを表示
 
     :param message: slackbot.dispatcher.Message
     """

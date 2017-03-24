@@ -71,10 +71,8 @@ class TestArgValidator():
     def test_is_valid_with_extra(self):
         validator = self._makeOne({'odd': 3}, extras=['pow'])
         assert validator.is_valid()
-        assert 'pow' not in validator.cleaned_data
-        if not validator.is_valid():
-            assert 'pow' in validator.errors
-            assert validator.errors['pow'] == 9
+        assert 'pow' in validator.cleaned_data
+        assert validator.cleaned_data['pow'] == 9
 
 
 class TestRegisterArgValidator():

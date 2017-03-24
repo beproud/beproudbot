@@ -4,7 +4,7 @@ from sqlalchemy.orm import relation
 from db import Base
 
 
-class CreatedCommand(Base):
+class CreateCommand(Base):
     """語録を登録するコマンドを管理するModel
     """
     __tablename__ = 'created_command'
@@ -13,7 +13,7 @@ class CreatedCommand(Base):
     name = Column(Unicode(100), nullable=False, unique=True)
     creator = Column(Unicode(100), nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    terms = relation('Term', backref='created_commands')
+    terms = relation('Term', backref='create_commands')
 
 
 class Term(Base):
@@ -23,7 +23,7 @@ class Term(Base):
 
     id = Column(Integer, primary_key=True)
     created_command = Column(Integer, ForeignKey(
-        'created_command.id',
+        'create_command.id',
         onupdate='CASCADE',
         ondelete='CASCADE'))
     word = Column(Unicode, nullable=False, unique=True)
