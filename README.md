@@ -91,6 +91,11 @@ $ source /path/env/bin/activate
 - `$cleaning help`: cleaningコマンドの使い方を返す
 - ※<day_of_week> は月、火、水、木、金が指定可能です
 
+### kudo コマンド
+
+- `<name>++`: 指定された名称に対して++します
+- `$kudo help`: kudoコマンドの使い方を返す
+
 ### thx コマンド
 
 - `[user_name]++ [word]`: 指定したSlackのユーザーにGJする
