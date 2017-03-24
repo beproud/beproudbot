@@ -1,6 +1,9 @@
 Unreleased
 ----------
-- [#6] cleaningコマンドを追加
+
+Release Notes - 2017-03-24
+--------------------------
+- [#4] thxコマンドを追加
 
 Release Notes - 2017-03-16
 --------------------------
@@ -9,6 +12,7 @@ Release Notes - 2017-03-16
 
 Release Notes - 2017-02-15
 --------------------------
+- [#6] cleaningコマンドを追加
 - [#37] SlackAPIのuser情報をキャッシュする
 
 Release Notes - 2017-02-14
