@@ -15,6 +15,7 @@ from beproudbot.plugins.kintai_models import KintaiHistory  # noqa
 from beproudbot.plugins.alias_models import UserAliasName  # noqa
 from beproudbot.plugins.cleaning_models import Cleaning  # noqa
 from beproudbot.plugins.kudo_models import KudoHistory  # noqa
+from beproudbot.plugins.thx_models import ThxHistory  # noqa
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):
