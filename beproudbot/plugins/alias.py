@@ -1,4 +1,5 @@
 from prettytable import PrettyTable
+
 from slackbot.bot import respond_to
 from utils.slack import get_user_name, get_slack_id_by_name
 from db import Session
