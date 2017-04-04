@@ -18,12 +18,9 @@ dependencies:
   cache_directories:
     - "~/.cache/pip"
 
-compile:
-  override:
-    - tox -e flake8_ci
-  post:
-    - flake8_junit flake8.txt $CIRCLE_TEST_REPORTS/pytest/flake8.xml
-
 test:
   override:
+    - tox -e flake8_ci
     - tox -e py35 -- --junitxml=$CIRCLE_TEST_REPORTS/pytest/py35.xml
+  post:
+    - flake8_junit flake8.txt $CIRCLE_TEST_REPORTS/pytest/flake8.xml
