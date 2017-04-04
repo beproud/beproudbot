@@ -25,53 +25,30 @@ HELP = """
 """
 
 
-def has_command_pattern(message, command_name):
+def command_patterns(message):
     """slackbotに実装したコマンドかどうか返す
 
     :param message: slackbot.dispatcher.Message
     :param str command_name: 確認するコマンド名
     """
+    command = []
     for deco in ['respond_to', 'listen_to']:
         for re_compile in message._plugins.commands.get(deco):
-            return re_compile.pattern.split('\s')[0].lstrip('^') == command_name
+            command.append(re_compile.pattern.split('\s')[0].lstrip('^'))
+    return command
 
 
-class TermValidator(BaseArgValidator):
+class BaseCommandValidator(BaseArgValidator):
     skip_args = ['message', 'params']
 
-    def clean_command_name(self, command_name):
-        """コマンド名に対して各種Validationを適用する
-        """
-        msg = self.callargs['message']
-
-        if self.funcname == 'run_command':
-            return not has_command_pattern(msg, command_name)
-
-        if self.funcname in ('add_command', 'del_command', 'return_term'):
-            if has_command_pattern(msg, command_name):
-                raise ValidationError('`${}`は予約語です'.format(command_name))
-
+    def has_command(self, command_name):
         s = Session()
-        command = (s.query(CreateCommand)
-                   .filter(CreateCommand.name == command_name))
+        qs = (s.query(CreateCommand)
+              .filter(CreateCommand.name == command_name))
+        return s.query(qs.exists()).scalar()
 
-        if self.funcname == 'add_command':
-            if s.query(command.exists()).scalar():
-                raise ValidationError('`${}`コマンドは既に登録されています'.format(command_name))
-
-        if self.funcname in ('del_command', 'return_term', 'run_command'):
-            if not s.query(command.exists()).scalar():
-                raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
-
-        return command_name
-
-    def clean_command(self):
-        """valid済のcommand名が存在すればCommandModelを返す
-        """
+    def get_command(self, command_name):
         s = Session()
-        command_name = self.cleaned_data.get('command_name')
-        if command_name is None:
-            return None
         command = (s.query(CreateCommand)
                    .filter(CreateCommand.name == command_name)
                    .one_or_none())
@@ -82,8 +59,77 @@ class TermValidator(BaseArgValidator):
             self.callargs['message'].send(err_msg)
 
 
+class AddCommandValidator(BaseCommandValidator):
+
+    def clean_command_name(self, command_name):
+        if self.has_command(command_name):
+            raise ValidationError('`${}`コマンドは既に登録されています'.format(command_name))
+
+        if command_name in command_patterns(self.callargs['message']):
+            raise ValidationError('`${}`は予約語です'.format(command_name))
+
+        return command_name
+
+
+class DelCommandValidator(BaseCommandValidator):
+
+    def clean_command_name(self, command_name):
+        if not self.has_command(command_name):
+            raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
+
+        if command_name in command_patterns(self.callargs['message']):
+            raise ValidationError('`${}`は予約語です'.format(command_name))
+
+        return command_name
+
+    def clean_command(self):
+        """valid済のcommand名が存在すればCommandModelを返す
+        """
+        command_name = self.cleaned_data.get('command_name')
+        return self.get_command(command_name)
+
+
+class RunCommandValidator(BaseCommandValidator):
+
+    def clean_command_name(self, command_name):
+        """コマンド名に対して各種Validationを適用する
+        """
+        if command_name not in command_patterns(self.callargs['message']):
+            if not self.has_command(command_name):
+                raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
+
+        return command_name
+
+    def clean_command(self):
+        """valid済のcommand名が存在すればCommandModelを返す
+        """
+        command_name = self.cleaned_data.get('command_name')
+        return self.get_command(command_name)
+
+
+class ReturnTermCommandValidator(BaseCommandValidator):
+
+    def clean_command_name(self, command_name):
+        """コマンド名に対して各種Validationを適用する
+        """
+        if command_name not in command_patterns(self.callargs['message']):
+            if not self.has_command(command_name):
+                raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
+
+        if command_name in command_patterns(self.callargs['message']):
+            raise ValidationError('`${}`は予約語です'.format(command_name))
+
+        return command_name
+
+    def clean_command(self):
+        """valid済のcommand名が存在すればCommandModelを返す
+        """
+        command_name = self.cleaned_data.get('command_name')
+        return self.get_command(command_name)
+
+
 @respond_to('^create\s+add\s+(\S+)$')
-@register_arg_validator(TermValidator)
+@register_arg_validator(AddCommandValidator)
 def add_command(message, command_name):
     """新たにコマンドを作成する
 
@@ -97,7 +143,7 @@ def add_command(message, command_name):
 
 
 @respond_to('^create\s+del\s+(\S+)$')
-@register_arg_validator(TermValidator, ['command'])
+@register_arg_validator(DelCommandValidator, ['command'])
 def del_command(message, command_name, command=None):
     """コマンドを削除する
 
@@ -105,13 +151,13 @@ def del_command(message, command_name, command=None):
     :param str create_command: 削除するコマンド名
     """
     s = Session()
-    s.delete(command)
+    s.query(CreateCommand).filter(CreateCommand.id == command.id).delete()
     s.commit()
     message.send('`${}`コマンドを削除しました'.format(command_name))
 
 
 @respond_to('^(\S+)$')
-@register_arg_validator(TermValidator, ['command'])
+@register_arg_validator(ReturnTermCommandValidator, ['command'])
 def return_term(message, command_name, command=None):
     """コマンドに登録されている語録をランダムに返す
 
@@ -141,7 +187,7 @@ def show_create_commands(message):
 
 
 @respond_to('^(\S+)\s+(.+)')
-@register_arg_validator(TermValidator, ['command'])
+@register_arg_validator(RunCommandValidator, ['command'])
 def run_command(message, command_name, params, command=None):
     """登録したコマンドに対して各種操作を行う
 
@@ -149,9 +195,6 @@ def run_command(message, command_name, params, command=None):
     :param str command: 登録済のコマンド名
     :param str params: 操作内容 + 語録
     """
-    if not command_name:
-        return
-
     data = params.split(maxsplit=1)
     subcommand = data[0]
 

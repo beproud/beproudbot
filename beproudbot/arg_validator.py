@@ -39,7 +39,7 @@ class BaseArgValidator(object):
 
     skip_args = []
 
-    def __init__(self, funcname, callargs, extras=[]):
+    def __init__(self, callargs, extras=[]):
         """__init__
 
         :param Dict[str, Any] callargs: 引数名と値の辞書
@@ -53,7 +53,6 @@ class BaseArgValidator(object):
 
         self.cleaned_data = {}
         self.errors = {}
-        self.funcname = funcname
 
     def handle_errors(self):
         """バリデーションに失敗した時呼び出されるハンドラ
@@ -116,7 +115,7 @@ def register_arg_validator(cls, extras=[]):
         def wrapper(*args, **kwargs):
             callargs = getcallargs(func, *args, **kwargs)
 
-            validator = cls(func.__name__, callargs, extras)
+            validator = cls(callargs, extras)
 
             if not validator.is_valid():
                 validator.handle_errors()
