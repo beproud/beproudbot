@@ -9,21 +9,21 @@ class TestBaseArgValidator():
     基底クラスなので基本的になにも起こらない
     """
 
-    def _makeOne(self, *args, **kwargs):
+    def _makeOne(self, funcname, *args, **kwargs):
         from beproudbot.arg_validator import BaseArgValidator
-        return BaseArgValidator(*args, **kwargs)
+        return BaseArgValidator(funcname, *args, **kwargs)
 
     def test_handle_errors(self):
         """よべる"""
-        self._makeOne({}).handle_errors()
+        self._makeOne('hoge', {}).handle_errors()
 
     def test_is_valid(self):
         """よべる"""
-        assert self._makeOne({}).is_valid()
+        assert self._makeOne('hoge', {}).is_valid()
 
     def test_is_valid_given_extra(self):
         """予期しない extras が与えられた場合にエラーになる"""
-        validator = self._makeOne({}, ['extra_arg'])
+        validator = self._makeOne('hoge', {}, ['extra_arg'])
 
         with pytest.raises(AttributeError):
             assert not validator.is_valid()
@@ -32,7 +32,7 @@ class TestBaseArgValidator():
 class TestArgValidator():
     """BaseArgvalidator を継承したクラスのテスト"""
 
-    def _makeOne(self, *args, **kwargs):
+    def _makeOne(self, funcname, *args, **kwargs):
         from beproudbot.arg_validator import (
             BaseArgValidator,
             ValidationError,
@@ -47,12 +47,12 @@ class TestArgValidator():
             def clean_pow(self):
                 return self.cleaned_data['odd'] * self.cleaned_data['odd']
 
-        return ArgValidator(*args, **kwargs)
+        return ArgValidator(funcname, *args, **kwargs)
 
     def test_clean_called(self):
         """対応するcleanメソッドが呼ばれる"""
         callargs = {'odd': 1}
-        validator = self._makeOne(callargs)
+        validator = self._makeOne('hoge', callargs)
         validator.clean_odd = MagicMock()
         validator.is_valid()
         validator.clean_odd.assert_called_with(callargs['odd'])
@@ -62,14 +62,14 @@ class TestArgValidator():
         ({'odd': 2}, False),
     ])
     def test_is_valid(self, callargs, expected):
-        validator = self._makeOne(callargs)
+        validator = self._makeOne('hoge', callargs)
         assert validator.is_valid() == expected
         if not validator.is_valid():
             assert 'odd' in validator.errors
             assert validator.errors['odd'] == "value should be odd"
 
     def test_is_valid_with_extra(self):
-        validator = self._makeOne({'odd': 3}, extras=['pow'])
+        validator = self._makeOne('hoge', {'odd': 3}, extras=['pow'])
         assert validator.is_valid()
         assert 'pow' in validator.cleaned_data
         assert validator.cleaned_data['pow'] == 9

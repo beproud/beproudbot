@@ -7,7 +7,7 @@ from db import Base
 class CreateCommand(Base):
     """語録を登録するコマンドを管理するModel
     """
-    __tablename__ = 'created_command'
+    __tablename__ = 'create_command'
 
     id = Column(Integer, primary_key=True)
     name = Column(Unicode(100), nullable=False, unique=True)
@@ -22,7 +22,7 @@ class Term(Base):
     __tablename__ = 'term'
 
     id = Column(Integer, primary_key=True)
-    created_command = Column(Integer, ForeignKey(
+    create_command = Column(Integer, ForeignKey(
         'create_command.id',
         onupdate='CASCADE',
         ondelete='CASCADE'))
