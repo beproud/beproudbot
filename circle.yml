@@ -21,8 +21,7 @@ compile:
   pre:
     - mkdir -p $CIRCLE_TEST_REPORTS/flake8
   override:
-    - tox -e flake8_ci;
-    - flake8_junit flake8.txt $CIRCLE_TEST_REPORTS/flake8/flake8.xml
+    - tox -e flake8_ci || flake8_junit flake8.txt $CIRCLE_TEST_REPORTS/flake8/flake8.xml
 
 test:
   pre:
