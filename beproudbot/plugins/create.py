@@ -16,6 +16,7 @@ HELP = """
 - `$create add <command>`: コマンドを追加する
 - `$create del <command>`: コマンドを削除する
 - `$create list`: createコマンドで登録したコマンド一覧を表示する
+- `$<command>`: コマンドに登録した語録の中からランダムに一つ返す
 - `$<command> <語録>`: 語録を登録する
 - `$<command> del <語録>`: 語録を削除する
 - `$<command> pop`: 最後に自分が登録した語録を削除する
@@ -62,6 +63,8 @@ class BaseCommandValidator(BaseArgValidator):
 class AddCommandValidator(BaseCommandValidator):
 
     def clean_command_name(self, command_name):
+        """コマンド名に対してValidationを適用する
+        """
         if self.has_command(command_name):
             raise ValidationError('`${}`コマンドは既に登録されています'.format(command_name))
 
@@ -74,6 +77,8 @@ class AddCommandValidator(BaseCommandValidator):
 class DelCommandValidator(BaseCommandValidator):
 
     def clean_command_name(self, command_name):
+        """コマンド名に対してValidationを適用する
+        """
         if not self.has_command(command_name):
             raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
 
@@ -92,7 +97,7 @@ class DelCommandValidator(BaseCommandValidator):
 class RunCommandValidator(BaseCommandValidator):
 
     def clean_command_name(self, command_name):
-        """コマンド名に対して各種Validationを適用する
+        """コマンド名に対してValidationを適用する
         """
         if command_name not in command_patterns(self.callargs['message']):
             if not self.has_command(command_name):
@@ -110,7 +115,7 @@ class RunCommandValidator(BaseCommandValidator):
 class ReturnTermCommandValidator(BaseCommandValidator):
 
     def clean_command_name(self, command_name):
-        """コマンド名に対して各種Validationを適用する
+        """コマンド名に対してValidationを適用する
         """
         if command_name not in command_patterns(self.callargs['message']):
             if not self.has_command(command_name):
@@ -128,6 +133,7 @@ class ReturnTermCommandValidator(BaseCommandValidator):
         return self.get_command(command_name)
 
 
+@respond_to('^create\s+(\S+)$')
 @respond_to('^create\s+add\s+(\S+)$')
 @register_arg_validator(AddCommandValidator)
 def add_command(message, command_name):
@@ -195,6 +201,11 @@ def run_command(message, command_name, params, command=None):
     :param str command: 登録済のコマンド名
     :param str params: 操作内容 + 語録
     """
+    # コマンドが登録済みの場合、登録済みコマンドの方で
+    # 応答をハンドルしている為ここではリターンする
+    if command_name in command_patterns(message):
+        return
+
     data = params.split(maxsplit=1)
     subcommand = data[0]
 
@@ -241,8 +252,8 @@ def pop_term(message, command):
         s.commit()
         message.send('コマンド `${}` から「{}」を削除しました'.format(name, term.word))
     else:
-        msg = ('コマンド `${}` にあなたは語録を登録していません\n'
-               '`${} add (語録)` で語録を登録してください'.format(name))
+        msg = ('コマンド `${0}` にあなたは語録を登録していません\n'
+               '`${0} add (語録)` で語録を登録してください'.format(name))
         message.send(msg)
 
 
@@ -260,8 +271,8 @@ def get_term(message, command):
             msg.append(t.word)
         message.send('\n'.join(msg))
     else:
-        msg = ('コマンド `${}` には語録が登録されていません\n'
-               '`${} add (語録)` で語録を登録してください'.format(name))
+        msg = ('コマンド `${0}` には語録が登録されていません\n'
+               '`${0} add (語録)` で語録を登録してください'.format(name))
         message.send(msg)
 
 

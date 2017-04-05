@@ -96,6 +96,7 @@ $ source /path/env/bin/activate
 - `$create add <command>`: コマンドを追加する
 - `$create del <command>`: コマンドを削除する
 - `$create list`: createコマンドで登録したコマンド一覧を表示する
+- `$<command>`: コマンドに登録した語録の中からランダムに一つ返す
 - `$<command> <語録>`: 語録を登録する
 - `$<command> del <語録>`: 語録を削除する
 - `$<command> pop`: 最後に自分が登録した語録を削除する
