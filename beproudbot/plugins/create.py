@@ -31,24 +31,31 @@ def command_patterns(message):
 
     :param message: slackbot.dispatcher.Message
     :param str command_name: 確認するコマンド名
+    :return list: 実装コマンドの一覧
     """
-    command = []
+    commands = []
     for deco in ['respond_to', 'listen_to']:
         for re_compile in message._plugins.commands.get(deco):
-            command.append(re_compile.pattern.split('\s')[0].lstrip('^'))
-    return command
+            commands.append(re_compile.pattern.split('\s')[0].lstrip('^'))
+    return commands
 
 
 class BaseCommandValidator(BaseArgValidator):
+    """createコマンドのバリデータの共通クラス
+    """
     skip_args = ['message', 'params']
 
     def has_command(self, command_name):
+        """コマンド名が登録済みか返す
+        """
         s = Session()
         qs = (s.query(CreateCommand)
               .filter(CreateCommand.name == command_name))
         return s.query(qs.exists()).scalar()
 
     def get_command(self, command_name):
+        """コマンド名が一致するCommandModelを返す
+        """
         s = Session()
         command = (s.query(CreateCommand)
                    .filter(CreateCommand.name == command_name)
