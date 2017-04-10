@@ -33,10 +33,10 @@ def command_patterns(message):
     :param str command_name: 確認するコマンド名
     :return list: 実装コマンドの一覧
     """
-    commands = []
+    commands = set()
     for deco in ['respond_to', 'listen_to']:
         for re_compile in message._plugins.commands.get(deco):
-            commands.append(re_compile.pattern.split('\s')[0].lstrip('^'))
+            commands.add(re_compile.pattern.split('\s')[0].lstrip('^'))
     return commands
 
 
