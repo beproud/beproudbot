@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/beproud/beproudbot.svg?style=svg)](https://circleci.com/gh/beproud/beproudbot)
+
 # Haro
 
 Haro is [slackbot](https://github.com/lins05/slackbot "lins05/slackbot: A chat bot for Slack (https://slack.com).") based beproud bot system.
