@@ -71,7 +71,7 @@ class BaseArgValidator(object):
 
         for name, given in self.callargs.items():
             # .skip_args の変数は検証しない
-            if name in self.skip_args:
+            if name in self.skip_args + self.extras:
                 self.cleaned_data[name] = given
                 continue
 
