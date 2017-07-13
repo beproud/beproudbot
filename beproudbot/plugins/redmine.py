@@ -24,7 +24,7 @@ def show_ticket_information(message, ticket_id):
     source_user = message['user']
 
     user = s.query(RedmineUser).\
-        filter(RedmineUser.user_id == source_user).first()
+        filter(RedmineUser.user_id==source_user).first()
 
     if user:
         url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)
