@@ -1,5 +1,6 @@
-from .slack import get_slack_id_by_name
 from beproudbot.plugins.alias_models import UserAliasName
+
+from .slack import get_slack_id_by_name
 
 
 def get_slack_id(session, user_name):

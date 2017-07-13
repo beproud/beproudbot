@@ -12,15 +12,16 @@ machine:
 
 dependencies:
   override:
-    - pip install -U pip setuptools tox
+    - pip install -U pip setuptools tox flake8_junit_report
 
   cache_directories:
     - "~/.cache/pip"
 
 test:
+  pre:
+    - mkdir -p $CIRCLE_TEST_REPORTS/{pytest,flake8}
   override:
-    - tox -e py35 -- --junitxml=junit.xml
-    - tox -e flake8 -- --junitxml=flake8.xml
+    - tox -e py35 -- --junitxml=$CIRCLE_TEST_REPORTS/pytest/py35.xml
+    - tox -e flake8_ci
   post:
-    - mkdir -p $CIRCLE_TEST_REPORTS/pytest
-    - mv {junit,flake8}.xml $CIRCLE_TEST_REPORTS/pytest/
+    - flake8_junit flake8.txt $CIRCLE_TEST_REPORTS/flake8/flake8.xml
