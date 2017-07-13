@@ -11,6 +11,7 @@ HELP = '''
 
 
 @respond_to('^#(\d+)')
+@respond_to('^t(\d+)')
 def show_ticket_information(message, ticket_id):
     """現在の水の在庫本数を返すコマンド
 
@@ -23,16 +24,17 @@ def show_ticket_information(message, ticket_id):
     source_user = message['user']
 
     user = s.query(RedmineUser).\
-        filter(RedmineUser.user_id==source_user).first()
+        filter(RedmineUser.user_id == source_user).first()
 
     if user:
-        res = requests.get("https://project.beproud.jp/redmine/issues/{}.json".format(ticket_id))
+        url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)
+        res = requests.get("{}.json".format(url))
         ticket = res.json()
 
-        proj_room = s.query(ProjectRoom).filter(ProjectRoom.id==ticket["issue"]["project"]["id"]).\
-            first()
+        proj_room = s.query(ProjectRoom).\
+            filter(ProjectRoom.id == ticket["issue"]["project"]["id"]).first()
         if proj_room and source_channel in proj_room:
-            message.send(ticket["issue"]["subject"])
+            message.send("{} {}".format(ticket["issue"]["subject"], url))
     else:
         message.send('{}は登録されていません。'.format(source_user))
 
