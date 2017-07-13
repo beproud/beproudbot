@@ -13,7 +13,7 @@ HELP = '''
 @respond_to('^#(\d+)')
 @respond_to('^t(\d+)')
 def show_ticket_information(message, ticket_id):
-    """現在の水の在庫本数を返すコマンド
+    """Show redmine ticket information in Slack
 
     :param message: slackbotの各種パラメータを保持したclass
     :param ticket_id ticket id
