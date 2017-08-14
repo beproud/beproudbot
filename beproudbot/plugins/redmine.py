@@ -1,5 +1,4 @@
 import requests
-import json
 from slackbot.bot import listen_to
 
 
@@ -31,17 +30,11 @@ def show_ticket_information(message, ticket_id):
         url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)
         headers = {'X-Redmine-API-Key': user.api_key}
         res = requests.get("{}.json".format(url), headers=headers)
-
-        # encoding headerは嘘ついてる、UTF-8ではなく　iso2022-jpです
-        # Still need to debug this - coding as iso2022-jp lets me return
-        # a url, but it strips all Japanese from the message (not useful).
-        # This may be an LC environment variable issue.
-        ticket = json.loads(res.content.decode("iso2022-jp", "ignore"))
+        ticket = res.json()
 
         # proj_room = s.query(ProjectRoom).\
         #   filter(ProjectRoom.id == ticket["issue"]["project"]["id"]).first()
         #if proj_room and source_channel in proj_room:
-
         message.send("{} {}".format(ticket["issue"]["subject"], url))
     else:
         message.send('{}は登録されていません。'.format(source_user))
