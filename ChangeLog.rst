@@ -1,6 +1,10 @@
 Unreleased
 ----------
 
+Release Notes - 2017-08-14
+--------------------------
+- [#fix_preorder_word] 勤怠コマンドからkintaiコマンドへ変更
+
 Release Notes - 2017-04-10
 --------------------------
 - [#13] createコマンドを追加

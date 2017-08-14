@@ -16,11 +16,11 @@ from beproudbot.plugins.kintai_models import KintaiHistory
 
 
 HELP = """
-- `$勤怠`: 自分の勤怠一覧を直近40日分表示する
-- `$勤怠 csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
+- `$kintai show`: 自分の勤怠一覧を直近40日分表示する
+- `$kintai csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
 - `おはよう` ・ `お早う` ・ `出社しました`: 出社時刻を記録します
 - `帰ります` ・ `かえります` ・ `退社します`: 退社時刻を記録します
-- `$勤怠 help`: 勤怠コマンドの使い方を返す
+- `$kintai help`: 勤怠コマンドの使い方を返す
 """
 
 DAY_OF_WEEK = '月火水木金土日'
@@ -69,7 +69,7 @@ def register_worktime(user_id, is_workon=True):
     s.commit()
 
 
-@respond_to('^勤怠$')
+@respond_to('^kintai\s+show$')
 def show_kintai_history(message):
     """直近40日分の勤怠記録を表示します
 
@@ -106,8 +106,8 @@ def show_kintai_history(message):
     message.send('{}の勤怠:\n{}'.format(user_name, '\n'.join(rows)))
 
 
-@respond_to('^勤怠\s+csv$')
-@respond_to('^勤怠\s+csv\s+(\d{4}/\d{1,2})$')
+@respond_to('^kintai\s+csv$')
+@respond_to('^kintai\s+csv\s+(\d{4}/\d{1,2})$')
 def show_kintai_history_csv(message, time=None):
     """指定した月の勤怠記録をCSV形式で返す
 
@@ -163,7 +163,7 @@ def show_kintai_history_csv(message, time=None):
                   files={'file': output.getvalue()})
 
 
-@respond_to('^勤怠\s+help$')
+@respond_to('^kintai\s+help$')
 def show_help_kintai_commands(message):
     """勤怠コマンドのhelpを表示
 
