@@ -1,5 +1,6 @@
 import requests
-from slackbot.bot import respond_to
+import json
+from slackbot.bot import listen_to
 
 
 from db import Session
@@ -10,7 +11,7 @@ HELP = '''
 '''
 
 
-@respond_to('[t#](\d+)')
+@listen_to('[t#](\d+)')
 def show_ticket_information(message, ticket_id):
     """Show redmine ticket information in Slack
 
@@ -19,22 +20,29 @@ def show_ticket_information(message, ticket_id):
     """
     s = Session()
 
-    source_channel = message['channel']
-    source_user = message['user']
+    channel = message.channel
+    source_channel = channel._body['name']
+    source_user = channel._client.users[message.body['user']][u'name']
 
     user = s.query(RedmineUser).\
         filter(RedmineUser.user_id == source_user).first()
-    message.send("Redmine Test")
 
     if user:
         url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)
-        res = requests.get("{}.json".format(url))
-        ticket = res.json()
+        headers = {'X-Redmine-API-Key': user.api_key}
+        res = requests.get("{}.json".format(url), headers=headers)
 
-        proj_room = s.query(ProjectRoom).\
-            filter(ProjectRoom.id == ticket["issue"]["project"]["id"]).first()
-        if proj_room and source_channel in proj_room:
-            message.send("{} {}".format(ticket["issue"]["subject"], url))
+        # encoding headerは嘘ついてる、UTF-8ではなく　iso2022-jpです
+        # Still need to debug this - coding as iso2022-jp lets me return
+        # a url, but it strips all Japanese from the message (not useful).
+        # This may be an LC environment variable issue.
+        ticket = json.loads(res.content.decode("iso2022-jp", "ignore"))
+
+        # proj_room = s.query(ProjectRoom).\
+        #   filter(ProjectRoom.id == ticket["issue"]["project"]["id"]).first()
+        #if proj_room and source_channel in proj_room:
+
+        message.send("{} {}".format(ticket["issue"]["subject"], url))
     else:
         message.send('{}は登録されていません。'.format(source_user))
 
