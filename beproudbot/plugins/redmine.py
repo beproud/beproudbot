@@ -10,8 +10,7 @@ HELP = '''
 '''
 
 
-@respond_to('^#(\d+)')
-@respond_to('^t(\d+)')
+@respond_to('[t#](\d+)')
 def show_ticket_information(message, ticket_id):
     """Show redmine ticket information in Slack
 
@@ -25,6 +24,7 @@ def show_ticket_information(message, ticket_id):
 
     user = s.query(RedmineUser).\
         filter(RedmineUser.user_id == source_user).first()
+    message.send("Redmine Test")
 
     if user:
         url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)

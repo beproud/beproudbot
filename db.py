@@ -17,6 +17,7 @@ from beproudbot.plugins.cleaning_models import Cleaning  # noqa
 from beproudbot.plugins.create_models import CreateCommand, Term  # noqa
 from beproudbot.plugins.kudo_models import KudoHistory  # noqa
 from beproudbot.plugins.thx_models import ThxHistory  # noqa
+from beproudbot.plugins.redmine_models import RedmineUser, ProjectRoom
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):
