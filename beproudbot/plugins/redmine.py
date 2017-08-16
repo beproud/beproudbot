@@ -1,48 +1,51 @@
 """redmineのチケット情報を参照."""
-import requests
-
 import logging
 
+import requests
 from slackbot.bot import listen_to
+
 from db import Session
-from beproudbot.plugins.redmine_models import RedmineUser, ProjectRoom
+from utils.slack import get_user_name
+from beproudbot.plugins.redmine_models import RedmineUser, ProjectChannel
 
 
 logging = logging.getLogger(__name__)
 
 
-@listen_to('[t#](\d+)')
+@listen_to('[t](\d+)')
 def show_ticket_information(message, ticket_id):
     """Redmineのチケット情報を参照する.
 
     :param message: slackbotの各種パラメータを保持したclass
-    :param ticket_id ticket id
+    :param ticket_id: redmineのチケット番号
     """
     s = Session()
 
     channel = message.channel
-    source_channel = channel._body['name']
-    source_user = channel._client.users[message.body['user']][u'name']
+    channel_id = channel._body['id']
+    user_id = message.body['user']
+    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).first()
 
-    user = s.query(RedmineUser).\
-        filter(RedmineUser.user_id == source_user).first()
+    if not user:
+        user_name = get_user_name(user_id)
+        message.send('{}は登録されていません。'.format(user_name))
+        return
+        
+    url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)
+    headers = {'X-Redmine-API-Key': user.api_key}
+    res = requests.get("{}.json".format(url), headers=headers)
 
-    if user:
-        url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)
-        headers = {'X-Redmine-API-Key': user.api_key}
-        res = requests.get("{}.json".format(url), headers=headers)
-        if res.status_code == 200:
-            ticket = res.json()
+    if res.status_code == 200:
+        ticket = res.json()
 
-            proj_room = s.query(ProjectRoom).\
-                filter(ProjectRoom.id == ticket["issue"]["project"]["id"]).first()
+        proj_id = ticket["issue"]["project"]["id"]
+        proj_room = s.query(ProjectChannel).filter(ProjectChannel.id == proj_id ).first()
 
-            if proj_room and source_channel in proj_room.rooms.split(","):
-                message.send("{} {}".format(ticket["issue"]["subject"], url))
-            else:
-                logging.debug("{} doesn't have permissions to show in {}".format(ticket_id,
-                                                                                 source_channel))
+        if proj_room and channel_id in proj_room.rooms.split(","):
+            message.send("{} {}".format(ticket["issue"]["subject"], url))
         else:
-            logging.info("{} doesn't have access to ticket #{}".format(source_user, ticket_id))
+            message.send("{}は{}で表示できません。".format(ticket_id, channel._body['name']))
     else:
-        message.send('{}は登録されていません。'.format(source_user))
+        user_name = get_user_name(user_id)
+        logging.info("{} doesn't have access to ticket #{}".format(user_name, ticket_id))
+

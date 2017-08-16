@@ -13,21 +13,20 @@ class RedmineUser(Base):
     __tablename__ = "redmine_users"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Unicode(100), nullable=False)  # Slack username
+    user_id = Column(Unicode(100), nullable=False)  # Slack user id
     api_key = Column(Unicode(100), nullable=False)  # Redmine API Key
 
 
-class ProjectRoom(Base):
+class ProjectChannel(Base):
     """Projectはどのチャネルで返してもよいのmap.
 
     id: Redmine project id
-    rooms: CSV room list i.e. this project's tickets can only be replied to in these rooms
+    channels: CSV channel id list i.e. Projectのチケットは定義したチャネルしかに表示しない
 
-    :param Base: `sqlalchemy.ext.declarative.api.DeclarativeMeta` を
-        継承したclass
+    :param Base: `sqlalchemy.ext.declarative.api.DeclarativeMeta` を継承したclass
     """
 
-    __tablename__ = "remine_projectroom"
+    __tablename__ = "redmine_projectchannel"
 
     id = Column(Integer, primary_key=True)  # Redmineのprojectのid
-    rooms = Column(Unicode(255), nullable=False)  # "slack-api-practice,bp-kaizen"
+    channels = Column(Unicode(255), nullable=False)  # "C0AGP8QQH,C0AGP8QQZ"

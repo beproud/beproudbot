@@ -23,9 +23,9 @@ def upgrade():
     sa.Column('api_key', sa.Unicode(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('remine_projectroom',
+    op.create_table('redmine_projectchannel',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('rooms', sa.Unicode(length=255), nullable=False),
+    sa.Column('channels', sa.Unicode(length=255), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     ### end Alembic commands ###
