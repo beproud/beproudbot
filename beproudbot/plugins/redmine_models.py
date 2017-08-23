@@ -1,4 +1,3 @@
-"""redmineのモデル."""
 from sqlalchemy import Column, Integer, Unicode
 from db import Base
 
@@ -13,8 +12,8 @@ class RedmineUser(Base):
     __tablename__ = "redmine_users"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Unicode(100), nullable=False)  # Slack user id
-    api_key = Column(Unicode(100), nullable=False)  # Redmine API Key
+    user_id = Column(Unicode(16), nullable=False)  # Slack user id
+    api_key = Column(Unicode(40), nullable=False)  # Redmine API Key
 
 
 class ProjectChannel(Base):
@@ -28,5 +27,6 @@ class ProjectChannel(Base):
 
     __tablename__ = "redmine_projectchannel"
 
-    id = Column(Integer, primary_key=True)  # Redmineのprojectのid
+    id = Column(Integer, primary_key=True)
+    project_id = Column(Integer)  # Redmineのprojectのid
     channels = Column(Unicode(255), nullable=False)  # "C0AGP8QQH,C0AGP8QQZ"
