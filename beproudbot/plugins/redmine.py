@@ -1,14 +1,16 @@
 import logging
+import os
 
 import requests
 from slackbot.bot import listen_to
 
 from db import Session
 from utils.slack import get_user_name
-from beproudbot.plugins.redmine_models import RedmineUser, ProjectChannel
+from .redmine_models import RedmineUser, ProjectChannel
 
 
 logging = logging.getLogger(__name__)
+REDMINE_URL = os.environ.get("REDMINE_URL", "https://project.beproud.jp/redmine/issues/")
 
 
 @listen_to('[t](\d+)')
@@ -24,27 +26,27 @@ def show_ticket_information(message, ticket_id):
     channel_id = channel._body['id']
     user_id = message.body['user']
 
-    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).first()
+    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
 
     if not user:
         user_name = get_user_name(user_id)
-        message.send('{}は登録されていません。'.format(user_name))
+        message.send('{}はRedmineUserテーブルに登録されていません。'.format(user_name))
         return
 
-    url = "https://project.beproud.jp/redmine/issues/{}".format(ticket_id)
+    ticket_url = "{}/{}".format(REDMINE_URL, ticket_id)
     headers = {'X-Redmine-API-Key': user.api_key}
-    res = requests.get("{}.json".format(url), headers=headers)
+    res = requests.get("{}.json".format(ticket_url), headers=headers)
 
-    if res.status_code == 200:
-        ticket = res.json()
-
-        proj_id = ticket["issue"]["project"]["id"]
-        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).first()
-
-        if proj_room and channel_id in proj_room.channels.split(","):
-            message.send("{}\n{}".format(ticket["issue"]["subject"], url))
-        else:
-            message.send("{}は{}で表示できません。".format(ticket_id, channel._body['name']))
-    else:
+    if res.status_code != 200:
         user_name = get_user_name(user_id)
         logging.info("{} doesn't have access to ticket #{}".format(user_name, ticket_id))
+        return
+
+    ticket = res.json()
+    proj_id = ticket["issue"]["project"]["id"]
+    proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).first()
+
+    if proj_room and channel_id in proj_room.channels.split(","):
+        message.send("{}\n{}".format(ticket["issue"]["subject"], ticket_url))
+    else:
+        message.send("{}は{}で表示できません。".format(ticket_id, channel._body['name']))
