@@ -14,7 +14,8 @@ REDMINE_URL = os.environ.get("REDMINE_URL", "https://project.beproud.jp/redmine/
 
 USER_NOT_FOUND = '{}はRedmineUserテーブルに登録されていません。'
 TICKET_INFO = '{}\n{}'
-NO_PERMISSIONS = '{}は{}で表示できません。'
+NO_TICKET_PERMISSIONS = "{}はチケットをアクセスできません"
+NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
 
 
 @listen_to('[t](\d+)')
@@ -43,7 +44,7 @@ def show_ticket_information(message, ticket_id):
 
     if res.status_code != 200:
         user_name = get_user_name(user_id)
-        logging.info("{} doesn't have access to ticket #{}".format(user_name, ticket_id))
+        message.send(NO_TICKET_PERMISSIONS.format(user_name))
         return
 
     ticket = res.json()
@@ -53,4 +54,4 @@ def show_ticket_information(message, ticket_id):
     if proj_room and channel_id in proj_room.channels.split(","):
         message.send(TICKET_INFO.format(ticket["issue"]["subject"], ticket_url))
     else:
-        message.send(NO_PERMISSIONS.format(ticket_id, channel._body['name']))
+        message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
