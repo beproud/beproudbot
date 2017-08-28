@@ -6,11 +6,15 @@ from slackbot.bot import listen_to
 
 from db import Session
 from utils.slack import get_user_name
-from .redmine_models import RedmineUser, ProjectChannel
 
+from .redmine_models import RedmineUser, ProjectChannel
 
 logging = logging.getLogger(__name__)
 REDMINE_URL = os.environ.get("REDMINE_URL", "https://project.beproud.jp/redmine/issues/")
+
+USER_NOT_FOUND = '{}はRedmineUserテーブルに登録されていません。'
+TICKET_INFO = '{}\n{}'
+NO_PERMISSIONS = '{}は{}で表示できません。'
 
 
 @listen_to('[t](\d+)')
@@ -30,7 +34,7 @@ def show_ticket_information(message, ticket_id):
 
     if not user:
         user_name = get_user_name(user_id)
-        message.send('{}はRedmineUserテーブルに登録されていません。'.format(user_name))
+        message.send(USER_NOT_FOUND.format(user_name))
         return
 
     ticket_url = "{}/{}".format(REDMINE_URL, ticket_id)
@@ -47,6 +51,6 @@ def show_ticket_information(message, ticket_id):
     proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).first()
 
     if proj_room and channel_id in proj_room.channels.split(","):
-        message.send("{}\n{}".format(ticket["issue"]["subject"], ticket_url))
+        message.send(TICKET_INFO.format(ticket["issue"]["subject"], ticket_url))
     else:
-        message.send("{}は{}で表示できません。".format(ticket_id, channel._body['name']))
+        message.send(NO_PERMISSIONS.format(ticket_id, channel._body['name']))
