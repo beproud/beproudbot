@@ -1,4 +1,3 @@
-import logging
 import os
 
 import requests
@@ -9,12 +8,11 @@ from utils.slack import get_user_name
 
 from .redmine_models import RedmineUser, ProjectChannel
 
-logging = logging.getLogger(__name__)
 REDMINE_URL = os.environ.get("REDMINE_URL", "https://project.beproud.jp/redmine/issues/")
 
 USER_NOT_FOUND = '{}はRedmineUserテーブルに登録されていません。'
 TICKET_INFO = '{}\n{}'
-NO_TICKET_PERMISSIONS = "{}はチケットをアクセスできません"
+NO_TICKET_PERMISSIONS = "{}はチケットをアクセスできません。"
 NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
 
 
