@@ -119,7 +119,7 @@ $ source /path/env/bin/activate
 - `$thx help`: thxコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
 
-### thx redmine
+### redmine コマンド
 
 beproudbotは文章の中の t<チケットid> を探し、見つかる祭、チケットへのリンクを返す。
 
