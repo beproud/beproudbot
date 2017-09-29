@@ -13,8 +13,16 @@ def test_engine():
     return engine
 
 
+@pytest.fixture()
+def db():
+    db = DatabaseManager()
+    db.initialize()
+    yield db
+
+
 class DatabaseManager(object):
     """testでfactoryの設定に使う
+
     設定の参考は http://momijiame.tumblr.com/post/108317509611/
     TODO: 本当はget_sql_session()なんかもこちらに寄せた方がよさそう。時間と相談
     """

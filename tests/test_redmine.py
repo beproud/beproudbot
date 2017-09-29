@@ -1,30 +1,39 @@
 from unittest.mock import MagicMock, Mock, patch
+from urllib.parse import urljoin
 
 import pytest
 import requests_mock
 
 from beproudbot.plugins.redmine import (show_ticket_information, USER_NOT_FOUND, REDMINE_URL,
-                                        NO_TICKET_PERMISSIONS, NO_CHANNEL_PERMISSIONS, TICKET_INFO)
-from tests.db import DatabaseManager
+                                        RESPONSE_ERROR, NO_CHANNEL_PERMISSIONS, TICKET_INFO)
+from tests.db import db
 from tests.factories.redmine import ProjectChannelFactory, RedmineUserFactory
 
 USER_NAME = "Emmanuel Goldstein"
 
 
 @pytest.fixture
-def redmine_user(user_id="U023BECGF", api_key="d1d567978001e4f884524a8941a9bbe6a8be87ac"):
-    return RedmineUserFactory.create(
-        user_id=user_id,
-        api_key=api_key
-    )
+def redmine_user(db, user_id="U023BECGF", api_key="d1d567978001e4f884524a8941a9bbe6a8be87ac"):
+    with db.transaction() as session:
+        user = RedmineUserFactory.create(
+            user_id=user_id,
+            api_key=api_key
+        )
+        session.bulk_save_objects([user])
+        session.commit()
+    return user
 
 
 @pytest.fixture
-def redmine_project(project_id=265, channels="C0AGP8QQH,C0AGP8QQZ"):
-    return ProjectChannelFactory.create(
-        project_id=project_id,
-        channels=channels
-    )
+def redmine_project(db, project_id=265, channels="C0AGP8QQH,C0AGP8QQZ"):
+    with db.transaction() as session:
+        project_channel = ProjectChannelFactory.create(
+            project_id=project_id,
+            channels=channels
+        )
+        session.bulk_save_objects([project_channel])
+        session.commit()
+    return project_channel
 
 
 @pytest.fixture
@@ -43,10 +52,7 @@ def slack_message(channel="C0AGP8QQH", user_id="U023BECGF"):
 
 
 @patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
-def test_invalid_user_response(slack_message):
-    db = DatabaseManager()
-    db.initialize()
-
+def test_invalid_user_response(db, slack_message):
     with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
         show_ticket_information(slack_message, "1234567")
         assert slack_message.send.called is True
@@ -54,40 +60,28 @@ def test_invalid_user_response(slack_message):
 
 
 @patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
-def test_no_ticket_permissions_response(slack_message, redmine_user):
-    db = DatabaseManager()
-    db.initialize()
-
-    with db.transaction() as session:
-        session.bulk_save_objects([redmine_user])
-        session.commit()
+def test_no_ticket_permissions_response(db, slack_message, redmine_user):
 
     with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
-            url = "{}/{}.json".format(REDMINE_URL, ticket_id)
+            url = urljoin(REDMINE_URL, "%s.json" % ticket_id)
             response.get(url, status_code=403)
 
             show_ticket_information(slack_message, ticket_id)
             assert slack_message.send.called is True
-            slack_message.send.assert_called_with(NO_TICKET_PERMISSIONS.format(USER_NAME))
+            slack_message.send.assert_called_with(RESPONSE_ERROR.format(USER_NAME))
 
 
 @patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
-def test_no_channel_permissions_response(slack_message, redmine_user, redmine_project):
-    db = DatabaseManager()
-    db.initialize()
-
-    with db.transaction() as session:
-        session.bulk_save_objects([redmine_user, redmine_project])
-        session.commit()
+def test_no_channel_permissions_response(db, slack_message, redmine_user, redmine_project):
 
     with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             channel_name = slack_message.channel._body['name']
 
-            url = "{}/{}.json".format(REDMINE_URL, ticket_id)
+            url = urljoin(REDMINE_URL, "%s.json" % ticket_id)
             response.get(url, status_code=200, json={"issue": {"project": {"id": 28}}})
 
             show_ticket_information(slack_message, ticket_id)
@@ -97,19 +91,13 @@ def test_no_channel_permissions_response(slack_message, redmine_user, redmine_pr
 
 
 @patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
-def test_successful_response(slack_message, redmine_user, redmine_project):
-    db = DatabaseManager()
-    db.initialize()
-
-    with db.transaction() as session:
-        session.bulk_save_objects([redmine_user, redmine_project])
-        session.commit()
+def test_successful_response(db, slack_message, redmine_user, redmine_project):
 
     with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
 
-            url = "{}/{}.json".format(REDMINE_URL, ticket_id)
+            url = urljoin(REDMINE_URL, "%s.json" % ticket_id)
             ticket = {
                 "issue":
                     {
