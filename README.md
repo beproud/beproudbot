@@ -121,16 +121,18 @@ $ source /path/env/bin/activate
 
 ### redmine コマンド
 
-beproudbotは文章の中の t<チケットid> を探し、見つかる祭、チケットへのリンクを返す。
+beproudbotは文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
 
 例:
 
-発言 
-> t56147はいつできるのかな？
+```
+james [9:00 PM]
+t56147はいつできるのかな？
 
-回答
-> SlackとRedmineとつながりたいです。
-> https://project.beproud.jp/redmine/issues/56147
+Haro [9:00 PM]
+SlackとRedmineとつながりたいです。
+https://project.beproud.jp/redmine/issues/56147
+```
 
 
 - `$redmine help`: redmineのコマンドの使い方を返す
