@@ -57,6 +57,10 @@ def show_ticket_information(message, ticket_id):
         message.send(USER_NOT_FOUND.format(user_name))
         return
 
+    channels = s.query(ProjectChannel.id).filter(ProjectChannel.channels.contains(channel_id))
+    if not s.query(channels.exists()).scalar():
+        return
+
     ticket_url = urljoin(REDMINE_URL, ticket_id)
     headers = {'X-Redmine-API-Key': user.api_key}
     res = requests.get('{}.json'.format(ticket_url), headers=headers)

@@ -51,6 +51,11 @@ def slack_message(channel="C0AGP8QQH", user_id="U023BECGF"):
     return message
 
 
+@pytest.fixture
+def no_channel_slack_message():
+    return slack_message(channel="111111111")
+
+
 @patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_invalid_user_response(db, slack_message):
     with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
@@ -60,14 +65,13 @@ def test_invalid_user_response(db, slack_message):
 
 
 @patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
-def test_no_ticket_permissions_response(db, slack_message, redmine_user):
+def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine_project):
 
     with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             url = urljoin(REDMINE_URL, "%s.json" % ticket_id)
             response.get(url, status_code=403)
-
             show_ticket_information(slack_message, ticket_id)
             assert slack_message.send.called is True
             slack_message.send.assert_called_with(RESPONSE_ERROR.format(USER_NAME))
@@ -114,3 +118,17 @@ def test_successful_response(db, slack_message, redmine_user, redmine_project):
             assert slack_message.send.called is True
             slack_message.send.assert_called_with(TICKET_INFO.format(ticket["issue"]["subject"],
                                                                      url[:-5]))
+
+
+@patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
+def test_no_channels_no_response(db, no_channel_slack_message, redmine_user, redmine_project):
+
+    with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
+        with requests_mock.mock() as response:
+            ticket_id = "1234567"
+
+            url = urljoin(REDMINE_URL, "%s.json" % ticket_id)
+            response.get(url, status_code=200, json={"issue": {"project": {"id": 28}}})
+
+            show_ticket_information(no_channel_slack_message, ticket_id)
+            assert no_channel_slack_message.send.called is False
