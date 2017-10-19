@@ -130,7 +130,7 @@ james [9:00 PM]
 t56147はいつできるのかな？
 
 Haro [9:00 PM]
-SlackとRedmineとつながりたいです。
+SlackからRedmineのチケットを見れるようにしよう
 https://project.beproud.jp/redmine/issues/56147
 ```
 
