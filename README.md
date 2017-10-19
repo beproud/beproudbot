@@ -118,3 +118,21 @@ $ source /path/env/bin/activate
 - `$thx to <user_name>`: 誰にGJしたかの一覧を返す
 - `$thx help`: thxコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
+
+### redmine コマンド
+
+beproudbotは文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
+
+例:
+
+```
+james [9:00 PM]
+t56147はいつできるのかな？
+
+Haro [9:00 PM]
+SlackからRedmineのチケットを見れるようにしよう
+https://project.beproud.jp/redmine/issues/56147
+```
+
+
+- `$redmine help`: redmineのコマンドの使い方を返す

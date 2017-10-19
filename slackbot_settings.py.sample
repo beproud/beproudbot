@@ -21,3 +21,6 @@ ALIASES = '$'
 #
 # Slack ファイルアップロードAPI
 FILE_UPLOAD_URL = 'https://slack.com/api/files.upload'
+
+# Redmine チケットAPI
+REDMINE_URL = 'https://project.beproud.jp/redmine/issues/'
