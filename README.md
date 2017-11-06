@@ -86,7 +86,7 @@ honchoは .env を自動的に読み込み、スクリプトを開始するこ�
 ansible の `configure` タグを使用します。また、デプロイ用の秘密鍵として `DEPLOY_KEY_PATH` を指定します
 
 ```bash
-$ (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connection local site.yml --tags=configure -e "DEPLOY_KEY_PATH=$DEPLOY_KEY_PATH")
+$ (cd beproudbot-haro/deplyoment && ansible-playbook -i hosts --connection local site.yml --tags=configure -e "DEPLOY_KEY_PATH=$DEPLOY_KEY_PATH")
 ```
 
 ## デプロイ
@@ -94,10 +94,10 @@ $ (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connecti
 `deploy` タグを使用します
 
 ```bash
-$ (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connection local site.yml --tags=deploy)
+$ (cd beproudbot-haro/deplyoment && ansible-playbook -i hosts --connection local site.yml --tags=deploy)
 # VM開発時は `git_sync_local` でローカルファイルを配備することができます
 # また `git_force_checkout` で --force checkout できます
-$ (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_sync_local" -e "git_force_checkout")
+$ (cd beproudbot-haro/deplyoment && ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_sync_local" -e "git_force_checkout")
 ```
 
 ## Command

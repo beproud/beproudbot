@@ -27,6 +27,6 @@ Vagrant.configure("2") do |config|
     sudo pip3 install -U pip
     sudo pip3 install ansible==2.4
 
-    (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connection local site.yml)
+    (cd beproudbot-haro/deplyoment && ansible-playbook -i hosts --connection local site.yml)
   SHELL
 end
