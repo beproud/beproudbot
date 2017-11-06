@@ -1,14 +1,12 @@
-import os
 from urllib.parse import urljoin
 
 import requests
 from slackbot.bot import listen_to, respond_to
+from slackbot_settings import REDMINE_URL
 
 from db import Session
 from haro.slack import get_user_name
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
-
-REDMINE_URL = os.environ.get('REDMINE_URL', 'https://project.beproud.jp/redmine/issues/')
 
 USER_NOT_FOUND = '{}はRedmineUserテーブルに登録されていません。'
 TICKET_INFO = '{}\n{}'

@@ -24,7 +24,7 @@ $ cd beproudbot
 $ source /path/env/bin/activate
 (env)$ cp env.sample .env
 (env)$ vi .env # API Token 等を記入する
-(env)$ pip install -r beproudbot/requirements.txt
+(env)$ pip install -r src/requirements.txt
 ```
 
 ## 起動方法
@@ -33,7 +33,7 @@ $ source /path/env/bin/activate
 $ source /path/env/bin/activate
 # configには環境変数を指定します
 (env)$ export $(cat .env |grep -v '#')
-(env)$ python run.py
+(env)$ cd src && python run.py
 ```
 
 ### Docker
@@ -44,6 +44,8 @@ $ source /path/env/bin/activate
 # bot の起動
 $ docker-compose build bot
 $ docker-compose run -d bot
+# コンテナにはいる
+$ docker-compose run --rm bot bash
 # 終了
 # docker-compose down
 ```
@@ -56,7 +58,7 @@ alembic を使用します
 
 ```bash
 (env)$ export $(cat .env |grep -v '#')
-(env)$ alembic --config alembic/conf.ini upgrade head
+(env)$ cd src && alembic --config alembic/conf.ini upgrade head
 ```
 
 ### マイグレーションファイル作成
@@ -65,7 +67,7 @@ alembic を使用します
 
 ```bash
 (env)$ export $(cat .env |grep -v '#')
-(env)$ alembic --config alembic/conf.ini revision --autogenerate -m "my message"
+(env)$ cd src && alembic --config alembic/conf.ini revision --autogenerate -m "my message"
 ```
 
 #### Procfile 使用
@@ -76,9 +78,9 @@ honchoは .env を自動的に読み込み、スクリプトを開始するこ�
 
 ```bash
 (env)$ pip install honcho
-# honcho run bot
-# honcho run migrate
-# honcho run makemigrations
+# honcho start bot
+# honcho start migrate
+# honcho start makemigrations
 ```
 
 ## 環境構築
@@ -89,11 +91,13 @@ ansible の `configure` タグを使用します。
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure)
 # Githubからリポジトリをcloneする場合、デプロイ用の秘密鍵として `DEPLOY_KEY_PATH` を指定します
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "DEPLOY_KEY_PATH=$DEPLOY_KEY_PATH")
+# MySQL をインストールしない場合 `use_mysql=false` とすることで設定をスキップできます
+$ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_mysql=false")
 ```
 
 ## デプロイ
 
-`deploy` タグを使用します
+ansible の `deploy` タグを使用します
 
 ```bash
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy)

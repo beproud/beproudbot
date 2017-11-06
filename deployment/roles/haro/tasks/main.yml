@@ -1,7 +1,7 @@
 ---
 
 # アプリを動かす準備
-- name: install python3.6 and pip
+- name: install pip
   apt:
     name: "{{ item }}"
   with_items:

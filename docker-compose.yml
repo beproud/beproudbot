@@ -5,7 +5,7 @@ services:
     build: .
     #environment:
     #  LANG: ja_JP.UTF-8
-    env_file: src/.env
+    env_file: .env
     volumes:
       - .:/proj
     working_dir: /proj

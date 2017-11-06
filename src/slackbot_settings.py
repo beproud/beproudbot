@@ -41,8 +41,6 @@ if DEBUG:
     import logging
     logging.basicConfig(level=logging.DEBUG)
 
-
 ##### DB #####
 SQLALCHEMY_URL = os.environ['SQLALCHEMY_URL']
 SQLALCHEMY_ECHO = os.environ['SQLALCHEMY_ECHO']
-
