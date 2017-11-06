@@ -8,16 +8,16 @@ Base = declarative_base()
 
 # beproudbotでModelを追加した場合、
 # alembicでimportしているBaseに紐付けるためModelをimportしてください
-# [例]:from beproudbot.plugins.user_models import User # noqa
-from beproudbot.plugins.water_models import WaterHistory  # noqa
-from beproudbot.plugins.redbull_models import RedbullHistory  # noqa
-from beproudbot.plugins.kintai_models import KintaiHistory  # noqa
-from beproudbot.plugins.alias_models import UserAliasName  # noqa
-from beproudbot.plugins.cleaning_models import Cleaning  # noqa
-from beproudbot.plugins.create_models import CreateCommand, Term  # noqa
-from beproudbot.plugins.kudo_models import KudoHistory  # noqa
-from beproudbot.plugins.thx_models import ThxHistory  # noqa
-from beproudbot.plugins.redmine_models import RedmineUser, ProjectChannel  # noqa
+# [例]:from haro.plugins.user_models import User # noqa
+from haro.plugins.water_models import WaterHistory  # noqa
+from haro.plugins.redbull_models import RedbullHistory  # noqa
+from haro.plugins.kintai_models import KintaiHistory  # noqa
+from haro.plugins.alias_models import UserAliasName  # noqa
+from haro.plugins.cleaning_models import Cleaning  # noqa
+from haro.plugins.create_models import CreateCommand, Term  # noqa
+from haro.plugins.kudo_models import KudoHistory  # noqa
+from haro.plugins.thx_models import ThxHistory  # noqa
+from haro.plugins.redmine_models import RedmineUser, ProjectChannel  # noqa
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):

@@ -3,11 +3,12 @@ from urllib.parse import urljoin
 
 import pytest
 import requests_mock
+from haro.plugins.redmine import (show_ticket_information, USER_NOT_FOUND,
+                                  REDMINE_URL,
+                                  RESPONSE_ERROR, NO_CHANNEL_PERMISSIONS,
+                                  TICKET_INFO)
 
-from beproudbot.plugins.redmine import (show_ticket_information, USER_NOT_FOUND, REDMINE_URL,
-                                        RESPONSE_ERROR, NO_CHANNEL_PERMISSIONS, TICKET_INFO)
-from tests.db import db
-from tests.factories.redmine import ProjectChannelFactory, RedmineUserFactory
+from tests import ProjectChannelFactory, RedmineUserFactory
 
 USER_NAME = "Emmanuel Goldstein"
 

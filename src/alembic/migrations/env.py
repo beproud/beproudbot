@@ -6,11 +6,14 @@ alembic init で生成される設定から以下を変更
 - db.Base モデルの定義を取得する
 """
 from __future__ import with_statement
+
 import os
 import sys
-from alembic import context
-from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context
 
 # Baseをimportするのでbeproudbotのrootパスを追加
 # NOTE: run.py と統合できない?

@@ -1,10 +1,11 @@
 import argparse
-from textwrap import dedent
 from configparser import ConfigParser, NoSectionError
+from textwrap import dedent
 
 from slackbot.bot import Bot, default_reply
-from slackbot_settings import SQLALCHEMY_URL, SQLALCHEMY_ECHO
+
 from db import init_dbsession
+from slackbot_settings import SQLALCHEMY_URL, SQLALCHEMY_ECHO
 
 
 def get_argparser():

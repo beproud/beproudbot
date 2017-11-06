@@ -19,7 +19,7 @@ API_TOKEN = os.environ['SLACK_API_TOKEN']
 
 # 読み込むpluginのリスト
 PLUGINS = [
-    'beproudbot.plugins',
+    'haro.plugins',
 ]
 
 # コマンドの接頭語

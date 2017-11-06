@@ -1,9 +1,9 @@
+from slackbot.bot import respond_to, listen_to
 from sqlalchemy import func
 
-from slackbot.bot import respond_to, listen_to
-from utils.slack import get_user_name
 from db import Session
-from beproudbot.plugins.kudo_models import KudoHistory
+from haro.plugins.kudo_models import KudoHistory
+from haro.slack import get_user_name
 
 HELP = """
 - `<name>++`: 指定された名称に対して++します

@@ -1,8 +1,8 @@
 import csv
 import datetime
-from io import StringIO
 from calendar import monthrange
 from collections import defaultdict, OrderedDict
+from io import StringIO
 
 import requests
 from slackbot import settings
@@ -10,10 +10,8 @@ from slackbot.bot import respond_to, listen_to
 from sqlalchemy import func, Date, cast
 
 from db import Session
-from utils.slack import get_user_name
-
-from beproudbot.plugins.kintai_models import KintaiHistory
-
+from haro.plugins.kintai_models import KintaiHistory
+from haro.slack import get_user_name
 
 HELP = """
 - `$kintai show`: 自分の勤怠一覧を直近40日分表示する

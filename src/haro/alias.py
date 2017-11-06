@@ -1,6 +1,6 @@
-from beproudbot.plugins.alias_models import UserAliasName
+from haro.plugins.alias_models import UserAliasName
 
-from .slack import get_slack_id_by_name
+from haro.slack import get_slack_id_by_name
 
 
 def get_slack_id(session, user_name):

@@ -1,9 +1,9 @@
 from prettytable import PrettyTable
-
 from slackbot.bot import respond_to
-from utils.slack import get_user_name, get_slack_id_by_name
+
 from db import Session
-from beproudbot.plugins.alias_models import UserAliasName
+from haro.plugins.alias_models import UserAliasName
+from haro.slack import get_user_name, get_slack_id_by_name
 
 HELP = """
 - `$alias show [user_name]`: Slackのユーザーに紐づいているエイリアス名一覧を表示する

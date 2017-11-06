@@ -4,7 +4,7 @@ from slackbot.bot import respond_to
 from sqlalchemy import func, case
 
 from db import Session
-from beproudbot.plugins.water_models import WaterHistory
+from haro.plugins.water_models import WaterHistory
 
 HELP = '''
 - `$water count`: 現在の残数を返す

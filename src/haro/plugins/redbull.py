@@ -1,8 +1,8 @@
 import csv
 from io import StringIO
-from string import ascii_letters
-from random import choice
 from itertools import groupby
+from random import choice
+from string import ascii_letters
 
 import requests
 from slackbot import settings
@@ -10,8 +10,8 @@ from slackbot.bot import respond_to
 from sqlalchemy import func
 
 from db import Session
-from utils.slack import get_user_name
-from beproudbot.plugins.redbull_models import RedbullHistory
+from haro.plugins.redbull_models import RedbullHistory
+from haro.slack import get_user_name
 
 _cache = {'token': None}
 

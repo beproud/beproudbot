@@ -1,6 +1,6 @@
-.env
-*.db
-*.sqlite
+src/.env
+src/*.db
+src/*.sqlite
 
 .vagrant/
 *.diff

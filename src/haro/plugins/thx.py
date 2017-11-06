@@ -3,13 +3,13 @@ from difflib import get_close_matches
 from io import StringIO
 
 import requests
-
 from slackbot import settings
 from slackbot.bot import respond_to, listen_to
-from utils.slack import get_user_name, get_users_info
-from utils.alias import get_slack_id
+
 from db import Session
-from beproudbot.plugins.thx_models import ThxHistory
+from haro.plugins.thx_models import ThxHistory
+from haro.slack import get_user_name, get_users_info
+from haro.alias import get_slack_id
 
 HELP = """
 - `[user_name]++ [word]`: 指定したSlackのユーザーにGJする

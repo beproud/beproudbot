@@ -1,16 +1,15 @@
 import random
 
+from slackbot.bot import respond_to
 from sqlalchemy.orm import join
 
-from slackbot.bot import respond_to
 from db import Session
-from beproudbot.plugins.create_models import CreateCommand, Term
-from beproudbot.arg_validator import (
+from haro.arg_validator import (
     BaseArgValidator,
     ValidationError,
     register_arg_validator,
 )
-
+from haro.plugins.create_models import CreateCommand, Term
 
 HELP = """
 - `$create add <command>`: コマンドを追加する

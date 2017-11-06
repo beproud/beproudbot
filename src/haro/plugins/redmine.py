@@ -5,9 +5,8 @@ import requests
 from slackbot.bot import listen_to, respond_to
 
 from db import Session
-from utils.slack import get_user_name
-
-from .redmine_models import RedmineUser, ProjectChannel
+from haro.slack import get_user_name
+from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
 REDMINE_URL = os.environ.get('REDMINE_URL', 'https://project.beproud.jp/redmine/issues/')
 

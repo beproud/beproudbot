@@ -6,8 +6,8 @@ RUN wget -O- https://bootstrap.pypa.io/get-pip.py | python3
 RUN cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 # アプリの依存
-COPY ./constraints.txt /tmp
-COPY ./requirements.txt /tmp
+COPY ./src/constraints.txt /tmp
+COPY ./src/requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
 RUN ln -s /usr/bin/python3 /usr/bin/python

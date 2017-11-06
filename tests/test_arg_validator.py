@@ -1,6 +1,6 @@
-import pytest
-
 from unittest.mock import MagicMock
+
+import pytest
 
 
 class TestBaseArgValidator():
@@ -10,7 +10,7 @@ class TestBaseArgValidator():
     """
 
     def _makeOne(self, *args, **kwargs):
-        from beproudbot.arg_validator import BaseArgValidator
+        from haro.arg_validator import BaseArgValidator
         return BaseArgValidator(*args, **kwargs)
 
     def test_handle_errors(self):
@@ -33,7 +33,7 @@ class TestArgValidator():
     """BaseArgvalidator を継承したクラスのテスト"""
 
     def _makeOne(self, *args, **kwargs):
-        from beproudbot.arg_validator import (
+        from haro.arg_validator import (
             BaseArgValidator,
             ValidationError,
         )
@@ -77,11 +77,11 @@ class TestArgValidator():
 
 class TestRegisterArgValidator():
     def _callFUT(self, *args, **kwargs):
-        from beproudbot.arg_validator import register_arg_validator
+        from haro.arg_validator import register_arg_validator
         return register_arg_validator(*args, **kwargs)
 
     def _validator_class(self):
-        from beproudbot.arg_validator import (
+        from haro.arg_validator import (
             BaseArgValidator,
             ValidationError,
         )
