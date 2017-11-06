@@ -3,6 +3,7 @@ from textwrap import dedent
 from configparser import ConfigParser, NoSectionError
 
 from slackbot.bot import Bot, default_reply
+from slackbot_settings import SQLALCHEMY_URL, SQLALCHEMY_ECHO
 from db import init_dbsession
 
 
@@ -16,7 +17,7 @@ def get_argparser():
 
     parser.add_argument('-c', '--config',
                         type=argparse.FileType('r'),
-                        required=True,
+                        default='alembic/conf.ini',
                         help='ini形式のファイルをファイルパスで指定します')
 
     return parser
@@ -42,8 +43,12 @@ def main():
 
     parser = get_argparser()
     args = parser.parse_args()
+
     conf = ConfigParser()
     conf.read_file(args.config)
+    # 環境変数で指定したいため ini ファイルでなくここで追記
+    conf["alembic"]['sqlalchemy.url'] = SQLALCHEMY_URL
+    conf["alembic"]['sqlalchemy.echo'] = SQLALCHEMY_ECHO
 
     if not conf.has_section('alembic'):
         raise NoSectionError('alembic')

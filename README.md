@@ -22,8 +22,8 @@ $ python3 -m venv env
 $ git clone git@github.com:beproud/beproudbot.git
 $ cd beproudbot
 $ source /path/env/bin/activate
-(env)$ cp slackbot_settings.py.sample slackbot_settings.py
-(env)$ vi slackbot_settings.py # API Token を記入する
+(env)$ cp env.sample .env
+(env)$ vi .env # API Token 等を記入する
 (env)$ pip install -r beproudbot/requirements.txt
 ```
 
@@ -31,8 +31,73 @@ $ source /path/env/bin/activate
 
 ```bash
 $ source /path/env/bin/activate
-# configには設定ファイルのファイルパスを指定します
-(env)$ python run.py --config conf/local.ini
+# configには環境変数を指定します
+(env)$ export $(cat .env |grep -v '#')
+(env)$ python run.py
+```
+
+### Docker
+
+```bash
+# MySQL を使用する場合先に立ち上げておく
+# docker-compose up -d db
+# bot の起動
+$ docker-compose build bot
+$ docker-compose run -d bot
+# 終了
+# docker-compose down
+```
+
+## DB操作
+
+alembic を使用します
+
+### マイグレーション
+
+```bash
+(env)$ export $(cat .env |grep -v '#')
+(env)$ alembic --config alembic/conf.ini upgrade head
+```
+
+### マイグレーションファイル作成
+
+`env.py`の設定を読み込み、`versions`以下にマイグレーションファイルが書き出されます
+
+```bash
+(env)$ export $(cat .env |grep -v '#')
+(env)$ alembic --config alembic/conf.ini revision --autogenerate -m "my message"
+```
+
+#### Procfile 使用
+
+マイグレーション等の操作は `honcho` を使用して操作することができます。
+
+honchoは .env を自動的に読み込み、スクリプトを開始することができます。
+
+```bash
+(env)$ pip install honcho
+# honcho run bot
+# honcho run migrate
+# honcho run makemigrations
+``
+
+## 環境構築
+
+ansible の `configure` タグを使用します。また、デプロイ用の秘密鍵として `DEPLOY_KEY_PATH` を指定します
+
+```bash
+$ (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connection local site.yml --tags=configure -e "DEPLOY_KEY_PATH=$DEPLOY_KEY_PATH")
+```
+
+## デプロイ
+
+`deploy` タグを使用します
+
+```bash
+$ (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connection local site.yml --tags=deploy)
+# VM開発時は `git_sync_local` でローカルファイルを配備することができます
+# また `git_force_checkout` で --force checkout できます
+$ (cd beproudbot-haro/deplyoment/ansible && ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_sync_local" -e "git_force_checkout")
 ```
 
 ## Command

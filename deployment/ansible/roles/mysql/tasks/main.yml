@@ -1,0 +1,41 @@
+---
+
+# MySQL5.6用の対応
+- name: apt-repository
+  apt_repository:
+    repo: deb http://archive.ubuntu.com/ubuntu trusty universe
+    state: present
+  tags: [configure]
+
+# MySQLのインストール
+- name: install mysql server
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items:
+    - mysql-server-5.6
+    - mysql-client-5.6
+    - python-mysqldb
+  notify:
+    - "restart mysqld"
+  tags: [configure]
+
+# MySQLのセットアップ
+- name: start mysqld
+  service:
+    name: mysql
+    state: started
+  tags: [configure, deploy]
+- name: setup user for haro
+  mysql_user:
+    name: "{{ MYSQL.USER_NAME }}"
+    priv: "{{ MYSQL.PRIVILEGE }}"
+    host: "{{ MYSQL.HOSTS }}"
+  tags: [configure]
+- name: setup db for haro
+  mysql_db:
+    login_user: "{{ MYSQL.USER_NAME }}"
+    login_password: '{{ MYSQL.PASSWORD }}'
+    name: "{{ MYSQL.DB_NAME }}"
+    encoding: "{{ MYSQL.ENCODING }}"
+  tags: [configure]

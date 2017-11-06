@@ -1,0 +1,10 @@
+---
+APP_NAME: haro
+
+BOT_USER: haro
+BOT_GROUP: haro
+
+REPOSITORY_PATH: "/home/{{ BOT_USER }}/beproudbot-haro"
+VIRTUALENV_PATH: "/home/{{ BOT_USER }}/venv"
+
+use_mysql: true

@@ -28,6 +28,6 @@ class Term(Base):
         'create_command.id',
         onupdate='CASCADE',
         ondelete='CASCADE'))
-    word = Column(Unicode, nullable=False, unique=True)
+    word = Column(Unicode(128), nullable=False, unique=True)
     creator = Column(Unicode(100), nullable=False)
     ctime = Column(DateTime, default=datetime.datetime.now, nullable=False)

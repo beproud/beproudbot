@@ -1,0 +1,10 @@
+---
+- hosts: app
+  become: yes
+  roles:
+    - { role: roles/mysql, when: use_mysql }
+    - roles/system
+    - roles/haro
+
+# * できれば: ディレクトリ階層をアプリとそれ以外にわけて扱えるようにする
+
