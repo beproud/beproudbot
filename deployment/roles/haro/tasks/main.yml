@@ -20,6 +20,7 @@
   shell: "cat {{ DEPLOY_KEY_PATH }}"
   register: tmp_deploy_key
   tags: [configure]
+  when: DEPLOY_KEY_PATH is defined
 - name: put deploy key
   copy:
     content: "{{ tmp_deploy_key.stdout }}"
@@ -28,6 +29,7 @@
     group: "{{ BOT_GROUP }}"
     mode: 0400
   tags: [configure]
+  when: DEPLOY_KEY_PATH is defined
 
 # 常駐設定
 - name: systemd
