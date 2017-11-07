@@ -91,8 +91,8 @@ ansible の `configure` タグを使用します。
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure)
 # 環境変数は `ENVIRONMENT_FILE_PATH` を指定することができます
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "ENVIRONMENT_FILE_PATH=path/to/.env")
-# MySQL をインストールしない場合 `use_mysql=false` とすることで設定をスキップできます
-$ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_mysql=false")
+# MySQL をインストールしない場合 `use_local_mysql_server=false` とすることで設定をスキップできます
+$ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_local_mysql_server=false")
 ```
 
 ## デプロイ
