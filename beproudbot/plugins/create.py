@@ -36,7 +36,7 @@ def command_patterns(message):
     commands = set()
     for deco in ['respond_to', 'listen_to']:
         for re_compile in message._plugins.commands.get(deco):
-            commands.add(re_compile.pattern.split('\s')[0].lstrip('^'))
+            commands.add(re_compile.pattern.split('\s')[0].lstrip('^').rstrip('$'))
     return commands
 
 
@@ -124,6 +124,10 @@ class ReturnTermCommandValidator(BaseCommandValidator):
     def clean_command_name(self, command_name):
         """コマンド名に対してValidationを適用する
         """
+        # randomは一文字コマンドなのでチェックから除外する
+        if command_name == "random":
+            return
+
         if command_name not in command_patterns(self.callargs['message']):
             if not self.has_command(command_name):
                 raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
@@ -140,7 +144,6 @@ class ReturnTermCommandValidator(BaseCommandValidator):
         return self.get_command(command_name)
 
 
-@respond_to('^create\s+(\S+)$')
 @respond_to('^create\s+add\s+(\S+)$')
 @register_arg_validator(AddCommandValidator)
 def add_command(message, command_name):
@@ -150,6 +153,7 @@ def add_command(message, command_name):
     :param str command: 登録するコマンド名
     """
     s = Session()
+
     s.add(CreateCommand(name=command_name, creator=message.body['user']))
     s.commit()
     message.send('`${}`コマンドを登録しました'.format(command_name))
@@ -177,12 +181,13 @@ def return_term(message, command_name, command=None):
     :param message: slackbot.dispatcher.Message
     :param str command: 語録が登録されているコマンド名
     """
-    if command.terms:
-        words = [term.word for term in command.terms]
-        word = random.choice(words)
-        message.send(word)
-    else:
-        message.send('`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
+    if command_name:
+        if command.terms:
+            words = [term.word for term in command.terms]
+            word = random.choice(words)
+            message.send(word)
+        else:
+            message.send('`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
 
 
 @respond_to('^create\s+list$')
