@@ -2,8 +2,7 @@
 SYSTEMD_SERVICE_FILE: "{{ APP_NAME }}.service"
 
 ALEMBIC_CONF_PATH: "alembic/conf.ini"
-REPOSITORY_URL: "git@github.com:beproud/beproudbot.git"
-key_file_path: "/home/{{ BOT_USER }}/.ssh/deploy.key"
+REPOSITORY_URL: "https://github.com/beproud/beproudbot.git"
 version: master
 git_sync_local: no
 git_force_checkout: no

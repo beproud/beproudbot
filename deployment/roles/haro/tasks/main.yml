@@ -15,22 +15,6 @@
     name: virtualenv
   tags: [configure]
 
-# デプロイキー設定
-- name: read deploy key file
-  shell: "cat {{ DEPLOY_KEY_PATH }}"
-  register: tmp_deploy_key
-  tags: [configure]
-  when: DEPLOY_KEY_PATH is defined
-- name: put deploy key
-  copy:
-    content: "{{ tmp_deploy_key.stdout }}"
-    dest: "{{ key_file_path }}"
-    owner: "{{ BOT_USER }}"
-    group: "{{ BOT_GROUP }}"
-    mode: 0400
-  tags: [configure]
-  when: DEPLOY_KEY_PATH is defined
-
 # 常駐設定
 - name: systemd
   template:
@@ -45,8 +29,6 @@
     repo: "{{ REPOSITORY_URL }}"
     version: "{{ version }}"
     dest: "{{ REPOSITORY_PATH }}"
-    accept_hostkey: yes
-    key_file: "{{ key_file_path }}"
     force: "{{ git_force_checkout }}"
   when: not git_sync_local
   tags: [deploy]

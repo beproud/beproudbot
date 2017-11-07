@@ -89,8 +89,6 @@ ansible の `configure` タグを使用します。
 
 ```bash
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure)
-# Githubからリポジトリをcloneする場合、デプロイ用の秘密鍵として `DEPLOY_KEY_PATH` を指定します
-$ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "DEPLOY_KEY_PATH=$DEPLOY_KEY_PATH")
 # MySQL をインストールしない場合 `use_mysql=false` とすることで設定をスキップできます
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_mysql=false")
 ```
