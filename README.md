@@ -92,7 +92,7 @@ $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts -
 # 環境変数は `ENVIRONMENT_FILE_PATH` を指定することができます
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "ENVIRONMENT_FILE_PATH=path/to/.env")
 # MySQL をインストールしない場合 `use_local_mysql_server=false` とすることで設定をスキップできます
-$ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_local_mysql_server=false")
+$ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_local_mysql_server=$use_local_mysql_server")
 ```
 
 ## デプロイ
@@ -101,6 +101,8 @@ ansible の `deploy` タグを使用します
 
 ```bash
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy)
+# `git_version` でブランチ/タグ/リビジョンを指定することができます
+$ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_version=branch_name")
 # VM開発時は `git_sync_local` でローカルファイルを配備することができます
 # また `git_force_checkout` で --force checkout できます
 $ (cd beproudbot-haro/deplyoment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_sync_local" -e "git_force_checkout")

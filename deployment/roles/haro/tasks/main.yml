@@ -27,7 +27,7 @@
   become_user: "{{ BOT_USER }}"
   git:
     repo: "{{ REPOSITORY_URL }}"
-    version: "{{ version }}"
+    version: "{{ git_version }}"
     dest: "{{ REPOSITORY_PATH }}"
     force: "{{ git_force_checkout }}"
   when: not git_sync_local
@@ -35,7 +35,7 @@
 - name: copy repository from local
   shell: |
     rm -rf {{ REPOSITORY_PATH }} &&
-    cp -r /home/vagrant/beproudbot-haro {{ REPOSITORY_PATH }} &&
+    cp -r  {{ local_repository_path }} {{ REPOSITORY_PATH }} &&
     chown -R {{ BOT_USER }}:{{ BOT_GROUP }} {{ REPOSITORY_PATH }}
   when: git_sync_local
   tags: [deploy]
