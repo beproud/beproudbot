@@ -42,7 +42,7 @@
 - name: pip install
   become_user: "{{ BOT_USER }}"
   pip:
-    requirements: "{{ REPOSITORY_PATH }}/requirements.txt"
+    requirements: "{{ REPOSITORY_PATH }}/src/requirements.txt"
     virtualenv: "{{ VIRTUALENV_PATH }}"
   tags: [deploy]
 
@@ -50,7 +50,8 @@
 - name: migrate
   become_user: "{{ BOT_USER }}"
   shell: |
-    export $(cat {{ REPOSITORY_PATH }}/.env | grep -v '#') &&
+    export $(cat {{ ENVIRONMENT_FILE_PATH }} | grep -v '#') &&
+    cd src &&
     {{ VIRTUALENV_PATH }}/bin/alembic --config {{ ALEMBIC_CONF_PATH }} upgrade head
   args:
     chdir: "{{ REPOSITORY_PATH }}"

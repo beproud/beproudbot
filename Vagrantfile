@@ -25,9 +25,10 @@ Vagrant.configure("2") do |config|
     sudo apt update -y
     sudo apt install -y build-essential python3 python3-dev libssl-dev libffi-dev python3-pip aptitude
     sudo pip3 install -U pip
+    sudo pip3 install virtualenv
 
-    virtualenv -p python3 venv_ansible
-    sudo venv_ansible/bin/pip install ansible==2.4
+    virtualenv -p python3 ~/venv_ansible
+    ~/venv_ansible/bin/pip install ansible==2.4
 
     (cd ~/beproudbot-haro/deployment &&
     export $(cat ~/beproudbot-haro/.env | grep -v '#' ) &&

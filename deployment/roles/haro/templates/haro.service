@@ -8,7 +8,7 @@ PIDFile=/run/haro.pid
 User={{ BOT_USER }}
 Group={{ BOT_GROUP }}
 WorkingDirectory={{ REPOSITORY_PATH }}
-EnvironmentFile={{ REPOSITORY_PATH }}/.env
+EnvironmentFile={{ ENVIRONMENT_FILE_PATH }}
 ExecStart={{ VIRTUALENV_PATH }}/bin/python run.py
 ExecStop=/bin/kill -s TERM $MAINPID
 # TODO: あとで設定するかみる
