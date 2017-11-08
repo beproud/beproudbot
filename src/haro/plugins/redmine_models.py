@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, Unicode
-
 from db import Base
 
 

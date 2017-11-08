@@ -5,7 +5,6 @@ from io import StringIO
 import requests
 from slackbot import settings
 from slackbot.bot import respond_to, listen_to
-
 from db import Session
 from haro.plugins.thx_models import ThxHistory
 from haro.slack import get_user_name, get_users_info

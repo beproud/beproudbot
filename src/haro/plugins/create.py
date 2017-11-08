@@ -2,7 +2,6 @@ import random
 
 from slackbot.bot import respond_to
 from sqlalchemy.orm import join
-
 from db import Session
 from haro.arg_validator import (
     BaseArgValidator,

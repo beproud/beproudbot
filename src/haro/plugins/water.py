@@ -2,7 +2,6 @@ import datetime
 
 from slackbot.bot import respond_to
 from sqlalchemy import func, case
-
 from db import Session
 from haro.plugins.water_models import WaterHistory
 
