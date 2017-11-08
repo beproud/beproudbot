@@ -9,7 +9,3 @@ pymysql
 requests
 prettytable
 cachetools
-
-### unused?
-# beautifulsoup4
-# lxml

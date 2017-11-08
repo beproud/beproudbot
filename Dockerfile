@@ -5,7 +5,7 @@ RUN apt update -y && apt install -y wget python3 sqlite3
 RUN wget -O- https://bootstrap.pypa.io/get-pip.py | python3
 RUN cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-# アプリの依存
+# アプリの実行環境設定
 COPY ./src/constraints.txt /tmp
 COPY ./src/requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
