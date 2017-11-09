@@ -12,14 +12,14 @@ Vagrant.configure("2") do |config|
         'modifyvm', :id,
         '--memory', '1024',
         '--cpus', '1',
-        '--name', 'beproudbot-haro',
+        '--name', 'vagrant-beproudbot',
       ]
     end
   end
 
-  config.vm.hostname = "beproudbot-haro"
+  config.vm.hostname = "vagrant-beproudbot"
   config.vm.network :private_network, :ip => "192.168.40.10"
-  config.vm.synced_folder ".", "/home/vagrant/beproudbot-haro"
+  config.vm.synced_folder ".", "/home/vagrant/beproudbot"
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
     sudo apt update -y
@@ -30,8 +30,8 @@ Vagrant.configure("2") do |config|
     virtualenv -p python3 ~/venv_ansible
     ~/venv_ansible/bin/pip install ansible==2.4
 
-    (cd ~/beproudbot-haro/deployment &&
-    export $(cat ~/beproudbot-haro/.env | grep -v '#' ) &&
+    (cd ~/beproudbot/deployment &&
+    export $(cat ~/beproudbot/.env | grep -v '#' ) &&
     ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml)
   SHELL
 end

@@ -15,12 +15,12 @@ NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
 
 
 HELP = """
-beproudbotは文章の中の t<チケットid> を探し、見つかる祭、チケットへのリンクを返す。
+haroは文章の中の t<チケットid> を探し、見つかる祭、チケットへのリンクを返す。
 
 例:
-> t56147はいつできるのかな？
+> t12345はいつできるのかな？
 < SlackとRedmineとつながりたいです。
-< https://project.beproud.jp/redmine/issues/56147
+< http://localhost:9000/redmine/issues/12345
 
 
 - `$redmine help`: redmineのコマンドの使い方を返す

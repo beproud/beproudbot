@@ -14,7 +14,7 @@ def get_argparser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent('''\
             説明:
-            beproudbotの設定ファイルを読み込んだ後にslackbotを起動します'''))
+            haroの設定ファイルを読み込んだ後にslackbotを起動します'''))
 
     parser.add_argument('-c', '--config',
                         type=argparse.FileType('r'),
@@ -25,7 +25,7 @@ def get_argparser():
 
 
 @default_reply
-def beproudbot_default_replay(message):
+def haro_default_replay(message):
     """コマンドを間違えた時に表示する文字列を返す
 
     :param message: slackbot.dispatcher.Message

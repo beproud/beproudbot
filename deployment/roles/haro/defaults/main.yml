@@ -5,7 +5,7 @@ ALEMBIC_CONF_PATH: "alembic/conf.ini"
 REPOSITORY_URL: "https://github.com/beproud/beproudbot.git"
 ENVIRONMENT_FILE_PATH: "{{ REPOSITORY_PATH }}/.env"
 
-local_repository_path: /home/vagrant/beproudbot-haro
+local_repository_path: /home/vagrant/beproudbot
 git_version: master
 git_sync_local: no
 git_force_checkout: no

@@ -1,7 +1,7 @@
 """
 alembic init で生成される設定から以下を変更
 
-- beproudbotのrootパスを追加
+- haro のrootパスを追加
 - 環境変数からDB設定をロードできるようにする
 - db.Base モデルの定義を取得する
 """
@@ -15,7 +15,7 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
-# Baseをimportするのでbeproudbotのrootパスを追加
+# Baseをimportするのでharoのrootパスを追加
 # NOTE: run.py と統合できない?
 root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(root)
