@@ -1,5 +1,6 @@
 from prettytable import PrettyTable
 from slackbot.bot import respond_to
+
 from db import Session
 from haro.plugins.alias_models import UserAliasName
 from haro.slack import get_user_name, get_slack_id_by_name

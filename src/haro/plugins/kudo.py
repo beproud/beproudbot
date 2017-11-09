@@ -1,5 +1,6 @@
 from slackbot.bot import respond_to, listen_to
 from sqlalchemy import func
+
 from db import Session
 from haro.plugins.kudo_models import KudoHistory
 from haro.slack import get_user_name

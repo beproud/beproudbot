@@ -8,6 +8,7 @@ import requests
 from slackbot import settings
 from slackbot.bot import respond_to, listen_to
 from sqlalchemy import func, Date, cast
+
 from db import Session
 from haro.plugins.kintai_models import KintaiHistory
 from haro.slack import get_user_name

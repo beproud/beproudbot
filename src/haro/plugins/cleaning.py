@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from prettytable import PrettyTable
 from slackbot.bot import respond_to
+
 from db import Session
 from haro.plugins.cleaning_models import Cleaning
 from haro.slack import get_user_name

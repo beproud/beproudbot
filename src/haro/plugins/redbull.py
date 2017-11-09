@@ -8,6 +8,7 @@ import requests
 from slackbot import settings
 from slackbot.bot import respond_to
 from sqlalchemy import func
+
 from db import Session
 from haro.plugins.redbull_models import RedbullHistory
 from haro.slack import get_user_name
