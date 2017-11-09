@@ -18,7 +18,7 @@ def get_argparser():
 
     parser.add_argument('-c', '--config',
                         type=argparse.FileType('r'),
-                        default='src/alembic/conf.ini',
+                        default='alembic/conf.ini',
                         help='ini形式のファイルをファイルパスで指定します')
 
     return parser
