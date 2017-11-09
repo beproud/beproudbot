@@ -1,8 +1,9 @@
-import pytest
 from contextlib import contextmanager
 
-from db import Base
+import pytest
 from sqlalchemy.orm import sessionmaker
+
+from db import Base
 
 
 @pytest.fixture(scope='session')

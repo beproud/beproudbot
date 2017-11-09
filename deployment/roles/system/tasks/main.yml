@@ -1,0 +1,32 @@
+---
+- name: prepare
+  apt:
+    update_cache: yes
+  tags: [configure]
+
+# 時刻設定
+- name: "set timezone to {{ TIMEZONE }}"
+  timezone:
+    name: "{{ TIMEZONE }}"
+  tags: [configure]
+- name: "generate locale {{ LANG }}"
+  locale_gen:
+    name: "{{ LANG }}"
+    state: present
+  tags: [configure]
+- name: "set locale {{ LANG }}"
+  command: update-locale LANG="{{ LANG }}"
+  tags: [configure]
+
+
+# ユーザー設定
+- name: add bot group
+  group:
+    name: "{{ BOT_GROUP }}"
+    state: present
+  tags: [configure]
+- name: add bot user
+  user:
+    name: "{{ BOT_USER }}"
+    group: "{{ BOT_GROUP }}"
+  tags: [configure]

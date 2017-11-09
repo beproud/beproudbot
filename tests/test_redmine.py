@@ -4,10 +4,13 @@ from urllib.parse import urljoin
 import pytest
 import requests_mock
 
-from beproudbot.plugins.redmine import (show_ticket_information, USER_NOT_FOUND, REDMINE_URL,
-                                        RESPONSE_ERROR, NO_CHANNEL_PERMISSIONS, TICKET_INFO)
-from tests.db import db
+from haro.plugins.redmine import (show_ticket_information, USER_NOT_FOUND,
+                                  REDMINE_URL,
+                                  RESPONSE_ERROR, NO_CHANNEL_PERMISSIONS,
+                                  TICKET_INFO)
+
 from tests.factories.redmine import ProjectChannelFactory, RedmineUserFactory
+from tests.db import db
 
 USER_NAME = "Emmanuel Goldstein"
 
@@ -56,18 +59,18 @@ def no_channel_slack_message():
     return slack_message(channel="111111111")
 
 
-@patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
+@patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_invalid_user_response(db, slack_message):
-    with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         show_ticket_information(slack_message, "1234567")
         assert slack_message.send.called is True
         slack_message.send.assert_called_with(USER_NOT_FOUND.format(USER_NAME))
 
 
-@patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
+@patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine_project):
 
-    with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             url = urljoin(REDMINE_URL, "%s.json" % ticket_id)
@@ -77,10 +80,10 @@ def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine
             slack_message.send.assert_called_with(RESPONSE_ERROR.format(USER_NAME))
 
 
-@patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
+@patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_no_channel_permissions_response(db, slack_message, redmine_user, redmine_project):
 
-    with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             channel_name = slack_message.channel._body['name']
@@ -94,10 +97,10 @@ def test_no_channel_permissions_response(db, slack_message, redmine_user, redmin
                                                                                 channel_name))
 
 
-@patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
+@patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_successful_response(db, slack_message, redmine_user, redmine_project):
 
-    with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
 
@@ -120,10 +123,10 @@ def test_successful_response(db, slack_message, redmine_user, redmine_project):
                                                                      url[:-5]))
 
 
-@patch('beproudbot.plugins.redmine.get_user_name', lambda x: USER_NAME)
+@patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_no_channels_no_response(db, no_channel_slack_message, redmine_user, redmine_project):
 
-    with patch('beproudbot.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
 

@@ -1,0 +1,66 @@
+---
+
+# アプリを動かす準備
+- name: install pip
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - python3-pip
+  tags: [configure]
+- name: update pip
+  command: pip3 install -U pip
+  tags: [configure]
+- name: install virtualenv
+  pip:
+    name: virtualenv
+  tags: [configure]
+
+# 常駐設定
+- name: systemd
+  template:
+    src: "{{ SYSTEMD_SERVICE_FILE }}"
+    dest: "/etc/systemd/system/{{ SYSTEMD_SERVICE_FILE }}"
+  tags: [configure]
+
+# デプロイ
+- name: clone repository
+  become_user: "{{ BOT_USER }}"
+  git:
+    repo: "{{ REPOSITORY_URL }}"
+    version: "{{ git_version }}"
+    dest: "{{ REPOSITORY_PATH }}"
+    force: "{{ git_force_checkout }}"
+  when: not git_sync_local
+  tags: [deploy]
+- name: copy repository from local
+  shell: |
+    rm -rf {{ REPOSITORY_PATH }} &&
+    cp -r  {{ local_repository_path }} {{ REPOSITORY_PATH }} &&
+    chown -R {{ BOT_USER }}:{{ BOT_GROUP }} {{ REPOSITORY_PATH }}
+  when: git_sync_local
+  tags: [deploy]
+- name: pip install
+  become_user: "{{ BOT_USER }}"
+  pip:
+    requirements: "{{ REPOSITORY_PATH }}/src/requirements.txt"
+    virtualenv: "{{ VIRTUALENV_PATH }}"
+  tags: [deploy]
+
+# マイグレーション
+- name: migrate
+  become_user: "{{ BOT_USER }}"
+  shell: |
+    export $(cat {{ ENVIRONMENT_FILE_PATH }} | grep -v '#') &&
+    cd src &&
+    {{ VIRTUALENV_PATH }}/bin/alembic --config {{ ALEMBIC_CONF_PATH }} upgrade head
+  args:
+    chdir: "{{ REPOSITORY_PATH }}"
+  tags: [deploy]
+
+# 関連プロセスの再起動
+- name: "restart {{ APP_NAME }}"
+  systemd:
+   state: restarted
+   daemon_reload: yes
+   name: "{{ APP_NAME }}"
+  tags: [deploy]
