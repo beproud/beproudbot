@@ -140,10 +140,10 @@ READMEにコマンドの説明を記載
 モジュール設計
 --------------------------
 
-* 基本的に ``beproudbot/beproudbot/plugins/`` 直下に機能の実装を行ってください。
-* コマンドに関連する処理は ``/plugin/hoge機能.py`` として実装してください
-* SQLAlchemyのTable オブジェクトは機能単位で ``/plugin/hoge機能_models.py`` として実装してください
-* ユーティリティ関数などは ``beproudbot/utils/`` 直下に実装してください
+* 基本的に ``src/haro/plugins/`` 直下に機能の実装を行ってください。
+* コマンドに関連する処理は ``src/haro/plugin/hoge機能.py`` として実装してください
+* SQLAlchemyのTable オブジェクトは機能単位で ``src/haro/plugin/hoge機能_models.py`` として実装してください
+* ユーティリティ関数などは ``src/haro/`` 直下に実装してください
 
 コーディング規則
 --------------------------
@@ -151,8 +151,9 @@ READMEにコマンドの説明を記載
 
 * Haro内のPythonコードはシングルクォーテーションで統一してください
 * Haro内のPythonコードは一行100文字以内に収めてください
-* Haro内で共通して使用する処理は ``beproudbot/utils/`` 内に切り出してください
-* Haro内で共通して使用する変数は ``beproudbot/slackbot_settings.py`` 内に定義してください
+* Haro内で共通して使用する処理は ``src/haro/`` 内に切り出してください
+* Haro内で共通して使用する変数は ``src/haro/slackbot_settings.py`` 内に定義してください
+  * 環境毎に設定する必要がある変数は環境変数から参照するようにしてください
 
 
 docstring
@@ -181,7 +182,7 @@ docstring
 --------------------------
 
 
-* ライブラリを導入した場合は ``beproudbot/requirements.txt`` に記載してください
+* ライブラリを導入した場合は ``src/requirements.txt`` に記載してください
 
 その他
 -------------
@@ -189,12 +190,12 @@ docstring
 
 SlackIDからユーザー名を取得する際は以下の関数を使ってください
 
-* ``/beproudbot/utils/slack.py`` の ``get_user_name()`` 関数
+* ``src/haro/slack.py`` の ``get_user_name()`` 関数
    - SlackのusersAPIのキャッシュからを呼び出しているのでSlackに問い合わせを行いません
 
 ユーザー名からSlackIDを取得する場合、以下の関数を使ってください
 
-* ``beproudbot/utils/alias.py`` の ``get_slack_id()`` 関数
+* ``src/haro/alias.py`` の ``get_slack_id()`` 関数
    - SlackのusersAPIのキャッシュから呼び出しているのでSlackに問い合わせを行いません
    - 上記の関数を使う事でAlias登録されているユーザー名からもSlackIDを引く事が可能
 
@@ -207,7 +208,7 @@ UnitTestを置く場所
 --------------------------
 
 
-* ``beproudbot/tests/`` 直下に実装してください
+* ``tests/`` 直下に実装してください
 
 UnitTestの実行
 --------------------------

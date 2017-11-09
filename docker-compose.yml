@@ -1,0 +1,20 @@
+version: '2'
+services:
+
+  bot:
+    build: .
+    #environment:
+    #  LANG: ja_JP.UTF-8
+    env_file: .env
+    volumes:
+      - .:/proj
+    working_dir: /proj
+    restart: always
+    command: "bash -c 'cd src && alembic --config alembic/conf.ini upgrade head && python3 run.py'"
+
+  db:
+    image: library/mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: haro
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci

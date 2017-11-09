@@ -1,0 +1,9 @@
+---
+MYSQL:
+  USER_NAME: haro
+  HOST_ADDRESS: localhost
+  DB_NAME: haro
+  PRIVILEGE: "*.*:ALL,GRANT"
+  HOSTS: "%"
+  PASSWORD: ""
+  ENCODING: utf8

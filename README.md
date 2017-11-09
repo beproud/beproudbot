@@ -22,17 +22,90 @@ $ python3 -m venv env
 $ git clone git@github.com:beproud/beproudbot.git
 $ cd beproudbot
 $ source /path/env/bin/activate
-(env)$ cp slackbot_settings.py.sample slackbot_settings.py
-(env)$ vi slackbot_settings.py # API Token を記入する
-(env)$ pip install -r beproudbot/requirements.txt
+(env)$ cp env.sample .env
+(env)$ vi .env # API Token 等を記入する
+(env)$ pip install -r src/requirements.txt
 ```
 
 ## 起動方法
 
 ```bash
 $ source /path/env/bin/activate
-# configには設定ファイルのファイルパスを指定します
-(env)$ python run.py --config conf/local.ini
+# configには環境変数を指定します
+(env)$ export $(cat .env |grep -v '#')
+(env)$ cd src && python run.py
+```
+
+### Docker
+
+```bash
+# MySQL を使用する場合先に立ち上げておく
+# docker-compose up -d db
+# bot の起動
+$ docker-compose build bot
+$ docker-compose run -d bot
+# コンテナにはいる
+$ docker-compose run --rm bot bash
+# 終了
+# docker-compose down
+```
+
+## DB操作
+
+alembic を使用します
+
+### マイグレーション
+
+```bash
+(env)$ export $(cat .env |grep -v '#')
+(env)$ cd src && alembic --config alembic/conf.ini upgrade head
+```
+
+### マイグレーションファイル作成
+
+`env.py`の設定を読み込み、`versions`以下にマイグレーションファイルが書き出されます
+
+```bash
+(env)$ export $(cat .env |grep -v '#')
+(env)$ cd src && alembic --config alembic/conf.ini revision --autogenerate -m "my message"
+```
+
+#### Procfile 使用
+
+マイグレーション等の操作は `honcho` を使用して操作することができます。
+
+honchoは .env を自動的に読み込み、スクリプトを開始することができます。
+
+```bash
+(env)$ pip install honcho
+# honcho start bot
+# honcho start migrate
+# honcho start makemigrations
+```
+
+## 環境構築
+
+ansible の `configure` タグを使用します。
+
+```bash
+$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure)
+# 環境変数は `ENVIRONMENT_FILE_PATH` を指定することができます
+$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "ENVIRONMENT_FILE_PATH=path/to/.env")
+# MySQL をインストールしない場合 `use_local_mysql_server=false` とすることで設定をスキップできます
+$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_local_mysql_server=$use_local_mysql_server")
+```
+
+## デプロイ
+
+ansible の `deploy` タグを使用します
+
+```bash
+$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy)
+# `git_version` でブランチ/タグ/リビジョンを指定することができます
+$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_version=branch_name")
+# VM開発時は `git_sync_local` でローカルファイルを配備することができます
+# また `git_force_checkout` で --force checkout できます
+$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_sync_local=true" -e "git_force_checkout=true")
 ```
 
 ## Command
@@ -121,17 +194,17 @@ $ source /path/env/bin/activate
 
 ### redmine コマンド
 
-beproudbotは文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
+haroは文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
 
 例:
 
 ```
 james [9:00 PM]
-t56147はいつできるのかな？
+t12345はいつできるのかな？
 
 Haro [9:00 PM]
 SlackからRedmineのチケットを見れるようにしよう
-https://project.beproud.jp/redmine/issues/56147
+http://localhost:9000/redmine/issues/12345
 ```
 
 

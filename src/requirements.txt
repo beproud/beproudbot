@@ -1,0 +1,11 @@
+-c constraints.txt
+
+slackbot
+
+SQLAlchemy
+alembic
+
+pymysql
+requests
+prettytable
+cachetools
