@@ -88,11 +88,11 @@ honchoは .env を自動的に読み込み、スクリプトを開始するこ�
 ansible の `configure` タグを使用します。
 
 ```bash
-$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml)
+$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml)
 # 環境変数は `ENVIRONMENT_FILE_PATH` を指定することができます
-$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml "ENVIRONMENT_FILE_PATH=path/to/.env")
+$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml "ENVIRONMENT_FILE_PATH=path/to/.env")
 # MySQL をインストールしない場合 `use_local_mysql_server=false` とすることで設定をスキップできます
-$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_local_mysql_server=$use_local_mysql_server")
+$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_local_mysql_server=$use_local_mysql_server")
 ```
 
 ## デプロイ
@@ -100,18 +100,18 @@ $ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --conn
 ansible の `deploy` タグを使用します
 
 ```bash
-$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy)
+$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy)
 # `git_version` でブランチ/タグ/リビジョンを指定することができます
-$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_version=branch_name")
+$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_version=branch_name")
 # VM開発時は `git_sync_local` でローカルファイルを配備することができます
 # また `git_force_checkout` で --force checkout できます
-$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_sync_local=true" -e "git_force_checkout=true")
+$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_sync_local=true" -e "git_force_checkout=true")
 ```
 
 環境変数からまとめてまとめて引数に渡す場合の例は以下です
 
 ```bash
-$ (cd beproudbot/deployment && venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml \
+$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml \
   -e "ENVIRONMENT_FILE_PATH=$ENVIRONMENT_FILE_PATH" \
   -e "use_local_mysql_server=$use_local_mysql_server" \
   -e "git_force_checkout=$git_force_checkout" \
