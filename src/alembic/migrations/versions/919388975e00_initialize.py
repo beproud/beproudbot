@@ -96,7 +96,7 @@ def upgrade():
     op.create_table('term',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('create_command', sa.Integer(), nullable=True),
-    sa.Column('word', sa.Unicode(length=128), nullable=False),
+    sa.Column('word', sa.Unicode(length=1024), nullable=False),
     sa.Column('creator', sa.Unicode(length=100), nullable=False),
     sa.Column('ctime', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['create_command'], ['create_command.id'], onupdate='CASCADE', ondelete='CASCADE'),
