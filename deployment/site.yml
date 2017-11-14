@@ -2,6 +2,6 @@
 - hosts: app
   become: yes
   roles:
-    - { role: roles/mysql, when: use_local_mysql_server }
+    - roles/mysql
     - roles/system
     - roles/haro
