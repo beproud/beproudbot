@@ -5,7 +5,6 @@
   apt_repository:
     repo: deb http://archive.ubuntu.com/ubuntu trusty universe
     state: present
-  tags: [configure]
 
 # MySQL client のインストール
 - name: install mysql client
@@ -14,7 +13,6 @@
     update_cache: yes
   with_items:
     - mysql-client-5.6
-  tags: [configure]
 
 # MySQL server のインストール
 - name: install mysql server
@@ -27,7 +25,6 @@
   notify:
     - "restart mysqld"
   when: use_local_mysql_server
-  tags: [configure]
 
 # MySQLのセットアップ
 - name: start mysqld
@@ -35,7 +32,6 @@
     name: mysql
     state: started
   when: use_local_mysql_server
-  tags: [configure]
 - name: setup user for haro
   mysql_user:
     name: "{{ MYSQL.USER_NAME }}"
