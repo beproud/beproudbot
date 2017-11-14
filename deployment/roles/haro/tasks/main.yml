@@ -6,14 +6,11 @@
     name: "{{ item }}"
   with_items:
     - python3-pip
-  tags: [configure]
 - name: update pip
   command: pip3 install -U pip
-  tags: [configure]
 - name: install virtualenv
   pip:
     name: virtualenv
-  tags: [configure]
 
 # 常駐設定
 - name: systemd

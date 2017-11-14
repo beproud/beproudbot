@@ -7,11 +7,10 @@ After=network.target
 PIDFile=/run/haro.pid
 User={{ BOT_USER }}
 Group={{ BOT_GROUP }}
-WorkingDirectory={{ REPOSITORY_PATH }}
+WorkingDirectory={{ REPOSITORY_PATH }}/src
 EnvironmentFile={{ ENVIRONMENT_FILE_PATH }}
-ExecStart={{ VIRTUALENV_PATH }}/bin/python src/run.py
+ExecStart={{ VIRTUALENV_PATH }}/bin/python run.py
 ExecStop=/bin/kill -s TERM $MAINPID
-# TODO: あとで設定するかみる
 PrivateTmp=true
 Restart=always
 

@@ -32,6 +32,12 @@ Vagrant.configure("2") do |config|
 
     (cd ~/beproudbot/deployment &&
     export $(cat ~/beproudbot/.env | grep -v '#' ) &&
-    ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml)
+    ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml \
+  -e "ENVIRONMENT_FILE_PATH=$ENVIRONMENT_FILE_PATH" \
+  -e "use_local_mysql_server=$use_local_mysql_server" \
+  -e "git_force_checkout=$git_force_checkout" \
+  -e "git_sync_local=$git_sync_local" \
+  -e "git_version=$git_version")
+
   SHELL
 end

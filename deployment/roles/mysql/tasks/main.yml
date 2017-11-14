@@ -5,32 +5,39 @@
   apt_repository:
     repo: deb http://archive.ubuntu.com/ubuntu trusty universe
     state: present
-  tags: [configure]
 
-# MySQLのインストール
+# MySQL client のインストール
+- name: install mysql client
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items:
+    - mysql-client-5.6
+
+# MySQL server のインストール
 - name: install mysql server
   apt:
     name: "{{ item }}"
     update_cache: yes
   with_items:
     - mysql-server-5.6
-    - mysql-client-5.6
     - python-mysqldb
   notify:
     - "restart mysqld"
-  tags: [configure]
+  when: use_local_mysql_server
 
 # MySQLのセットアップ
 - name: start mysqld
   service:
     name: mysql
     state: started
-  tags: [configure, deploy]
+  when: use_local_mysql_server
 - name: setup user for haro
   mysql_user:
     name: "{{ MYSQL.USER_NAME }}"
     priv: "{{ MYSQL.PRIVILEGE }}"
     host: "{{ MYSQL.HOSTS }}"
+  when: use_local_mysql_server
   tags: [configure]
 - name: setup db for haro
   mysql_db:
@@ -38,4 +45,5 @@
     login_password: '{{ MYSQL.PASSWORD }}'
     name: "{{ MYSQL.DB_NAME }}"
     encoding: "{{ MYSQL.ENCODING }}"
+  when: use_local_mysql_server
   tags: [configure]
