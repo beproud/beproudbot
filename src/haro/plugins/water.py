@@ -1,5 +1,3 @@
-import datetime
-
 from slackbot.bot import respond_to
 from sqlalchemy import func, case
 

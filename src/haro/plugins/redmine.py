@@ -50,7 +50,7 @@ def show_ticket_information(message, ticket_id):
     channel = message.channel
     channel_id = channel._body['id']
     # message.bodyにuserが含まれている場合のみ反応する
-    if message.body.get('user'):
+    if not message.body.get('user'):
         return
     user_id = message.body['user']
 
