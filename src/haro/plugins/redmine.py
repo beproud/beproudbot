@@ -49,6 +49,9 @@ def show_ticket_information(message, ticket_id):
 
     channel = message.channel
     channel_id = channel._body['id']
+    # message.bodyにuserが含まれている場合のみ反応する
+    if not message.body.get('user'):
+        return
     user_id = message.body['user']
 
     user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()

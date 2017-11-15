@@ -1,5 +1,3 @@
-import datetime
-
 from slackbot.bot import respond_to
 from sqlalchemy import func, case
 
@@ -24,13 +22,11 @@ def count_water_stock(message):
     stock_number, latest_ctime = (
         s.query(func.sum(WaterHistory.delta),
                 func.max(case(whens=((
-                    WaterHistory.delta > 0,
+                    WaterHistory.delta != 0,
                     WaterHistory.ctime),), else_=None))).first()
     )
 
     if stock_number:
-        latest_ctime = datetime.datetime.strptime(latest_ctime,
-                                                  '%Y-%m-%d %H:%M:%S')
         message.send('残数: {}本 ({:%Y年%m月%d日} 追加)'
                      .format(stock_number, latest_ctime))
     else:
@@ -47,6 +43,10 @@ def manage_water_stock(message, delta):
         DBは追加の場合正数、取替の場合は負数を記録する
     """
     delta = -int(delta)
+    if not delta:
+        message.send('0は指定できません')
+        return
+
     user_id = message.body['user']
 
     s = Session()

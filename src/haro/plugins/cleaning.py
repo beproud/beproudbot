@@ -33,7 +33,7 @@ CLEANING_TASKS = [
 
 # 掃除作業を表示用に整形した文字列
 FORMATTED_CLEANING_TASKS = ('掃除でやることリスト\n'
-                            '\n'.join(['- [] {}'.format(row) for row in CLEANING_TASKS]))
+                            ''.join(['- [] {}'.format(row) for row in CLEANING_TASKS]))
 
 DAY_OF_WEEK = '月火水木金'
 
@@ -70,6 +70,7 @@ def show_cleaning_list(message):
         dow2users.setdefault(c.day_of_week, []).append(user)
 
     pt = PrettyTable(['曜日', '掃除当番'])
+    pt.align['掃除当番'] = 'l'
     for day_of_week, users in dow2users.items():
         dow = DAY_OF_WEEK[day_of_week]
         str_users = ', '.join(users)
