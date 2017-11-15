@@ -1,3 +1,5 @@
+import datetime
+
 from slackbot.bot import respond_to
 from sqlalchemy import func, case
 
@@ -27,6 +29,10 @@ def count_water_stock(message):
     )
 
     if stock_number:
+        # SQLiteの場合文字列で渡ってくるので対応
+        if not isinstance(latest_ctime, datetime.datetime):
+            latest_ctime = datetime.datetime.strptime(latest_ctime,
+                                                      '%Y-%m-%d %H:%M:%S')
         message.send('残数: {}本 ({:%Y年%m月%d日} 追加)'
                      .format(stock_number, latest_ctime))
     else:
