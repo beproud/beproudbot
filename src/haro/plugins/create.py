@@ -14,7 +14,6 @@ from haro.plugins.create_models import CreateCommand, Term
 HELP = """
 - `$create add <command>`: コマンドを追加する
 - `$create del <command>`: コマンドを削除する
-- `$create list`: createコマンドで登録したコマンド一覧を表示する
 - `$<command>`: コマンドに登録した語録の中からランダムに一つ返す
 - `$<command> <語録>`: 語録を登録する
 - `$<command> del <語録>`: 語録を削除する
@@ -187,20 +186,6 @@ def return_term(message, command_name, command=None):
             message.send(word)
         else:
             message.send('`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
-
-
-@respond_to('^create\s+list$')
-def show_create_commands(message):
-    """登録したコマンド一覧を表示する
-
-    :param message: slackbot.dispatcher.Message
-    """
-    s = Session()
-    msg = ['登録されているコマンド一覧']
-    for command in s.query(CreateCommand).order_by(CreateCommand.name.asc()):
-        msg.append('${}'.format(command.name))
-
-    message.send('\n'.join(msg))
 
 
 @respond_to('^(\S+)\s+(.+)')
