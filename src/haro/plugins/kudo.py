@@ -11,47 +11,51 @@ HELP = """
 """
 
 
-@listen_to('^(\S*[^\+|\s])\s*\+\+$')
-def update_kudo(message, name):
+@listen_to('^(.*)\s*\+\+$')
+def update_kudo(message, names):
     """ 指定された名前に対して ++ する
 
     OK:
-       name++、name ++、name  ++、@name++
+       name++、name ++、name  ++、@name++、name1 name2++
 
     NG:
-       name+ +、name++hoge、
+       name+ +、name++hoge、 name1,name2++
 
 
     :param message: slackbot.dispatcher.Message
     :param name str: ++する対象の名前
     """
     slack_id = message.body['user']
-    # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
-    # `<@{slack_id}>` というstr型で渡ってくるので対応
-    if get_user_name(name.lstrip('<@').rstrip('>')):
-        name = get_user_name(name.lstrip('<@').rstrip('>'))
+    name_list = []
+    for name in [x for x in names.split(' ') if x]:
+        # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
+        # `<@{slack_id}>` というstr型で渡ってくるので対応
+        if get_user_name(name.lstrip('<@').rstrip('>')):
+            name = get_user_name(name.lstrip('<@').rstrip('>'))
 
-    s = Session()
-    kudo = (s.query(KudoHistory)
-            .filter(KudoHistory.name == name)
-            .filter(KudoHistory.from_user_id == slack_id)
-            .one_or_none())
+        s = Session()
+        kudo = (s.query(KudoHistory)
+                .filter(KudoHistory.name == name)
+                .filter(KudoHistory.from_user_id == slack_id)
+                .one_or_none())
 
-    if kudo is None:
-        # name ×from_user_id の組み合わせが存在していない -> 新規登録
-        s.add(KudoHistory(name=name, from_user_id=slack_id, delta=1))
-        s.commit()
-    else:
-        # name ×from_user_id の組み合わせが存在 -> 更新
-        kudo.delta = kudo.delta + 1
-        s.commit()
+        if kudo is None:
+            # name ×from_user_id の組み合わせが存在していない -> 新規登録
+            s.add(KudoHistory(name=name, from_user_id=slack_id, delta=1))
+            s.commit()
+        else:
+            # name ×from_user_id の組み合わせが存在 -> 更新
+            kudo.delta = kudo.delta + 1
+            s.commit()
 
-    q = (s.query(
-        func.sum(KudoHistory.delta).label('total_count'))
-        .filter(KudoHistory.name == name))
-    total_count = q.one().total_count
+        q = (s.query(
+            func.sum(KudoHistory.delta).label('total_count'))
+            .filter(KudoHistory.name == name))
+        total_count = q.one().total_count
+        name_list.append((name, total_count))
 
-    message.send('({}: 通算 {})'.format(name, total_count))
+    msg = ['({}: 通算 {})'.format(n, tc) for n, tc in name_list]
+    message.send('\n'.join(msg))
 
 
 @respond_to('^kudo\s+help$')
