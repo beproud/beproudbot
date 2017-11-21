@@ -3,6 +3,10 @@ Unreleased
 
 Release Notes - 2017-11-21
 --------------------------
+- [#77] $randomコマンドのGroup対応
+
+Release Notes - 2017-11-21
+--------------------------
 - [#69] thx、kudoコマンドの複数++対応
 
 Release Notes - 2017-11-20
