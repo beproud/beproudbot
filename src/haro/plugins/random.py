@@ -30,8 +30,17 @@ def random_command(message, subcommand=None):
     # チャンネルのメンバー一覧を取得
     channel = message.body['channel']
     webapi = slacker.Slacker(settings.API_TOKEN)
-    cinfo = webapi.channels.info(channel)
-    members = cinfo.body['channel']['members']
+    try:
+        cinfo = webapi.channels.info(channel)
+        members = cinfo.body['channel']['members']
+    except slacker.Error:
+        try:
+            cinfo = webapi.groups.info(channel)
+            members = cinfo.body['group']['members']
+        except slacker.Error:
+            # TODO: 例外で判定しないように修正する
+            # チャンネルに紐付かない場合はreturn
+            return
 
     # bot の id は除く
     bot_id = message._client.login_data['self']['id']
