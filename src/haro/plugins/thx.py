@@ -20,8 +20,8 @@ HELP = """
 """
 
 
-@listen_to('^(\S*[^\+|\s])\s*\+\+\s+(\S+)$')
-def update_thx(message, user_name, word):
+@listen_to('(.*)\s*\+\+\s+(\S+)')
+def update_thx(message, user_names, word):
     """指定したSlackのユーザーにGJを行う
 
     OK:
@@ -29,11 +29,13 @@ def update_thx(message, user_name, word):
        user_name ++ hoge
        user_name  ++ hoge
        @user_name++ hoge
+       user_name user_name ++ hoge
 
     NG:
        user_name+ + hoge
        user_name+++ hoge
        user_name++hoge
+       user_name,user_name ++ hoge
 
     :param message: slackbot.dispatcher.Message
     :param str user_name: ++するユーザー名
@@ -43,33 +45,66 @@ def update_thx(message, user_name, word):
     channel_id = message.body['channel']
 
     s = Session()
-    # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
-    # `<@{slack_id}>` というstr型で渡ってくるので対応
-    if get_user_name(user_name.lstrip('<@').rstrip('>')):
-        slack_id = user_name.lstrip('<@').rstrip('>')
-    else:
-        slack_id = get_slack_id(s, user_name)
+    user_dict = check_user_name(s, user_names)
 
-    if not slack_id:
-        hint = get_close_matches(user_name, get_users_info().values())
-        if hint:
-            message.send('もしかして: `{}`'.format(hint[0]))
+    msg = []
+    if user_dict.get('matched'):
+        for slack_id, user_name in user_dict['matched']:
+            s.add(ThxHistory(
+                user_id=slack_id,
+                from_user_id=from_user_id,
+                word=word,
+                channel_id=channel_id))
+            s.commit()
+
+            count = (s.query(ThxHistory)
+                     .filter(ThxHistory.channel_id == channel_id)
+                     .filter(ThxHistory.user_id == slack_id)
+                     .count())
+            msg.append('{}({}: {}GJ)'.format(word, user_name, count))
+
+    if user_dict.get('hint_name'):
+        for hint_name in user_dict['hint_name']:
+            msg.append('もしかして: `{}`'.format(hint_name))
+
+    if user_dict.get('not_matched'):
+        for name in user_dict['not_matched']:
+            msg.append('{}はSlackのユーザーとして存在しません'.format(name))
+
+    message.send('\n'.join(msg))
+
+
+def check_user_name(session, user_names):
+    """Slackユーザー情報と照ら合わせ結果を辞書で返す
+
+    :param list user_names: Slackで＋＋対象のSlackユーザー名
+    :return dict user_dict:
+       keyが `matched`: Slackユーザーに紐付いた名前
+       keyが `hint_name`: 紐付かなかったが、似た名前が存在する名前
+       keyが `not_matched`: Slackユーザーに紐付かなかった名前
+    """
+    user_dict = {}
+    for name in [x for x in user_names.split(' ') if x]:
+
+        # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
+        # `<@{slack_id}>` というstr型で渡ってくるので対応
+        if get_user_name(name.lstrip('<@').rstrip('>')):
+            slack_id = name.lstrip('<@').rstrip('>')
         else:
-            message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
-        return
+            slack_id = get_slack_id(session, name)
 
-    s.add(ThxHistory(
-        user_id=slack_id,
-        from_user_id=from_user_id,
-        word=word,
-        channel_id=channel_id))
-    s.commit()
-
-    count = (s.query(ThxHistory)
-             .filter(ThxHistory.channel_id == channel_id)
-             .filter(ThxHistory.user_id == slack_id)
-             .count())
-    message.send('{}({}: {}GJ)'.format(word, user_name, count))
+        if slack_id:
+            # slack_idに紐づくユーザーが存在
+            user_dict.setdefault('matched', []).append((slack_id, name))
+        else:
+            # 一番近いユーザー名を算出
+            hint = get_close_matches(name, get_users_info().values())
+            if hint:
+                user_dict.setdefault('hint_name', []).append(hint[0])
+            # 紐づくユーザーが存在しなかった場合
+            else:
+                user_dict.setdefault('not_matched', []).append(name)
+    return user_dict
 
 
 @respond_to('^thx\s+from$')
