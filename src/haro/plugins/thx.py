@@ -20,7 +20,7 @@ HELP = """
 """
 
 
-@listen_to('(.*)\s*\+\+\s+(\S+)')
+@listen_to('(.*)\s*\+\+\s+(.+)')
 def update_thx(message, user_names, word):
     """指定したSlackのユーザーにGJを行う
 
