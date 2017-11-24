@@ -9,3 +9,4 @@ pymysql
 requests
 prettytable
 cachetools
+python-redmine
