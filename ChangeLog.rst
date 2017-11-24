@@ -1,6 +1,8 @@
 Unreleased
 ----------
 
+- [#18] yougo plugin の実装
+
 
 Release Notes - 2017-11-21
 --------------------------
