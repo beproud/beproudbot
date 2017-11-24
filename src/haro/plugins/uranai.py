@@ -1,7 +1,5 @@
 import datetime
-import json
-import urllib
-import numpy as np
+import requests
 from slackbot.bot import respond_to
 
 
@@ -9,31 +7,31 @@ def star(n):
     return '★' * n + '☆' * (5 - n)
 
 
-def uranai(dt):
-    uranai_dd = [18, 48, 79, 109, 140, 172, 203, 234, 265, 296, 326, 355]
-    tdy = datetime.date.today().strftime('%Y/%m/%d')
-    n = (np.searchsorted(uranai_dd, (datetime.date(2000, int(dt[:2]), int(dt[2:])) -
-                                     datetime.date(2000, 1, 1)).days) + 9) % 12
-    with urllib.request.urlopen('http://api.jugemkey.jp/api/horoscope/free/%s' % tdy) as fp:
-        d = json.loads(fp.read().decode())['horoscope'][tdy][n]
+def uranai(birthday):
+    today = datetime.date.today().strftime('%Y/%m/%d')
+    r = requests.get('http://api.jugemkey.jp/api/horoscope/free/{}'.format(today))
+    month, day = int(birthday[:2]), int(birthday[2:])
+    period = [20, 19, 21, 20, 21, 22, 23, 23, 23, 24, 22, 23]
+    n = (month + 8 + (day >= period[month - 1])) % 12
+    d = r.json()['horoscope'][today][n]
+    for s in ['total', 'love', 'money', 'job']:
+        d[s] = star(d[s])
     return """\
-%s位 %s
-総合: %s
-恋愛運: %s
-金運: %s
-仕事運: %s
-ラッキーカラー: %s
-ラッキーアイテム: %s
-%s
-""" % (d['rank'], d['sign'], d['total'], d['love'], d['money'], d['job'],
-       d['color'], d['item'], d['content'])
+{rank}位 {sign}
+総合: {total}
+恋愛運: {love}
+金運: {money}
+仕事運: {job}
+ラッキーカラー: {color}
+ラッキーアイテム: {item}
+{content}""".format(**d)
 
 
-@respond_to('^uranai\s+(\S{4})$')
-def show_uranai_commands(message, dt):
+@respond_to('^uranai\s+(\d{4})$')
+def show_uranai_commands(message, birthday):
     """Uranaiコマンドの結果を表示
 
     :param message: slackbot.dispatcher.Message
-    :param dt: 4桁の誕生日
+    :param birthday: 4桁の誕生日
     """
-    message.send(uranai(dt))
+    message.send(uranai(birthday))
