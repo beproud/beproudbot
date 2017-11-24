@@ -14,18 +14,19 @@ def uranai(dt):
     tdy = datetime.date.today().strftime('%Y/%m/%d')
     n = (np.searchsorted(uranai_dd, (datetime.date(2000, int(dt[:2]), int(dt[2:])) -
                                      datetime.date(2000, 1, 1)).days) + 9) % 12
-    with urllib.request.urlopen(f'http://api.jugemkey.jp/api/horoscope/free/{tdy}') as fp:
+    with urllib.request.urlopen('http://api.jugemkey.jp/api/horoscope/free/%s' % tdy) as fp:
         d = json.loads(fp.read().decode())['horoscope'][tdy][n]
-    return f"""\
-{d['rank']}位 {d['sign']}
-総合: {star(d['total'])}
-恋愛運: {star(d['love'])}
-金運: {star(d['money'])}
-仕事運: {star(d['job'])}
-ラッキーカラー: {d['color']}
-ラッキーアイテム: {d['item']}
-{d['content']}
-"""
+    return """\
+%s位 %s
+総合: %s
+恋愛運: %s
+金運: %s
+仕事運: %s
+ラッキーカラー: %s
+ラッキーアイテム: %s
+%s
+""" % (d['rank'], d['sign'], d['total'], d['love'], d['money'], d['job'],
+       d['color'], d['item'], d['content'])
 
 
 @respond_to('^uranai\s+(\S{4})$')
