@@ -1,6 +1,6 @@
-from urllib.parse import urljoin
+from redminelib import Redmine
+from redminelib.exceptions import ForbiddenError, ResourceNotFoundError
 
-import requests
 from slackbot.bot import listen_to, respond_to
 from slackbot_settings import REDMINE_URL
 
@@ -71,20 +71,18 @@ def show_ticket_information(message, ticket_id):
     if not s.query(channels.exists()).scalar():
         return
 
-    ticket_url = urljoin(REDMINE_URL, ticket_id)
-    headers = {'X-Redmine-API-Key': user.api_key}
-    res = requests.get('{}.json'.format(ticket_url), headers=headers)
-
-    if res.status_code != 200:
+    redmine = Redmine(REDMINE_URL, key=user.api_key)
+    try:
+        ticket = redmine.issue.get(ticket_id)
+    except (ResourceNotFoundError, ForbiddenError):
         message.send(RESPONSE_ERROR)
         return
 
-    ticket = res.json()
-    proj_id = ticket['issue']['project']['id']
+    proj_id = ticket.project.id
     proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
 
     if proj_room and channel_id in proj_room.channels.split(','):
-        message.send(TICKET_INFO.format(ticket['issue']['subject'], ticket_url))
+        message.send(TICKET_INFO.format(ticket.subject, ticket.url))
     else:
         message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
@@ -132,6 +130,15 @@ def remove_key(message):
     s.commit()
 
 
+def project_channel_from_identifier(api_key, identifier):
+    redmine = Redmine(REDMINE_URL, key=api_key)
+
+    try:
+        return redmine.project.get(identifier.strip())
+    except (ForbiddenError, ResourceNotFoundError):
+        pass
+
+
 @respond_to('^redmine\s+add\s+(\S+)$')
 def register_room(message, project_identifier):
     """Redmineのプロジェクトはチャンネルと繋ぐ.
@@ -151,28 +158,54 @@ def register_room(message, project_identifier):
         message.send(USER_NOT_FOUND.format(user_name))
         return
 
-    channels = s.query(ProjectChannel.id).filter(ProjectChannel.channels.contains(channel_id))
-    if not s.query(channels.exists()).scalar():
+    project = project_channel_from_identifier(user.api_key, project_identifier)
+    if not project:
+        message.send(PROJECT_NOT_FOUND)
         return
 
-    # project_url = urljoin(REDMINE_URL, project_identifier)
-    # headers = {'X-Redmine-API-Key': user.api_key}
-    # res = requests.get('{}.json'.format(ticket_url), headers=headers)
-    #
-    # if res.status_code != 200:
-    #     message.send(RESPONSE_ERROR)
-    #     return
-    #
-    # ticket = res.json()
-    # proj_id = ticket['issue']['project']['id']
-    # proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
-    #
-    # if proj_room and channel_id in proj_room.channels.split(','):
-    #     message.send(TICKET_INFO.format(ticket['issue']['subject'], ticket_url))
-    # else:
-    #     message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
+    project_channel = s.query(ProjectChannel).filter(ProjectChannel.project_id == project.id).\
+        one_or_none()
+
+    if not project_channel:
+        project_channel = ProjectChannel(project_id=project.id)
+
+    channels = project_channel.channels.split(",") if project_channel.channels else []
+
+    if channel_id not in channels:
+        channels.append(channel_id)
+        project_channel.channels = ",".join(channels)
+        s.commit()
+        message.send(CHANNEL_REGISTERED.format(project.name))
+        return
 
 
 @respond_to('^redmine\s+remove$')
-def unregister_room(message):
-    pass
+def unregister_room(message, project_identifier):
+    s = Session()
+
+    channel = message.channel
+    channel_id = channel._body['id']
+
+    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
+
+    if not user:
+        user_name = get_user_name(user_id)
+        message.send(USER_NOT_FOUND.format(user_name))
+        return
+
+    project = project_channel_from_identifier(user.api_key, project_identifier)
+    if not project:
+        message.send(PROJECT_NOT_FOUND)
+        return
+
+    project_channel = s.query(ProjectChannel).filter(ProjectChannel.project_id == project.id).\
+        one_or_none()
+
+    try:
+        channels = project_channel.channels.split(",") if project_channel.channels else []
+        channels.remove(channel_id)
+        project_channel.channels = ",".join(channels)
+        s.commit()
+        message.send(CHANNEL_UNREGISTERED.format(project.name))
+    except ValueError:
+        pass
