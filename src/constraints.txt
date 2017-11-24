@@ -16,3 +16,5 @@ slacker==0.9.60
 SQLAlchemy==1.1.14
 urllib3==1.22
 websocket-client==0.44.0
+python-redmine==2.0.2
+beautifulsoup4==4.6.0
