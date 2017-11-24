@@ -37,6 +37,33 @@ http://localhost:9000/redmine/issues/12345
 """
 
 
+def project_channel_from_identifier(api_key, identifier, session):
+    redmine = Redmine(REDMINE_URL, key=api_key)
+
+    try:
+        project = redmine.project.get(identifier.strip())
+    except (ForbiddenError, ResourceNotFoundError):
+        return None, None
+
+    chan = session.query(ProjectChannel).filter(ProjectChannel.project_id == project.id).\
+        one_or_none()
+    return project, chan
+
+
+def user_from_message(message, session):
+    # message.bodyにuserが含まれている場合のみ反応する
+    if not message.body.get('user'):
+        return
+    user_id = message.body['user']
+
+    user = session.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
+    if not user:
+        user_name = get_user_name(user_id)
+        message.send(USER_NOT_FOUND.format(user_name))
+        return
+    return user
+
+
 @respond_to('^redmine\s+help$')
 def show_help_redmine_commands(message):
     """Redmineコマンドのhelpを表示
@@ -55,16 +82,9 @@ def show_ticket_information(message, ticket_id):
 
     channel = message.channel
     channel_id = channel._body['id']
-    # message.bodyにuserが含まれている場合のみ反応する
-    if not message.body.get('user'):
-        return
-    user_id = message.body['user']
 
-    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
-
+    user = user_from_message(message, s)
     if not user:
-        user_name = get_user_name(user_id)
-        message.send(USER_NOT_FOUND.format(user_name))
         return
 
     channels = s.query(ProjectChannel.id).filter(ProjectChannel.channels.contains(channel_id))
@@ -117,26 +137,12 @@ def register_key(message, api_key):
 def remove_key(message):
     s = Session()
 
-    if not message.body.get('user'):
-        return
-
-    user_id = message.body['user']
-    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
-
+    user = user_from_message(message, s)
     if not user:
         return
 
     user.api_key = ""
     s.commit()
-
-
-def project_channel_from_identifier(api_key, identifier):
-    redmine = Redmine(REDMINE_URL, key=api_key)
-
-    try:
-        return redmine.project.get(identifier.strip())
-    except (ForbiddenError, ResourceNotFoundError):
-        pass
 
 
 @respond_to('^redmine\s+add\s+(\S+)$')
@@ -151,20 +157,14 @@ def register_room(message, project_identifier):
     channel = message.channel
     channel_id = channel._body['id']
 
-    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
-
+    user = user_from_message(message, s)
     if not user:
-        user_name = get_user_name(user_id)
-        message.send(USER_NOT_FOUND.format(user_name))
         return
 
-    project = project_channel_from_identifier(user.api_key, project_identifier)
+    project, project_channel = project_channel_from_identifier(user.api_key, project_identifier, s)
     if not project:
         message.send(PROJECT_NOT_FOUND)
         return
-
-    project_channel = s.query(ProjectChannel).filter(ProjectChannel.project_id == project.id).\
-        one_or_none()
 
     if not project_channel:
         project_channel = ProjectChannel(project_id=project.id)
@@ -176,7 +176,6 @@ def register_room(message, project_identifier):
         project_channel.channels = ",".join(channels)
         s.commit()
         message.send(CHANNEL_REGISTERED.format(project.name))
-        return
 
 
 @respond_to('^redmine\s+remove$')
@@ -186,20 +185,17 @@ def unregister_room(message, project_identifier):
     channel = message.channel
     channel_id = channel._body['id']
 
-    user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
-
+    user = user_from_message(message, s)
     if not user:
-        user_name = get_user_name(user_id)
-        message.send(USER_NOT_FOUND.format(user_name))
         return
 
-    project = project_channel_from_identifier(user.api_key, project_identifier)
+    project, project_channel = project_channel_from_identifier(user.api_key, project_identifier, s)
     if not project:
         message.send(PROJECT_NOT_FOUND)
         return
 
-    project_channel = s.query(ProjectChannel).filter(ProjectChannel.project_id == project.id).\
-        one_or_none()
+    if not project_channel:
+        return
 
     try:
         channels = project_channel.channels.split(",") if project_channel.channels else []
