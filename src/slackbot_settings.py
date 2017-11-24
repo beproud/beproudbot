@@ -33,6 +33,8 @@ FILE_UPLOAD_URL = 'https://slack.com/api/files.upload'
 
 # Redmine チケットAPI
 REDMINE_URL = os.environ['REDMINE_URL']
+REDMINE_USER_NAME = os.environ['REDMINE_USER_NAME']
+REDMINE_PASSWORD = os.environ['REDMINE_PASSWORD']
 
 ##### HARO #####
 # デバッグモードにするとログが出るので、開発時には便利

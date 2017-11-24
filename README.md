@@ -201,3 +201,11 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 - `$thx to <user_name>`: 誰にGJしたかの一覧を返す
 - `$thx help`: thxコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
+
+
+### yougo コマンド
+
+- `$yougo load <RedmineProject名>`: Redmineプロジェクトに紐づく用語集を更新
+- `$yougo search <用語>`: 用語を検索する
+- `$ys <用語>`: 用語を検索する(ショートカットコマンド)
+- `$yougo help`: yougoコマンドの使い方を返す

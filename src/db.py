@@ -18,6 +18,7 @@ from haro.plugins.create_models import CreateCommand, Term  # noqa
 from haro.plugins.kudo_models import KudoHistory  # noqa
 from haro.plugins.thx_models import ThxHistory  # noqa
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel  # noqa
+from haro.plugins.yougo_models import Yougo  # noqa
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):
