@@ -12,7 +12,7 @@ def uranai(birthday):
     r = requests.get('http://api.jugemkey.jp/api/horoscope/free/{}'.format(today))
     month, day = int(birthday[:2]), int(birthday[2:])
     period = [20, 19, 21, 20, 21, 22, 23, 23, 23, 24, 22, 23]
-    n = (month + 8 + (day >= period[month - 1])) % 12
+    n = (month + 8 + (day >= period[(month - 1) % 12])) % 12
     d = r.json()['horoscope'][today][n]
     for s in ['total', 'love', 'money', 'job']:
         d[s] = star(d[s])
