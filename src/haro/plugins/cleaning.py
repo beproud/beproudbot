@@ -32,8 +32,8 @@ CLEANING_TASKS = [
 ]
 
 # 掃除作業を表示用に整形した文字列
-FORMATTED_CLEANING_TASKS = ('掃除でやることリスト\n'
-                            ''.join(['- [] {}'.format(row) for row in CLEANING_TASKS]))
+FORMATTED_CLEANING_TASKS = ('掃除でやることリスト\n' +
+                            '\n'.join(['- [] {}'.format(row) for row in CLEANING_TASKS]))
 
 DAY_OF_WEEK = '月火水木金'
 
