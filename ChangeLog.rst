@@ -3,6 +3,7 @@ Unreleased
 
 Release Notes - 2017-11-27
 --------------------------
+- [#76] pool_sizeの上限に引っかかりエラー
 - [#90] $cleaning taskのコマンドの出力内容に不要な文言が混ざっている
 
 Release Notes - 2017-11-27
