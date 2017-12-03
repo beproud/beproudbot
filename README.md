@@ -206,3 +206,8 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 
 - `$uranai <誕生日(4桁)>`: 今日の占いを返す
 
+### lunch コマンド
+
+- `$lunch`: オフィス近辺のお店情報返す
+- `$lunch get <keyword>`: 指定したキーワードのお店情報を返す
+- `$lunch help`: このコマンドの使い方を返す

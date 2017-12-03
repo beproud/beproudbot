@@ -2,7 +2,9 @@ alembic==0.9.6
 cachetools==2.0.1
 certifi==2017.7.27.1
 chardet==3.0.4
+geopy==1.11.0
 idna==2.6
+kml2geojson==4.0.2
 Mako==1.0.7
 MarkupSafe==1.0
 prettytable==0.7.2
