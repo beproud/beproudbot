@@ -202,6 +202,9 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 - `$thx help`: thxコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
 
+### uranai コマンド
+
+- `$uranai <誕生日(4桁)>`: 今日の占いを返す
 
 ### yougo コマンド
 
