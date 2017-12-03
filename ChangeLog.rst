@@ -1,5 +1,6 @@
 Unreleased
 ----------
+- [#98] lunch plugin の実装
 
 Release Notes - 2017-11-27
 --------------------------
