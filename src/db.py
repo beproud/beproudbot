@@ -1,4 +1,4 @@
-from sqlalchemy import engine_from_config
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -27,7 +27,16 @@ def init_dbsession(config, prefix='sqlalchemy.'):
     :param str prefix: configのoption名から取り除く接頭辞
     :return: `~sqlalchemy.orm.session.Session` インスタンス
     """
-    engine = engine_from_config(config, prefix)
+    options = dict((key[len(prefix):], config[key])
+                   for key in config
+                   if key.startswith(prefix))
+    options['_coerce_config'] = True
+    url = options.pop('url')
+    try:
+        engine = create_engine(url, pool_size=20, **options)
+    except TypeError:
+        # SQLiteの場合pool_sizeは指定できないので暫定対応
+        engine = create_engine(url, **options)
     Session.configure(bind=engine)
     Base.metadata.bind = engine
     return Session
