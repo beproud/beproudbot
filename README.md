@@ -206,3 +206,9 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 
 - `$uranai <誕生日(4桁)>`: 今日の占いを返す
 
+### yougo コマンド
+
+- `$yougo load <RedmineProject名>`: Redmineプロジェクトに紐づく用語集を更新
+- `$yougo search <用語>`: 用語を検索する
+- `$ys <用語>`: 用語を検索する(ショートカットコマンド)
+- `$yougo help`: yougoコマンドの使い方を返す
