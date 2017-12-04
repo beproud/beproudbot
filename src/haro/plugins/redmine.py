@@ -1,8 +1,11 @@
+import json
+
 from redminelib import Redmine
 from redminelib.exceptions import ForbiddenError, ResourceNotFoundError
 
 from slackbot.bot import listen_to, respond_to
-from slackbot_settings import REDMINE_URL
+from slackbot_settings import REDMINE_URL, API_TOKEN
+from slackclient import SlackClient
 
 from db import Session
 from haro.slack import get_user_name
@@ -107,8 +110,33 @@ def show_ticket_information(message, ticket_id):
     proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
 
     if proj_room and channel_id in proj_room.channels.split(','):
-        # TODO: もっと綺麗に情報を表示する
-        message.send(TICKET_INFO.format(ticket.subject, ticket.url))
+        sc = SlackClient(API_TOKEN)
+        attachments = [{
+            "fallback": ticket.description,
+            "author_name": str(ticket.author),
+            "title": ticket.subject,
+            "title_link": ticket.url,
+            "text": ticket.description,
+            "fields": [
+                {
+                    "title": "担当者",
+                    "value": str(ticket.assigned_to),
+                    "short": True,
+                },
+                {
+                    "title": "ステータス",
+                    "value": str(ticket.status),
+                    "short": True,
+                },
+                {
+                    "title": "優先",
+                    "value": str(ticket.priority),
+                    "short": True,
+                }
+            ],
+        }]
+
+        sc.api_call("chat.postMessage", channel=channel_id, as_user=True, attachments=json.dumps(attachments))
     else:
         message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
@@ -151,7 +179,6 @@ def register_room(message, project_identifier):
     user = user_from_message(message, s)
     if not user:
         return
-
     project, project_channel = project_channel_from_identifier(user.api_key, project_identifier, s)
     if not project:
         message.send(PROJECT_NOT_FOUND)

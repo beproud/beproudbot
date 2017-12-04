@@ -1,7 +1,7 @@
 -c constraints.txt
 
 slackbot
-
+slackclient
 SQLAlchemy
 alembic
 
