@@ -9,3 +9,6 @@ pymysql
 requests
 prettytable
 cachetools
+
+geopy
+kml2geojson
