@@ -136,7 +136,8 @@ def show_ticket_information(message, ticket_id):
             ],
         }]
 
-        sc.api_call("chat.postMessage", channel=channel_id, as_user=True, attachments=json.dumps(attachments))
+        sc.api_call("chat.postMessage", channel=channel_id, as_user=True,
+                    attachments=json.dumps(attachments))
     else:
         message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
