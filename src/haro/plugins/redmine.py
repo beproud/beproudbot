@@ -18,9 +18,15 @@ API_KEY_RESET = 'APIキーを削除しました。'
 INVALID_API_KEY = 'APIキーは無効です。'
 CHANNEL_REGISTERED = 'Redmineの{}プロジェクトをチャンネルに追加しました。'
 CHANNEL_UNREGISTERED = 'Redmineの{}プロジェクトをチャンネルから削除しました。'
-PROJECT_NOT_FOUND = 'プロジェクトは見つけませんでした。'
+CHANNEL_ALREADY_REGISTERED = 'このSlackチャンネルは既に登録されています。'
+CHANNEL_NOT_REGISTERED = 'このSlackチャンネルは{}プロジェクトに登録されていません。'
+PROJECT_NOT_FOUND = 'プロジェクトは見つかりませんでした。'
 
 HELP = """
+- `/msg @haro $redmine key xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`: 自分のRedmineのAPIキーを登録する
+- `$redmine add redmine-project-identifier`: コマンドを実行したSlackチャンネルとRedmineのプロジェクトを連携させます
+- `$redmine remove redmine-project-identifier`: コマンドを実行したSlackチャンネルとRedmineプロジェクトの連携を解除します
+
 文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
 
 例:
@@ -86,7 +92,6 @@ def show_ticket_information(message, ticket_id):
     user = user_from_message(message, s)
     if not user:
         return
-
     channels = s.query(ProjectChannel.id).filter(ProjectChannel.channels.contains(channel_id))
     if not s.query(channels.exists()).scalar():
         return
@@ -102,6 +107,7 @@ def show_ticket_information(message, ticket_id):
     proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
 
     if proj_room and channel_id in proj_room.channels.split(','):
+        # TODO: もっと綺麗に情報を表示する
         message.send(TICKET_INFO.format(ticket.subject, ticket.url))
     else:
         message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
@@ -125,35 +131,20 @@ def register_key(message, api_key):
 
     if not user:
         s.add(RedmineUser(user_id=user_id, api_key=api_key))
-        s.commit()
-        message.send(API_KEY_SET)
-        return
-
-    user.api_key = api_key
+    else:
+        user.api_key = api_key
     s.commit()
-
-
-@respond_to('^redmine\s+reset$')
-def remove_key(message):
-    s = Session()
-
-    user = user_from_message(message, s)
-    if not user:
-        return
-
-    user.api_key = ""
-    s.commit()
+    message.send(API_KEY_SET)
 
 
 @respond_to('^redmine\s+add\s+(\S+)$')
 def register_room(message, project_identifier):
-    """Redmineのプロジェクトはチャンネルと繋ぐ.
+    """RedmineのプロジェクトとSlackチャンネルを繋ぐ.
 
     :param message: slackbotの各種パラメータを保持したclass
     :param project_identifier: redmineのプロジェクトの識別名
     """
     s = Session()
-
     channel = message.channel
     channel_id = channel._body['id']
 
@@ -168,6 +159,7 @@ def register_room(message, project_identifier):
 
     if not project_channel:
         project_channel = ProjectChannel(project_id=project.id)
+        s.add(project_channel)
 
     channels = project_channel.channels.split(",") if project_channel.channels else []
 
@@ -176,6 +168,8 @@ def register_room(message, project_identifier):
         project_channel.channels = ",".join(channels)
         s.commit()
         message.send(CHANNEL_REGISTERED.format(project.name))
+    else:
+        message.send(CHANNEL_ALREADY_REGISTERED)
 
 
 @respond_to('^redmine\s+remove$')
@@ -204,4 +198,4 @@ def unregister_room(message, project_identifier):
         s.commit()
         message.send(CHANNEL_UNREGISTERED.format(project.name))
     except ValueError:
-        pass
+        message.send(CHANNEL_NOT_REGISTERED.format(project_identifier))
