@@ -26,9 +26,9 @@ CHANNEL_NOT_REGISTERED = 'このSlackチャンネルは{}プロジェクトに�
 PROJECT_NOT_FOUND = 'プロジェクトは見つかりませんでした。'
 
 HELP = """
-- `/msg @haro $redmine key xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`: 自分のRedmineのAPIキーを登録する
-- `$redmine add redmine-project-identifier`: コマンドを実行したSlackチャンネルとRedmineのプロジェクトを連携させます
-- `$redmine remove redmine-project-identifier`: コマンドを実行したSlackチャンネルとRedmineプロジェクトの連携を解除します
+- `/msg @haro $redmine key <your_api_key>`: 自分のRedmineのAPIキーを登録する
+- `$redmine add <redmine_project_identifier>`: コマンドを実行したSlackチャンネルとRedmineのプロジェクトを連携させます
+- `$redmine remove <redmine_project_identifier>`: コマンドを実行したSlackチャンネルとRedmineプロジェクトの連携を解除します
 
 文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
 
