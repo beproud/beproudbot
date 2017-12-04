@@ -69,7 +69,6 @@ def test_invalid_user_response(db, slack_message):
 
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine_project):
-
     with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
@@ -82,7 +81,6 @@ def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine
 
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_no_channel_permissions_response(db, slack_message, redmine_user, redmine_project):
-
     with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
@@ -99,35 +97,55 @@ def test_no_channel_permissions_response(db, slack_message, redmine_user, redmin
 
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_successful_response(db, slack_message, redmine_user, redmine_project):
-
     with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
-        with requests_mock.mock() as response:
-            ticket_id = "1234567"
+        with patch('haro.plugins.redmine.SlackClient') as slack_client:
+            sc = Mock()
+            api_call = Mock()
+            sc.api_call = api_call
+            slack_client.return_value = sc
 
-            url = urljoin(REDMINE_URL, "issues/%s" % ticket_id)
-            ticket = {
-                "issue":
-                    {
-                        "id": ticket_id,
-                        "project":
-                            {
-                                "id": redmine_project.project_id
-                            },
-                        "subject": "Test Subject",
-                    },
-            }
-            mock_url = url + ".json?key=%s" % redmine_user.api_key
-            response.get(mock_url, status_code=200, json=ticket)
+            with requests_mock.mock() as response:
+                ticket_id = "1234567"
 
-            show_ticket_information(slack_message, ticket_id)
-            assert slack_message.send.called is True
-            slack_message.send.assert_called_with(TICKET_INFO.format(ticket["issue"]["subject"],
-                                                                     url))
+                url = urljoin(REDMINE_URL, "issues/%s" % ticket_id)
+                ticket = {
+                    "issue":
+                        {
+                            "id": ticket_id,
+                            "project":
+                                {
+                                    "id": redmine_project.project_id
+                                },
+                            "author": {
+                                "name": "author",
+                                "id": 1
+                                },
+                            "subject": "Test Subject",
+                            "description": "Description",
+                            "assigned_to": {
+                                "name": "assigned to",
+                                "id": 1
+                                },
+                            "status": {
+                                "name": "status",
+                                "id": 1
+                                },
+                            "priority": {
+                                "name": "priority",
+                                "id": 1
+                                },
+                        },
+                }
+                mock_url = url + ".json?key=%s" % redmine_user.api_key
+                response.get(mock_url, status_code=200, json=ticket)
+
+                show_ticket_information(slack_message, ticket_id)
+
+                assert api_call.called is True
 
 
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_no_channels_no_response(db, no_channel_slack_message, redmine_user, redmine_project):
-
     with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
         with requests_mock.mock() as response:
             ticket_id = "1234567"
