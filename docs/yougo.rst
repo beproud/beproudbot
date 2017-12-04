@@ -35,6 +35,6 @@ Redmineの用語集ページの用語をSlackから呼び出し表示します
 設定方法
 -----------
 
-1. Redmineの用語集を導入したプロジェクトにRedmineのbot用ユーザーを追加
+1. Redmineの用語集を導入したプロジェクトにRedmineのharo用ユーザーを追加
 2. Redmineのプロジェクト設定画面のカスタムフィード項目「SlackChannel」に用語を呼び出したいチャンネル名を登録
 3. 用語を呼び出したいチャンネルで $yougo load <Redmine Identifie名> コマンドを打ち、用語集をDBに読み込む
