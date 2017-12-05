@@ -98,50 +98,51 @@ def test_no_channel_permissions_response(db, slack_message, redmine_user, redmin
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_successful_response(db, slack_message, redmine_user, redmine_project):
     with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
-        with patch('haro.plugins.redmine.Slacker') as slack_client:
-            sc, chat, post_message = Mock(), Mock(), Mock()
-            chat.post_message = post_message
-            sc.chat = chat
-            slack_client.return_value = sc
 
-            with requests_mock.mock() as response:
-                ticket_id = "1234567"
+        client, web_api, chat, post_message = Mock(), Mock(), Mock(), Mock()
+        chat.post_message = post_message
+        web_api.chat = chat
+        client.webapi = web_api
+        slack_message._client = client
 
-                url = urljoin(REDMINE_URL, "issues/%s" % ticket_id)
-                ticket = {
-                    "issue":
-                        {
-                            "id": ticket_id,
-                            "project":
-                                {
-                                    "id": redmine_project.project_id
-                                },
-                            "author": {
-                                "name": "author",
-                                "id": 1
-                                },
-                            "subject": "Test Subject",
-                            "description": "Description",
-                            "assigned_to": {
-                                "name": "assigned to",
-                                "id": 1
-                                },
-                            "status": {
-                                "name": "status",
-                                "id": 1
-                                },
-                            "priority": {
-                                "name": "priority",
-                                "id": 1
-                                },
-                        },
-                }
-                mock_url = url + ".json?key=%s" % redmine_user.api_key
-                response.get(mock_url, status_code=200, json=ticket)
+        with requests_mock.mock() as response:
+            ticket_id = "1234567"
 
-                show_ticket_information(slack_message, ticket_id)
+            url = urljoin(REDMINE_URL, "issues/%s" % ticket_id)
+            ticket = {
+                "issue":
+                    {
+                        "id": ticket_id,
+                        "project":
+                            {
+                                "id": redmine_project.project_id
+                            },
+                        "author": {
+                            "name": "author",
+                            "id": 1
+                            },
+                        "subject": "Test Subject",
+                        "description": "Description",
+                        "assigned_to": {
+                            "name": "assigned to",
+                            "id": 1
+                            },
+                        "status": {
+                            "name": "status",
+                            "id": 1
+                            },
+                        "priority": {
+                            "name": "priority",
+                            "id": 1
+                            },
+                    },
+            }
+            mock_url = url + ".json?key=%s" % redmine_user.api_key
+            response.get(mock_url, status_code=200, json=ticket)
 
-                assert post_message.called is True
+            show_ticket_information(slack_message, ticket_id)
+
+            assert post_message.called is True
 
 
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
