@@ -98,10 +98,10 @@ def test_no_channel_permissions_response(db, slack_message, redmine_user, redmin
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)
 def test_successful_response(db, slack_message, redmine_user, redmine_project):
     with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
-        with patch('haro.plugins.redmine.SlackClient') as slack_client:
-            sc = Mock()
-            api_call = Mock()
-            sc.api_call = api_call
+        with patch('haro.plugins.redmine.Slacker') as slack_client:
+            sc, chat, post_message = Mock(), Mock(), Mock()
+            chat.post_message = post_message
+            sc.chat = chat
             slack_client.return_value = sc
 
             with requests_mock.mock() as response:
@@ -141,7 +141,7 @@ def test_successful_response(db, slack_message, redmine_user, redmine_project):
 
                 show_ticket_information(slack_message, ticket_id)
 
-                assert api_call.called is True
+                assert post_message.called is True
 
 
 @patch('haro.plugins.redmine.get_user_name', lambda x: USER_NAME)

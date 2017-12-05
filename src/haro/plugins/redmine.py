@@ -5,7 +5,7 @@ from redminelib.exceptions import ForbiddenError, ResourceNotFoundError
 
 from slackbot.bot import listen_to, respond_to
 from slackbot_settings import REDMINE_URL, API_TOKEN
-from slackclient import SlackClient
+from slacker import Slacker
 
 from db import Session
 from haro.slack import get_user_name
@@ -110,7 +110,7 @@ def show_ticket_information(message, ticket_id):
     proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
 
     if proj_room and channel_id in proj_room.channels.split(','):
-        sc = SlackClient(API_TOKEN)
+        sc = Slacker(API_TOKEN)
         attachments = [{
             "fallback": ticket.description,
             "author_name": str(ticket.author),
@@ -136,8 +136,7 @@ def show_ticket_information(message, ticket_id):
             ],
         }]
 
-        sc.api_call("chat.postMessage", channel=channel_id, as_user=True,
-                    attachments=json.dumps(attachments))
+        sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
     else:
         message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
