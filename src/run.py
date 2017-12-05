@@ -5,7 +5,11 @@ from textwrap import dedent
 from slackbot.bot import Bot, default_reply
 
 from db import init_dbsession
-from slackbot_settings import SQLALCHEMY_URL, SQLALCHEMY_ECHO
+from slackbot_settings import (
+    SQLALCHEMY_URL,
+    SQLALCHEMY_ECHO,
+    SQLALCHEMY_POOL_SIZE,
+)
 
 
 def get_argparser():
@@ -50,7 +54,8 @@ def main():
     # 環境変数で指定したいため ini ファイルでなくここで追記
     conf["alembic"]['sqlalchemy.url'] = SQLALCHEMY_URL
     conf["alembic"]['sqlalchemy.echo'] = SQLALCHEMY_ECHO
-
+    if SQLALCHEMY_POOL_SIZE:
+        conf["alembic"]['sqlalchemy.pool_size'] = SQLALCHEMY_POOL_SIZE
     if not conf.has_section('alembic'):
         raise NoSectionError('alembic')
 

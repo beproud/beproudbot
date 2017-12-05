@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -23,20 +23,11 @@ from haro.plugins.redmine_models import RedmineUser, ProjectChannel  # noqa
 def init_dbsession(config, prefix='sqlalchemy.'):
     """configに設定した値でDBの設定情報を初期化
 
-    :param dict config: configから生成したdictの設定値
+    :param dict config: `alembic/conf.ini` から生成したdictの設定値
     :param str prefix: configのoption名から取り除く接頭辞
     :return: `~sqlalchemy.orm.session.Session` インスタンス
     """
-    options = dict((key[len(prefix):], config[key])
-                   for key in config
-                   if key.startswith(prefix))
-    options['_coerce_config'] = True
-    url = options.pop('url')
-    try:
-        engine = create_engine(url, pool_size=20, **options)
-    except TypeError:
-        # SQLiteの場合pool_sizeは指定できないので暫定対応
-        engine = create_engine(url, **options)
+    engine = engine_from_config(config, prefix)
     Session.configure(bind=engine)
     Base.metadata.bind = engine
     return Session
