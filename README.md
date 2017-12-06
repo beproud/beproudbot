@@ -221,3 +221,8 @@ http://localhost:9000/redmine/issues/12345
 ```
 
 - `$redmine help`: redmineのコマンドの使い方を返す
+
+### uranai コマンド
+
+- `$uranai <誕生日(4桁)>`: 今日の占いを返す
+

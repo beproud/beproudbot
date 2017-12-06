@@ -1,6 +1,15 @@
 Unreleased
 ----------
+- [#96] 「MySQL server has gone away」が発生する
 
+Release Notes - 2017-11-27
+--------------------------
+- [#76] pool_sizeの上限に引っかかりエラー
+- [#90] $cleaning taskのコマンドの出力内容に不要な文言が混ざっている
+
+Release Notes - 2017-11-27
+--------------------------
+- [#83] uranai実装
 
 Release Notes - 2017-11-21
 --------------------------

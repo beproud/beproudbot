@@ -23,7 +23,7 @@ from haro.plugins.redmine_models import RedmineUser, ProjectChannel  # noqa
 def init_dbsession(config, prefix='sqlalchemy.'):
     """configに設定した値でDBの設定情報を初期化
 
-    :param dict config: configから生成したdictの設定値
+    :param dict config: `alembic/conf.ini` から生成したdictの設定値
     :param str prefix: configのoption名から取り除く接頭辞
     :return: `~sqlalchemy.orm.session.Session` インスタンス
     """
