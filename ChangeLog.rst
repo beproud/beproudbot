@@ -1,5 +1,6 @@
 Unreleased
 ----------
+- [#96] 「MySQL server has gone away」が発生する
 
 Release Notes - 2017-11-27
 --------------------------
