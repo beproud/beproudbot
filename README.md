@@ -202,6 +202,26 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 - `$thx help`: thxコマンドの使い方を返す
 - ※各コマンドにてuser_name引数を省略した際には投稿者に対しての操作になります
 
+### redmine コマンド
+
+- `/msg @haro $redmine key <your_api_key>`: 自分のRedmineのAPIキーを登録する
+- `$redmine add <redmine_project_identifier>`: コマンドを実行したSlackチャンネルとRedmineのプロジェクトを連携させます
+- `$redmine remove <redmine_project_identifier>`: コマンドを実行したSlackチャンネルとRedmineプロジェクトの連携を解除します
+
+文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
+
+例:
+```
+james [9:00 PM]
+t12345はいつできるのかな？
+
+Haro [9:00 PM]
+SlackからRedmineのチケットを見れるようにしよう
+http://localhost:9000/redmine/issues/12345
+```
+
+- `$redmine help`: redmineのコマンドの使い方を返す
+
 ### uranai コマンド
 
 - `$uranai <誕生日(4桁)>`: 今日の占いを返す
