@@ -24,6 +24,7 @@ HELP = """
 def find_thx(s, text):
     """Slackに投稿されたメッセージからthxを見つけて返す
 
+    :param s: sqlalchemy.orm.session.Session
     :param str text: ユーザーが投稿した内容
     :return dict word_map_names_dict:
        キーがthx内容、バリューが対象Slackユーザーのリスト
