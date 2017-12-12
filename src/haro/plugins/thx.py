@@ -35,7 +35,7 @@ def find_thx(s, text):
     hint_names = []
     not_matched = []
 
-    thx_matcher = re.compile('(?P<user_names>.*)\s*\+\+\s+(?P<word>.+)',
+    thx_matcher = re.compile('(?P<user_names>.+)[ \t\f\v]*\+\+[ \t\f\v]+(?P<word>.+)',
                              re.MULTILINE)
     for thx in thx_matcher.finditer(text):
         user_names = [x for x in thx.group('user_names').split(' ') if x]
