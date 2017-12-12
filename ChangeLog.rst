@@ -1,5 +1,9 @@
-Unreleased
-----------
+Release Notes - 2017-12-12
+--------------------------
+- [#100] 一コメント内の複数行プラプラを処理
+
+Release Notes - 2017-12-06
+--------------------------
 - [#96] 「MySQL server has gone away」が発生する
 
 Release Notes - 2017-11-27

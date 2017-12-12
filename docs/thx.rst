@@ -17,18 +17,15 @@ Slackに登録されているユーザーに++を行うプラグインです
       @user_name++ hoge
       user_name user_name ++ hoge
 
+      # 一回の投稿で改行して++を記載する場合
+      user_name1++ hoge1
+      user_name2++ hoge2
+
    NG:
       user_name+ + hoge
       user_name+++ hoge
       user_name++hoge
       user_name,user_name ++ hoge
-
-
-制限
-
-
-- 複数ユーザーに++する場合は一行に半角空白文字区切りで複数ユーザー名記載してください
-- 改行して++の内容を記載した場合、一番最初の++しか反応しません
 
 
 出力

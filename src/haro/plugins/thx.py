@@ -1,3 +1,4 @@
+import re
 import csv
 from difflib import get_close_matches
 from io import StringIO
@@ -20,8 +21,48 @@ HELP = """
 """
 
 
-@listen_to('(.*)\s*\+\+\s+(.+)')
-def update_thx(message, user_names, word):
+def find_thx(s, text):
+    """Slackに投稿されたメッセージからthxを見つけて返す
+
+    :param s: sqlalchemy.orm.session.Session
+    :param str text: ユーザーが投稿した内容
+    :return dict word_map_names_dict:
+       キーがthx内容、バリューが対象Slackユーザーのリスト
+    :return list hint_names: Slackユーザーに似た名前が存在する名前一覧
+    :return list not_matched: Slackユーザーとして存在しなかった名前の一覧
+    """
+    word_map_names_dict = {}
+    hint_names = []
+    not_matched = []
+
+    thx_matcher = re.compile('(?P<user_names>.*)\s*\+\+\s+(?P<word>.+)',
+                             re.MULTILINE)
+    for thx in thx_matcher.finditer(text):
+        user_names = [x for x in thx.group('user_names').split(' ') if x]
+        for name in user_names:
+            if get_user_name(name.lstrip('<@').rstrip('>')):
+                slack_id = name.lstrip('<@').rstrip('>')
+            else:
+                slack_id = get_slack_id(s, name)
+
+            if slack_id:
+                word_map_names_dict.setdefault(
+                    thx.group('word'), []
+                ).append((slack_id, name))
+            else:
+                # 一番近いユーザー名を算出
+                hint = get_close_matches(name, get_users_info().values())
+                if hint:
+                    hint_names.append(hint[0])
+                # 紐づくユーザーが存在しなかった場合
+                else:
+                    not_matched.append(name)
+
+    return word_map_names_dict, hint_names, not_matched
+
+
+@listen_to('.*\s*\+\+\s+.+')
+def update_thx(message):
     """指定したSlackのユーザーにGJを行う
 
     OK:
@@ -43,68 +84,37 @@ def update_thx(message, user_names, word):
     """
     from_user_id = message.body['user']
     channel_id = message.body['channel']
+    text = message.body['text']
 
     s = Session()
-    user_dict = check_user_name(s, user_names)
+    user_dict, hint_names, not_matched = find_thx(s, text)
 
     msg = []
-    if user_dict.get('matched'):
-        for slack_id, user_name in user_dict['matched']:
-            s.add(ThxHistory(
-                user_id=slack_id,
-                from_user_id=from_user_id,
-                word=word,
-                channel_id=channel_id))
-            s.commit()
+    if user_dict:
+        for word, users in user_dict.items():
+            for slack_id, name in users:
+                s.add(ThxHistory(
+                    user_id=slack_id,
+                    from_user_id=from_user_id,
+                    word=word,
+                    channel_id=channel_id))
+                s.commit()
 
-            count = (s.query(ThxHistory)
-                     .filter(ThxHistory.channel_id == channel_id)
-                     .filter(ThxHistory.user_id == slack_id)
-                     .count())
-            msg.append('{}({}: {}GJ)'.format(word, user_name, count))
+                count = (s.query(ThxHistory)
+                         .filter(ThxHistory.channel_id == channel_id)
+                         .filter(ThxHistory.user_id == slack_id)
+                         .count())
+                msg.append('{}({}: {}GJ)'.format(word, name, count))
 
-    if user_dict.get('hint_name'):
-        for hint_name in user_dict['hint_name']:
+    if hint_names:
+        for hint_name in hint_names:
             msg.append('もしかして: `{}`'.format(hint_name))
 
-    if user_dict.get('not_matched'):
-        for name in user_dict['not_matched']:
+    if not_matched:
+        for name in not_matched:
             msg.append('{}はSlackのユーザーとして存在しません'.format(name))
 
     message.send('\n'.join(msg))
-
-
-def check_user_name(session, user_names):
-    """Slackユーザー情報と照ら合わせ結果を辞書で返す
-
-    :param list user_names: Slackで＋＋対象のSlackユーザー名
-    :return dict user_dict:
-       keyが `matched`: Slackユーザーに紐付いた名前
-       keyが `hint_name`: 紐付かなかったが、似た名前が存在する名前
-       keyが `not_matched`: Slackユーザーに紐付かなかった名前
-    """
-    user_dict = {}
-    for name in [x for x in user_names.split(' ') if x]:
-
-        # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
-        # `<@{slack_id}>` というstr型で渡ってくるので対応
-        if get_user_name(name.lstrip('<@').rstrip('>')):
-            slack_id = name.lstrip('<@').rstrip('>')
-        else:
-            slack_id = get_slack_id(session, name)
-
-        if slack_id:
-            # slack_idに紐づくユーザーが存在
-            user_dict.setdefault('matched', []).append((slack_id, name))
-        else:
-            # 一番近いユーザー名を算出
-            hint = get_close_matches(name, get_users_info().values())
-            if hint:
-                user_dict.setdefault('hint_name', []).append(hint[0])
-            # 紐づくユーザーが存在しなかった場合
-            else:
-                user_dict.setdefault('not_matched', []).append(name)
-    return user_dict
 
 
 @respond_to('^thx\s+from$')
