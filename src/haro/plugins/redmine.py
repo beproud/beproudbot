@@ -91,7 +91,7 @@ def show_ticket_information(message, *ticket_ids):
     channel = message.channel
     channel_id = channel._body['id']
     user = user_from_message(message, s)
-    if not user:
+    if not user or not user.api_key:
         return
     channels = s.query(ProjectChannel.id).filter(ProjectChannel.channels.contains(channel_id))
     if not s.query(channels.exists()).scalar():
@@ -108,7 +108,8 @@ def show_ticket_information(message, *ticket_ids):
             return
 
         proj_id = ticket.project.id
-        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
+        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id)\
+            .one_or_none()
 
         if proj_room and channel_id in proj_room.channels.split(','):
             sc = message._client.webapi
