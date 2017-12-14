@@ -85,7 +85,7 @@ def show_ticket_information(message, *ticket_ids):
     channel = message.channel
     channel_id = channel._body['id']
     user = user_from_message(message, s)
-    if not user or not user.api_key:
+    if not user:
         return
     channels = s.query(ProjectChannel.id).filter(ProjectChannel.channels.contains(channel_id))
     if not s.query(channels.exists()).scalar():
