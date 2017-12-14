@@ -7,10 +7,8 @@ from slackbot.bot import listen_to, respond_to
 from slackbot_settings import REDMINE_URL
 
 from db import Session
-from haro.slack import get_user_name
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
-USER_NOT_FOUND = '{}はRedmineUserテーブルに登録されていません。'
 TICKET_INFO = '{}\n{}'
 RESPONSE_ERROR = 'Redmineにアクセスできませんでした。'
 NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
@@ -65,10 +63,6 @@ def user_from_message(message, session):
     user_id = message.body['user']
 
     user = session.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
-    if not user:
-        user_name = get_user_name(user_id)
-        message.send(USER_NOT_FOUND.format(user_name))
-        return
     return user
 
 
