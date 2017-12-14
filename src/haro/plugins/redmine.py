@@ -7,10 +7,8 @@ from slackbot.bot import listen_to, respond_to
 from slackbot_settings import REDMINE_URL
 
 from db import Session
-from haro.slack import get_user_name
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
-USER_NOT_FOUND = '{}はRedmineUserテーブルに登録されていません。'
 TICKET_INFO = '{}\n{}'
 RESPONSE_ERROR = 'Redmineにアクセスできませんでした。'
 NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
@@ -65,10 +63,6 @@ def user_from_message(message, session):
     user_id = message.body['user']
 
     user = session.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
-    if not user:
-        user_name = get_user_name(user_id)
-        message.send(USER_NOT_FOUND.format(user_name))
-        return
     return user
 
 
@@ -79,8 +73,8 @@ def show_help_redmine_commands(message):
     message.send(HELP)
 
 
-@listen_to('[t](\d{2,})')
-def show_ticket_information(message, ticket_id):
+@listen_to('issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
+def show_ticket_information(message, *ticket_ids):
     """Redmineのチケット情報を参照する.
 
     :param message: slackbotの各種パラメータを保持したclass
@@ -90,7 +84,6 @@ def show_ticket_information(message, ticket_id):
 
     channel = message.channel
     channel_id = channel._body['id']
-
     user = user_from_message(message, s)
     if not user:
         return
@@ -99,45 +92,49 @@ def show_ticket_information(message, ticket_id):
         return
 
     redmine = Redmine(REDMINE_URL, key=user.api_key)
-    try:
-        ticket = redmine.issue.get(ticket_id)
-    except (ResourceNotFoundError, ForbiddenError):
-        message.send(RESPONSE_ERROR)
-        return
+    for ticket_id in ticket_ids:
+        if not ticket_id:
+            continue
+        try:
+            ticket = redmine.issue.get(ticket_id)
+        except (ResourceNotFoundError, ForbiddenError):
+            message.send(RESPONSE_ERROR)
+            return
 
-    proj_id = ticket.project.id
-    proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
+        proj_id = ticket.project.id
+        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id)\
+            .one_or_none()
 
-    if proj_room and channel_id in proj_room.channels.split(','):
-        sc = message._client.webapi
-        attachments = [{
-            "fallback": ticket.description,
-            "author_name": str(ticket.author),
-            "title": ticket.subject,
-            "title_link": ticket.url,
-            "text": ticket.description,
-            "fields": [
-                {
-                    "title": "担当者",
-                    "value": str(ticket.assigned_to),
-                    "short": True,
-                },
-                {
-                    "title": "ステータス",
-                    "value": str(ticket.status),
-                    "short": True,
-                },
-                {
-                    "title": "優先",
-                    "value": str(ticket.priority),
-                    "short": True,
-                }
-            ],
-        }]
+        if proj_room and channel_id in proj_room.channels.split(','):
+            sc = message._client.webapi
+            attachments = [{
+                "fallback": ticket.description,
+                "author_name": str(ticket.author),
+                "title": ticket.subject,
+                "title_link": ticket.url,
+                "text": ticket.description,
+                "fields": [
+                    {
+                        "title": "担当者",
+                        "value": str(ticket.assigned_to),
+                        "short": True,
+                    },
+                    {
+                        "title": "ステータス",
+                        "value": str(ticket.status),
+                        "short": True,
+                    },
+                    {
+                        "title": "優先",
+                        "value": str(ticket.priority),
+                        "short": True,
+                    }
+                ],
+            }]
 
-        sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
-    else:
-        message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
+            sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
+        else:
+            message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
 
 @respond_to('^redmine\s+key\s+(\S+)$')
@@ -198,7 +195,7 @@ def register_room(message, project_identifier):
         message.send(CHANNEL_ALREADY_REGISTERED)
 
 
-@respond_to('^redmine\s+remove$')
+@respond_to('^redmine\s+remove\s+(\S+)$')
 def unregister_room(message, project_identifier):
     s = Session()
 
