@@ -113,8 +113,7 @@ def show_ticket_information(message, *ticket_ids):
                 "title": ticket.subject,
                 "title_link": ticket.url,
                 "text": ticket.description,
-                "fields": []
-                ,
+                "fields": [],
             }]
 
             fields = (("担当者", 'assigned_to'),
