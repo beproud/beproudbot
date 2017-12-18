@@ -113,24 +113,21 @@ def show_ticket_information(message, *ticket_ids):
                 "title": ticket.subject,
                 "title_link": ticket.url,
                 "text": ticket.description,
-                "fields": [
-                    {
-                        "title": "担当者",
-                        "value": str(ticket.assigned_to),
-                        "short": True,
-                    },
-                    {
-                        "title": "ステータス",
-                        "value": str(ticket.status),
-                        "short": True,
-                    },
-                    {
-                        "title": "優先",
-                        "value": str(ticket.priority),
-                        "short": True,
-                    }
-                ],
+                "fields": [],
             }]
+
+            fields = (("担当者", 'assigned_to'),
+                      ("ステータス", "status"),
+                      ("優先", "priority"), )
+
+            for title, attr in fields:
+                value = getattr(ticket, attr, False)
+                if value:
+                    attachments[0]["fields"].append({
+                        "title": title,
+                        "value": str(value),
+                        "short": True,
+                    })
 
             sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
         else:
