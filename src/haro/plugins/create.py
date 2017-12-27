@@ -126,6 +126,10 @@ class ReturnTermCommandValidator(BaseCommandValidator):
         if command_name == "random":
             return
 
+        # lunchは一文字コマンドなのでチェックから除外する
+        if command_name == "lunch":
+            return
+
         if command_name not in command_patterns(self.callargs['message']):
             if not self.has_command(command_name):
                 raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))

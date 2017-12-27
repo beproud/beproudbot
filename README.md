@@ -209,5 +209,6 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 ### lunch コマンド
 
 - `$lunch`: オフィス近辺のお店情報返す
-- `$lunch get <keyword>`: 指定したキーワードのお店情報を返す
+- `$lunch <keyword>`: 指定したキーワードのお店情報を返す
+- `$lunch <keyword> <distance>`: 指定したキーワードと検索距離のお店情報を返す
 - `$lunch help`: このコマンドの使い方を返す

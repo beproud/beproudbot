@@ -12,7 +12,8 @@ BP_COORDINATES = (35.68641, 139.70343)
 
 HELP = '''
 - `$lunch`: オフィス近辺のお店情報返す
-- `$lunch get <keyword>`: 指定したキーワードのお店情報を返す
+- `$lunch <keyword>`: 指定したキーワードのお店情報を返す
+- `$lunch <keyword> <distance>`: 指定したキーワードと検索距離のお店情報を返す
 - `$lunch help`: このコマンドの使い方を返す
 '''
 
@@ -25,6 +26,8 @@ def parse_kml_to_json(url):
     :return: jsonデータ（店舗情報）
     """
     r = requests.get(url)
+    r.raise_for_status()
+
     kml_str = md.parseString(r.content)
     layers = k2g.build_layers(kml_str)
     places = layers[0]['features']
@@ -47,18 +50,22 @@ def get_distance_from_office(destination):
     return int(distance)
 
 
-def lunch(keyword):
+def lunch(keyword, distance=500):
     """
     BPランチマップより店舗情報を取得し、オフィス近くの候補１件の情報を返す。
     :keywordの指定がある場合は、店舗情報にキーワードを含むお店からランダムに1件の情報を返す。
     候補がない場合、メッセージを返す。
 
     :param keyword: 検索用のキーワード(ex.: `ラーメン`)
+    :param distance: 検索範囲の指定（ex.: 300）、メートル
     :return: 検索結果の文字列
     """
-    walking_distance = 500  # TODO: 指定できるようにすると良いかもしれない。
+    walking_distance = distance  # TODO: 指定できるようにすると良いかもしれない。
 
-    places = parse_kml_to_json(KML_SOURCE)
+    try:
+        places = parse_kml_to_json(KML_SOURCE)
+    except requests.exceptions.HTTPError as e:
+        return '''ランチの検索をしたが、次の問題が発生してしまいました。ごめんなさい:cry:\n```{}```'''.format(e)
 
     # 検索キーワード指定があれば、該当する店舗だけの候補列を作る
     if keyword:
@@ -85,9 +92,12 @@ def lunch(keyword):
         elif get_distance_from_office(place) > walking_distance:
             places.remove(place)
         else:
-            msg = '''\n今日のランチはココ！{}\n{}\n{}{},{}\nオフィスから{}m
-            '''.format(place['properties']['name'], place['properties']['description'], MAPS_URL_BASE,
-                       place['geometry']['coordinates'][1], place['geometry']['coordinates'][0],
+            msg = '''\n今日のランチはココ！\n>>>*{}*\n{}\n`{}{},{}`\n_オフィスから{}m_
+            '''.format(place['properties']['name'],
+                       place['properties']['description'],
+                       MAPS_URL_BASE,
+                       place['geometry']['coordinates'][1],
+                       place['geometry']['coordinates'][0],
                        get_distance_from_office(place))
             msg = re.sub(r'<[^<]+?>', '\n', msg)
             return msg
@@ -96,14 +106,21 @@ def lunch(keyword):
 
 
 @respond_to('^lunch$')
-@respond_to('^lunch\s+get\s+(\S+)$')
-def show_lunch(message, keyword=None):
+@respond_to('^lunch\s+(\S+)$')
+@respond_to('^lunch\s+(\S+)\s+(\d+)$')
+def show_lunch(message, keyword=None, distance=500):
     """Lunchコマンドの結果を表示する
 
     :param message: slackbot.dispatcher.Message
     :param keyword: 検索キーワード
+    :param distance: 検索範囲 (default 500m)
     """
-    message.send(lunch(keyword))
+    if keyword is 'help':
+        return
+
+    distance = int(distance)
+
+    message.send(lunch(keyword, distance))
 
 
 @respond_to('^lunch\s+help$')
