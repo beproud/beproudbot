@@ -115,7 +115,7 @@ def show_lunch(message, keyword=None, distance=500):
     :param keyword: 検索キーワード
     :param distance: 検索範囲 (default 500m)
     """
-    if keyword is 'help':
+    if keyword == 'help':
         return
 
     distance = int(distance)
