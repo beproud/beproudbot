@@ -9,3 +9,6 @@ requests
 prettytable
 cachetools
 python-redmine
+
+geopy
+kml2geojson
