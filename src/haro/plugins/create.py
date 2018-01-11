@@ -118,12 +118,15 @@ class RunCommandValidator(BaseCommandValidator):
 
 
 class ReturnTermCommandValidator(BaseCommandValidator):
+    EXCEPT_1WORD_COMMANDS = ['random', 'lunch']
 
     def clean_command_name(self, command_name):
         """コマンド名に対してValidationを適用する
         """
-        # randomは一文字コマンドなのでチェックから除外する
-        if command_name == "random":
+
+        # 一文字コマンドをチェックから除外する
+        # haroに登録されているコマンドを自動的に除外できるとよさそう
+        if command_name in self.EXCEPT_1WORD_COMMANDS:
             return
 
         if command_name not in command_patterns(self.callargs['message']):

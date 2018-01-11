@@ -226,3 +226,9 @@ http://localhost:9000/redmine/issues/12345
 
 - `$uranai <誕生日(4桁)>`: 今日の占いを返す
 
+### lunch コマンド
+
+- `$lunch`: オフィス近辺のお店情報返す
+- `$lunch <keyword>`: 指定したキーワードのお店情報を返す
+- `$lunch <keyword> <distance>`: 指定したキーワードと検索距離のお店情報を返す
+- `$lunch help`: このコマンドの使い方を返す
