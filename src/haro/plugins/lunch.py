@@ -51,7 +51,7 @@ def get_distance_from_office(destination):
     return int(distance)
 
 
-def lunch(keyword, distance=500):
+def lunch(keyword, distance=500):  # NOQA: ignore=C901
     """
     BPランチマップより店舗情報を取得し、オフィス近くの候補１件の情報を返す。
     :keywordの指定がある場合は、店舗情報にキーワードを含むお店からランダムに1件の情報を返す。
