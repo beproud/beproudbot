@@ -61,7 +61,7 @@ def lunch(keyword, distance=500):
     :param distance: 検索範囲の指定（ex.: 300）、メートル
     :return: 検索結果の文字列
     """
-    walking_distance = distance  # TODO: 指定できるようにすると良いかもしれない。
+    walking_distance = distance
 
     try:
         places = parse_kml_to_json(KML_SOURCE)
