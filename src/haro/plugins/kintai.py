@@ -1,5 +1,6 @@
 import csv
 import datetime
+import random
 from calendar import monthrange
 from collections import defaultdict, OrderedDict
 from io import StringIO
@@ -24,6 +25,22 @@ HELP = """
 DAY_OF_WEEK = '月火水木金土日'
 
 
+@listen_to('おはよう|お早う|出社しました')
+def replay_good_morning(message):
+    """「おはようごさいます」を返す
+    """
+    message.reply('おはようごさいます')
+
+
+@listen_to('帰ります|かえります|退社します')
+def replay_you_did_good_today(message):
+    """「お疲れ様でした」を返す
+    """
+    messages = ['お疲れ様でした'] * 99
+    messages.append('うぇーい、おつかれちゃーん！')
+    message.reply(random.choice(messages))
+
+
 @listen_to('^kintai\s+start$')
 def register_workon_time(message):
     """出社時刻を記録して挨拶を返すコマンド
@@ -32,7 +49,7 @@ def register_workon_time(message):
     """
     user_id = message.body['user']
     register_worktime(user_id)
-    message.reply('おはようございます、出社時刻を記録しました')
+    message.reply('出社時刻を記録しました')
 
 
 @listen_to('^kintai\s+end$')
@@ -43,7 +60,7 @@ def register_workoff_time(message):
     """
     user_id = message.body['user']
     register_worktime(user_id, is_workon=False)
-    message.reply('お疲れ様でした、退社時刻を記録しました')
+    message.reply('退社時刻を記録しました')
 
 
 def register_worktime(user_id, is_workon=True):

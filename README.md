@@ -150,10 +150,10 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 
 ### kintai コマンド
 
+- `$kintai start: 出社時刻を記録します
+- `$kintai end: 退社時刻を記録します
 - `$kintai show`: 自分の勤怠一覧を直近40日分表示する
 - `$kintai csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
-- `おはよう`・`お早う`・`出社しました`: 出社時刻を記録します
-- `帰ります`・`かえります`・`退社します`: 退社時刻を記録します
 - `$kintai help`: 勤怠コマンドの使い方を返す
 
 ### alias コマンド
