@@ -17,8 +17,8 @@ from haro.slack import get_user_name
 HELP = """
 - `$kintai show`: 自分の勤怠一覧を直近40日分表示する
 - `$kintai csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
-- `$kintai start: 出社時刻を記録します
-- `$kintai end: 退社時刻を記録します
+- `$kintai start`: 出社時刻を記録します
+- `$kintai end`: 退社時刻を記録します
 - `$kintai help`: 勤怠コマンドの使い方を返す
 """
 
@@ -41,7 +41,7 @@ def replay_you_did_good_today(message):
     message.reply(random.choice(messages))
 
 
-@listen_to('^kintai\s+start$')
+@respond_to('^kintai\s+start$')
 def register_workon_time(message):
     """出社時刻を記録して挨拶を返すコマンド
 
@@ -52,7 +52,7 @@ def register_workon_time(message):
     message.reply('出社時刻を記録しました')
 
 
-@listen_to('^kintai\s+end$')
+@respond_to('^kintai\s+end$')
 def register_workoff_time(message):
     """退社時刻を記録して挨拶を返すコマンド
 
