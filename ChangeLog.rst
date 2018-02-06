@@ -1,6 +1,10 @@
 Unreleased
 ----------
 
+Release Notes - 2018-02-06
+--------------------------
+- [#104] SQLAlchemyのbetaバージョンを変更
+
 Release Notes - 2018-01-11
 --------------------------
 - [#98] lunch plugin の実装
