@@ -3,6 +3,7 @@ Unreleased
 
 Release Notes - 2018-02-06
 --------------------------
+- [#112] kintaiコマンドの勤怠記録のトリガーをわかりやすくする
 - [#104] SQLAlchemyのbetaバージョンを変更
 
 Release Notes - 2018-01-11

@@ -1,5 +1,6 @@
 import csv
 import datetime
+import random
 from calendar import monthrange
 from collections import defaultdict, OrderedDict
 from io import StringIO
@@ -16,8 +17,8 @@ from haro.slack import get_user_name
 HELP = """
 - `$kintai show`: 自分の勤怠一覧を直近40日分表示する
 - `$kintai csv <year>/<month>`: monthに指定した月の勤怠記録をCSV形式で返す(defaultは当年月)
-- `おはよう` ・ `お早う` ・ `出社しました`: 出社時刻を記録します
-- `帰ります` ・ `かえります` ・ `退社します`: 退社時刻を記録します
+- `$kintai start`: 出社時刻を記録します
+- `$kintai end`: 退社時刻を記録します
 - `$kintai help`: 勤怠コマンドの使い方を返す
 """
 
@@ -25,6 +26,22 @@ DAY_OF_WEEK = '月火水木金土日'
 
 
 @listen_to('おはよう|お早う|出社しました')
+def replay_good_morning(message):
+    """「おはようごさいます」を返す
+    """
+    message.reply('おはようごさいます')
+
+
+@listen_to('帰ります|かえります|退社します')
+def replay_you_did_good_today(message):
+    """「お疲れ様でした」を返す
+    """
+    messages = ['お疲れ様でした'] * 99
+    messages.append('うぇーい、おつかれちゃーん！')
+    message.reply(random.choice(messages))
+
+
+@respond_to('^kintai\s+start$')
 def register_workon_time(message):
     """出社時刻を記録して挨拶を返すコマンド
 
@@ -32,10 +49,10 @@ def register_workon_time(message):
     """
     user_id = message.body['user']
     register_worktime(user_id)
-    message.reply('おはようございます')
+    message.reply('出社時刻を記録しました')
 
 
-@listen_to('帰ります|かえります|退社します')
+@respond_to('^kintai\s+end$')
 def register_workoff_time(message):
     """退社時刻を記録して挨拶を返すコマンド
 
@@ -43,7 +60,7 @@ def register_workoff_time(message):
     """
     user_id = message.body['user']
     register_worktime(user_id, is_workon=False)
-    message.reply('お疲れ様でした')
+    message.reply('退社時刻を記録しました')
 
 
 def register_worktime(user_id, is_workon=True):
