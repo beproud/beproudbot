@@ -26,6 +26,8 @@ HELP = """
 - `/msg @haro $redmine key <your_api_key>`: 自分のRedmineのAPIキーを登録する
 - `$redmine add <redmine_project_identifier>`: コマンドを実行したSlackチャンネルとRedmineのプロジェクトを連携させます
 - `$redmine remove <redmine_project_identifier>`: コマンドを実行したSlackチャンネルとRedmineプロジェクトの連携を解除します
+- ※<your_api_key> はRedmineの `[個人設定] -> [APIアクセスキー] -> [表示]` から取得します
+- ※<redmine_project_identifier> はRedmineのプロジェクトを開き、 `[設定] -> [情報] -> [識別子]` から取得します
 
 文章の中にチケット番号(tXXXX)が含まれている場合、チケットのタイトル名とチケットのリンクを表示します。
 
