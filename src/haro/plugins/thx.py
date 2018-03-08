@@ -152,7 +152,7 @@ def show_thx_from(message, user_name=None):
     }
     requests.post(settings.FILE_UPLOAD_URL,
                   params=param,
-                  files={'file': output.getvalue()})
+                  files={'file': ("%s_thx.csv" % user_name, output.getvalue(), 'text/csv', )})
 
 
 @respond_to('^thx\s+to$')
@@ -189,7 +189,7 @@ def show_thx_to(message, user_name=None):
     }
     requests.post(settings.FILE_UPLOAD_URL,
                   params=param,
-                  files={'file': output.getvalue()})
+                  files={'file': ("%s_thx.csv" % user_name, output.getvalue(), 'text/csv',)})
 
 
 @respond_to('^thx\s+help$')
