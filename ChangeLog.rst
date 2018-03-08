@@ -1,5 +1,8 @@
 Unreleased
 ----------
+Release Notes - 2018-0-08
+--------------------------
+- [#122] $thx from hogeと$thx to hogeコマンドで添付するファイルをCSVファイルとす
 
 Release Notes - 2018-02-28
 --------------------------
