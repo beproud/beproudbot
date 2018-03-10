@@ -2,6 +2,8 @@ import random
 
 from slackbot.bot import respond_to
 
+from haro.botmessage import botsend
+
 
 @respond_to('^shuffle\s+(.*)')
 def shuffle(message, words):
@@ -9,10 +11,10 @@ def shuffle(message, words):
     """
     words = words.split()
     if len(words) == 1:
-        message.send('キーワードを複数指定してください\n`$shuffle word1 word2...`')
+        botsend(message, 'キーワードを複数指定してください\n`$shuffle word1 word2...`')
     else:
         random.shuffle(words)
-        message.send(' '.join(words))
+        botsend(message, ' '.join(words))
 
 
 @respond_to('^choice\s+(.*)')
@@ -21,6 +23,6 @@ def choice(message, words):
     """
     words = words.split()
     if len(words) == 1:
-        message.send('キーワードを複数指定してください\n`$choice word1 word2...`')
+        botsend(message, 'キーワードを複数指定してください\n`$choice word1 word2...`')
     else:
-        message.send(random.choice(words))
+        botsend(message, random.choice(words))

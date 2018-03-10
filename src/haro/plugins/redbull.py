@@ -10,6 +10,7 @@ from slackbot.bot import respond_to
 from sqlalchemy import func
 
 from db import Session
+from haro.botmessage import botsend
 from haro.plugins.redbull_models import RedbullHistory
 from haro.slack import get_user_name
 
@@ -36,7 +37,7 @@ def count_redbull_stock(message):
     stock_number = q.one().stock_number
     if stock_number is None:
         stock_number = 0
-    message.send('レッドブル残り {} 本'.format(stock_number))
+    botsend(message, 'レッドブル残り {} 本'.format(stock_number))
 
 
 @respond_to('^redbull\s+(-?\d+)$')
@@ -57,11 +58,9 @@ def manage_redbull_stock(message, delta):
     s.commit()
 
     if delta > 0:
-        message.send('レッドブルが{}により{}本投入されました'
-                     .format(user_name, delta))
+        botsend(message, 'レッドブルが{}により{}本投入されました'.format(user_name, delta))
     else:
-        message.send('レッドブルが{}により{}本消費されました'
-                     .format(user_name, -delta))
+        botsend(message, 'レッドブルが{}により{}本消費されました'.format(user_name, -delta))
 
 
 @respond_to('^redbull\s+history$')
@@ -85,7 +84,7 @@ def show_user_redbull_history(message):
     if tmp:
         ret = '\n'.join(tmp)
 
-    message.send('{}の消費したレッドブル:\n{}'.format(user_name, ret))
+    botsend(message, '{}の消費したレッドブル:\n{}'.format(user_name, ret))
 
 
 @respond_to('^redbull\s+csv$')
@@ -137,9 +136,13 @@ def clear_redbull_history(message, token=None):
     """
     if token is None:
         _cache['token'] = ''.join(choice(ascii_letters) for i in range(16))
-        message.send('履歴をDBからすべてクリアします。'
-                     '続けるには\n`$redbull clear {}`\nと書いてください'
-                     .format(_cache['token']))
+        botsend(message, '履歴をDBからすべてクリアします。'
+                '続けるには\n`$redbull clear {}`\nと書いてください'
+                .format(_cache['token']))
+        botsend(message,
+                '履歴をDBからすべてクリアします。'
+                '続けるには\n`$redbull clear {}`\nと書いてください'
+                .format(_cache['token']))
         return
 
     if token == _cache['token']:
@@ -147,10 +150,9 @@ def clear_redbull_history(message, token=None):
         s = Session()
         s.query(RedbullHistory).delete()
         s.commit()
-        message.send('履歴をクリアしました')
+        botsend(message, '履歴をクリアしました')
     else:
-        message.send('コマンドが一致しないため'
-                     '履歴をクリアできませんでした')
+        botsend(message, 'コマンドが一致しないため履歴をクリアできませんでした')
 
 
 @respond_to('^redbull\s+help$')
@@ -159,4 +161,4 @@ def show_help_redbull_commands(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    message.send(HELP)
+    botsend(message, HELP)

@@ -4,6 +4,8 @@ from slackbot.bot import respond_to
 from slackbot import settings
 import slacker
 
+from haro.botmessage import botsend
+
 
 HELP = '''
 - `$random`: チャンネルにいるメンバーからランダムに一人を選ぶ
@@ -24,7 +26,7 @@ def random_command(message, subcommand=None):
     """
 
     if subcommand == 'help':
-        message.send(HELP)
+        botsend(message, HELP)
         return
 
     # チャンネルのメンバー一覧を取得
@@ -61,4 +63,4 @@ def random_command(message, subcommand=None):
 
     user_info = webapi.users.info(member_id)
     name = user_info.body['user']['name']
-    message.send('{} さん、君に決めた！'.format(name))
+    botsend(message, '{} さん、君に決めた！'.format(name))

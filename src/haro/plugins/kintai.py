@@ -11,6 +11,7 @@ from slackbot.bot import respond_to, listen_to
 from sqlalchemy import func, Date, cast
 
 from db import Session
+from haro.botmessage import botreply, botsend
 from haro.plugins.kintai_models import KintaiHistory
 from haro.slack import get_user_name
 
@@ -29,7 +30,7 @@ DAY_OF_WEEK = '月火水木金土日'
 def replay_good_morning(message):
     """「おはようごさいます」を返す
     """
-    message.reply('おはようごさいます')
+    botreply(message, 'おはようごさいます')
 
 
 @listen_to('帰ります|かえります|退社します')
@@ -38,7 +39,7 @@ def replay_you_did_good_today(message):
     """
     messages = ['お疲れ様でした'] * 99
     messages.append('うぇーい、おつかれちゃーん！')
-    message.reply(random.choice(messages))
+    botreply(message, random.choice(messages))
 
 
 @respond_to('^kintai\s+start$')
@@ -49,7 +50,7 @@ def register_workon_time(message):
     """
     user_id = message.body['user']
     register_worktime(user_id)
-    message.reply('出社時刻を記録しました')
+    botreply(message, '出社時刻を記録しました')
 
 
 @respond_to('^kintai\s+end$')
@@ -60,7 +61,7 @@ def register_workoff_time(message):
     """
     user_id = message.body['user']
     register_worktime(user_id, is_workon=False)
-    message.reply('退社時刻を記録しました')
+    botreply(message, '退社時刻を記録しました')
 
 
 def register_worktime(user_id, is_workon=True):
@@ -118,7 +119,7 @@ def show_kintai_history(message):
         rows = ['勤怠記録はありません']
 
     user_name = get_user_name(user_id)
-    message.send('{}の勤怠:\n{}'.format(user_name, '\n'.join(rows)))
+    botsend(message, '{}の勤怠:\n{}'.format(user_name, '\n'.join(rows)))
 
 
 @respond_to('^kintai\s+csv$')
@@ -138,7 +139,7 @@ def show_kintai_history_csv(message, time=None):
     year, month = int(year_str), int(month_str)
 
     if not 1 <= month <= 12:
-        message.send('指定した対象月は存在しません')
+        botsend(message, '指定した対象月は存在しません')
         return
 
     s = Session()
@@ -184,4 +185,4 @@ def show_help_kintai_commands(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    message.send(HELP)
+    botsend(message, HELP)

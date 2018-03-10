@@ -4,6 +4,7 @@ from slackbot.bot import respond_to
 from sqlalchemy import func, case
 
 from db import Session
+from haro.botmessage import botsend
 from haro.plugins.water_models import WaterHistory
 
 HELP = '''
@@ -33,10 +34,10 @@ def count_water_stock(message):
         if not isinstance(latest_ctime, datetime.datetime):
             latest_ctime = datetime.datetime.strptime(latest_ctime,
                                                       '%Y-%m-%d %H:%M:%S')
-        message.send('残数: {}本 ({:%Y年%m月%d日} 追加)'
-                     .format(stock_number, latest_ctime))
+        botsend(message, '残数: {}本 ({:%Y年%m月%d日} 追加)'
+                .format(stock_number, latest_ctime))
     else:
-        message.send('管理履歴はありません')
+        botsend(message, '管理履歴はありません')
 
 
 @respond_to('^water\s+(-?\d+)$')
@@ -50,7 +51,7 @@ def manage_water_stock(message, delta):
     """
     delta = -int(delta)
     if not delta:
-        message.send('0は指定できません')
+        botsend(message, '0は指定できません')
         return
 
     user_id = message.body['user']
@@ -63,11 +64,11 @@ def manage_water_stock(message, delta):
     stock_number = q.one().stock_number
 
     if delta < 0:
-        message.send('ウォーターサーバーのボトルを{}本取りかえました。(残数: {}本)'
-                     .format(-delta, stock_number))
+        botsend(message, 'ウォーターサーバーのボトルを{}本取りかえました。(残数: {}本)'
+                .format(-delta, stock_number))
     else:
-        message.send('ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)'
-                     .format(delta, stock_number))
+        botsend(message, 'ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)'
+                .format(delta, stock_number))
 
 
 @respond_to('^water\s+history$')
@@ -95,7 +96,7 @@ def show_water_history(message, limit='10'):
     if tmp:
         ret = '\n'.join(tmp)
 
-    message.send('水の管理履歴:\n{}'.format(ret))
+    botsend(message, '水の管理履歴:\n{}'.format(ret))
 
 
 @respond_to('^water\s+help$')
@@ -104,4 +105,4 @@ def show_help_water_commands(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    message.send(HELP)
+    botsend(message, HELP)

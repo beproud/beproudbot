@@ -1,6 +1,9 @@
 import datetime
+
 import requests
 from slackbot.bot import respond_to
+
+from haro.botmessage import botsend
 
 
 def star(n):
@@ -34,4 +37,4 @@ def show_uranai_commands(message, birthday):
     :param message: slackbot.dispatcher.Message
     :param birthday: 4桁の誕生日
     """
-    message.send(uranai(birthday))
+    botsend(message, uranai(birthday))
