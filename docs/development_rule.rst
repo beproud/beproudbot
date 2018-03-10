@@ -63,12 +63,13 @@ HELPコマンドの実装
    HELP = """
    - `コマンド名`: コマンドの説明
    """
+   from haro.botmessage import botsend
 
    @respond_to('^hoge\s+help$')
    def show_help_hoge_commands(message):
        """hogeコマンドのhelpを表示
        """
-       message.send(HELP)
+       botsend(message, HELP)
 
 * 例
 
@@ -83,11 +84,13 @@ HELPコマンドの実装
    - `$redbull help`: redbullコマンドの使い方を返す
    """
 
+      from haro.botmessage import botsend
+
       @respond_to('^redbull\s+help$')
       def show_help_redbull_commands(message):
           """RedBullコマンドのhelpを表示
           """
-          message.send(HELP)
+          botsend(message, HELP)
 
 READMEにコマンドの説明を記載
 ---------------------------------------
