@@ -107,7 +107,6 @@ class RunCommandValidator(BaseCommandValidator):
         """
         if command_name not in command_patterns(self.callargs['message']):
             if not self.has_command(command_name):
-                print('RunCommandValidator')
                 raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
 
         return command_name
@@ -123,8 +122,10 @@ class ReturnTermCommandValidator(BaseCommandValidator):
     EXCEPT_1WORD_COMMANDS = ['random', 'lunch']
 
     def clean_command_name(self, command_name):
+
         """コマンド名に対してValidationを適用する
         """
+
         # 一文字コマンドをチェックから除外する
         # haroに登録されているコマンドを自動的に除外できるとよさそう
         if command_name in self.EXCEPT_1WORD_COMMANDS:
