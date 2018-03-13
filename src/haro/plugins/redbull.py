@@ -139,10 +139,6 @@ def clear_redbull_history(message, token=None):
         botsend(message, '履歴をDBからすべてクリアします。'
                 '続けるには\n`$redbull clear {}`\nと書いてください'
                 .format(_cache['token']))
-        botsend(message,
-                '履歴をDBからすべてクリアします。'
-                '続けるには\n`$redbull clear {}`\nと書いてください'
-                .format(_cache['token']))
         return
 
     if token == _cache['token']:
