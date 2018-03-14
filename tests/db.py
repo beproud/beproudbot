@@ -3,7 +3,10 @@ from contextlib import contextmanager
 import pytest
 from sqlalchemy.orm import sessionmaker
 
-from db import Base
+from db import Base, Session
+
+
+session = Session()
 
 
 @pytest.fixture(scope='session')
