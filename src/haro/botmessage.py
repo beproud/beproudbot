@@ -7,7 +7,7 @@ def botsend(message, text):
     """
     if 'thread_ts' in message.body:
         # スレッド内のメッセージの場合
-        message.send(thread_ts=message.thread_ts)
+        message.send(text, thread_ts=message.thread_ts)
     else:
         # 親メッセージの場合
         message.send(text)
