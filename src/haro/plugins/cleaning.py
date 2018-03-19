@@ -5,9 +5,10 @@ from prettytable import PrettyTable
 from slackbot.bot import respond_to
 
 from db import Session
+from haro.alias import get_slack_id
+from haro.botmessage import botsend
 from haro.plugins.cleaning_models import Cleaning
 from haro.slack import get_user_name
-from haro.alias import get_slack_id
 
 HELP = """
 - `$cleaning task`: 掃除作業の一覧を表示する
@@ -44,7 +45,7 @@ def show_help_cleaning_commands(message):
 
     :param message: slackbot.dispatcher.Message
     """
-    message.send(HELP)
+    botsend(message, HELP)
 
 
 @respond_to('^cleaning\s+task$')
@@ -53,7 +54,7 @@ def show_cleaning_task(message):
 
     :param message: slackbot.dispatcher.Message
     """
-    message.send(FORMATTED_CLEANING_TASKS)
+    botsend(message, FORMATTED_CLEANING_TASKS)
 
 
 @respond_to('^cleaning\s+list$')
@@ -75,7 +76,7 @@ def show_cleaning_list(message):
         dow = DAY_OF_WEEK[day_of_week]
         str_users = ', '.join(users)
         pt.add_row([dow, str_users])
-    message.send('```{}```'.format(pt))
+    botsend(message, '```{}```'.format(pt))
 
 
 @respond_to('^cleaning\s+today$')
@@ -89,7 +90,7 @@ def show_today_cleaning_list(message):
     s = Session()
     users = [get_user_name(c.slack_id) for
              c in s.query(Cleaning).filter(Cleaning.day_of_week == dow)]
-    message.send('今日の掃除当番は{}です'.format('、'.join(users)))
+    botsend(message, '今日の掃除当番は{}です'.format('、'.join(users)))
 
 
 @respond_to('^cleaning\s+add\s+(\S+)\s+(\S+)$')
@@ -101,23 +102,23 @@ def cleaning_add(message, user_name, day_of_week):
     :param str day_of_week: 追加する掃除曜日
     """
     if day_of_week not in DAY_OF_WEEK:
-        message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
+        botsend(message, '曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
         return
 
     s = Session()
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
     q = s.query(Cleaning).filter(Cleaning.slack_id == slack_id)
     if s.query(q.exists()).scalar():
-        message.send('{}は既に登録されています'.format(user_name, day_of_week))
+        botsend(message, '{}は既に登録されています'.format(user_name, day_of_week))
         return
 
     s.add(Cleaning(slack_id=slack_id, day_of_week=DAY_OF_WEEK.index(day_of_week)))
     s.commit()
-    message.send('{}を{}曜日の掃除当番に登録しました'.format(user_name, day_of_week))
+    botsend(message, '{}を{}曜日の掃除当番に登録しました'.format(user_name, day_of_week))
 
 
 @respond_to('^cleaning\s+del\s+(\S+)\s+(\S+)$')
@@ -129,13 +130,13 @@ def cleaning_del(message, user_name, day_of_week):
     :param str day_of_week: 削除する掃除当番が登録されている曜日
     """
     if day_of_week not in DAY_OF_WEEK:
-        message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
+        botsend(message, '曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
         return
 
     s = Session()
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
     cleaning_user = (s.query(Cleaning)
@@ -146,9 +147,9 @@ def cleaning_del(message, user_name, day_of_week):
     if cleaning_user:
         s.delete(cleaning_user)
         s.commit()
-        message.send('{}を{}曜日の掃除当番から削除しました'.format(user_name, day_of_week))
+        botsend(message, '{}を{}曜日の掃除当番から削除しました'.format(user_name, day_of_week))
     else:
-        message.send('{}は{}曜日の掃除当番に登録されていません'.format(user_name, day_of_week))
+        botsend(message, '{}は{}曜日の掃除当番に登録されていません'.format(user_name, day_of_week))
 
 
 @respond_to('^cleaning\s+swap\s+(\S+)\s+(\S+)$')
@@ -165,13 +166,13 @@ def cleaning_swap(message, user_name1, user_name2):
     slack_id2 = get_slack_id(s, user_name2)
 
     if slack_id1 is None:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name1))
+        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name1))
         return
     if slack_id2 is None:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name2))
+        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name2))
         return
     if slack_id1 == slack_id2:
-        message.send('{}と{}は同じSlackのユーザーです'.format(user_name1, user_name2))
+        botsend(message, '{}と{}は同じSlackのユーザーです'.format(user_name1, user_name2))
         return
 
     cleaning_user1 = (s.query(Cleaning)
@@ -182,16 +183,16 @@ def cleaning_swap(message, user_name1, user_name2):
                       .one_or_none())
 
     if not cleaning_user1:
-        message.send('{}は掃除当番に登録されていません'.format(user_name1))
+        botsend(message, '{}は掃除当番に登録されていません'.format(user_name1))
         return
     if not cleaning_user2:
-        message.send('{}は掃除当番に登録されていません'.format(user_name2))
+        botsend(message, '{}は掃除当番に登録されていません'.format(user_name2))
         return
 
     cleaning_user1.slack_id = slack_id2
     cleaning_user2.slack_id = slack_id1
     s.commit()
-    message.send('{}と{}の掃除当番を交換しました'.format(user_name1, user_name2))
+    botsend(message, '{}と{}の掃除当番を交換しました'.format(user_name1, user_name2))
 
 
 @respond_to('^cleaning\s+move\s+(\S+)\s+(\S+)$')
@@ -203,13 +204,13 @@ def cleaning_move(message, user_name, day_of_week):
     :param str day_of_week: 移動先の曜日名
     """
     if day_of_week not in DAY_OF_WEEK:
-        message.send('曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
+        botsend(message, '曜日には `月` 、 `火` 、 `水` 、 `木` 、 `金` のいずれかを指定してください')
         return
 
     s = Session()
     slack_id = get_slack_id(s, user_name)
     if slack_id is None:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
     cleaning_user = (s.query(Cleaning)
@@ -217,9 +218,9 @@ def cleaning_move(message, user_name, day_of_week):
                      .one_or_none())
 
     if not cleaning_user:
-        message.send('{}は掃除当番に登録されていません'.format(user_name))
+        botsend(message, '{}は掃除当番に登録されていません'.format(user_name))
         return
 
     cleaning_user.day_of_week = DAY_OF_WEEK.index(day_of_week)
     s.commit()
-    message.send('{}の掃除当番の曜日を{}曜日に変更しました'.format(user_name, day_of_week))
+    botsend(message, '{}の掃除当番の曜日を{}曜日に変更しました'.format(user_name, day_of_week))

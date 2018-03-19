@@ -8,9 +8,10 @@ from slackbot import settings
 from slackbot.bot import respond_to, listen_to
 
 from db import Session
+from haro.alias import get_slack_id
+from haro.botmessage import botsend
 from haro.plugins.thx_models import ThxHistory
 from haro.slack import get_user_name, get_users_info
-from haro.alias import get_slack_id
 
 HELP = """
 - `[user_name]++ [word]`: 指定したSlackのユーザーにGJする
@@ -114,7 +115,7 @@ def update_thx(message):
         for name in not_matched:
             msg.append('{}はSlackのユーザーとして存在しません'.format(name))
 
-    message.send('\n'.join(msg))
+    botsend(message, '\n'.join(msg))
 
 
 @respond_to('^thx\s+from$')
@@ -131,7 +132,7 @@ def show_thx_from(message, user_name=None):
         user_name = get_user_name(message.body['user'])
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
     rows = [['GJしたユーザー', 'GJ内容']]
@@ -169,7 +170,7 @@ def show_thx_to(message, user_name=None):
     s = Session()
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
-        message.send('{}はSlackのユーザーとして存在しません'.format(user_name))
+        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name))
         return
 
     rows = [['GJされたユーザー', 'GJ内容']]
@@ -198,4 +199,4 @@ def show_help_thx_commands(message):
 
     :param message: slackbot.dispatcher.Message
     """
-    message.send(HELP)
+    botsend(message, HELP)

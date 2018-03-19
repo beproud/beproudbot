@@ -2,6 +2,7 @@ from prettytable import PrettyTable
 from slackbot.bot import respond_to
 
 from db import Session
+from haro.botmessage import botsend
 from haro.plugins.alias_models import UserAliasName
 from haro.slack import get_user_name, get_slack_id_by_name
 
@@ -29,7 +30,7 @@ def show_user_alias_name(message, user_name=None):
         user_name = get_user_name(slack_id)
 
     if not slack_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
+        botsend(message, '{}に紐づくSlackのuser_idは存在しません'.format(user_name))
         return
 
     s = Session()
@@ -40,7 +41,7 @@ def show_user_alias_name(message, user_name=None):
     pt = PrettyTable(['ユーザー名', 'Slack ID', 'エイリアス名'])
     alias_name = ','.join(alias_names)
     pt.add_row([user_name, slack_id, alias_name])
-    message.send('```{}```'.format(pt))
+    botsend(message, '```{}```'.format(pt))
 
 
 @respond_to('^alias\s+add\s+(\S+)$')
@@ -65,23 +66,23 @@ def alias_name(message, user_name, alias_name=None):
 
     user = get_slack_id_by_name(alias_name)
     if user:
-        message.send('`{}` はユーザーが存在しているので使用できません'.format(alias_name))
+        botsend(message, '`{}` はユーザーが存在しているので使用できません'.format(alias_name))
         return
 
     if not slack_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
+        botsend(message, '{}に紐づくSlackのuser_idは存在しません'.format(user_name))
         return
 
     s = Session()
     alias_user_name = (s.query(UserAliasName)
                        .filter(UserAliasName.alias_name == alias_name))
     if s.query(alias_user_name.exists()).scalar():
-        message.send('エイリアス名 `{}` は既に登録されています'.format(alias_name))
+        botsend(message, 'エイリアス名 `{}` は既に登録されています'.format(alias_name))
         return
 
     s.add(UserAliasName(slack_id=slack_id, alias_name=alias_name))
     s.commit()
-    message.send('{}のエイリアス名に `{}` を追加しました'.format(user_name, alias_name))
+    botsend(message, '{}のエイリアス名に `{}` を追加しました'.format(user_name, alias_name))
 
 
 @respond_to('^alias\s+del\s+(\S+)$')
@@ -105,7 +106,7 @@ def unalias_name(message, user_name, alias_name=None):
         user_name = get_user_name(slack_id)
 
     if not slack_id:
-        message.send('{}に紐づくSlackのuser_idは存在しません'.format(user_name))
+        botsend(message, '{}に紐づくSlackのuser_idは存在しません'.format(user_name))
         return
 
     s = Session()
@@ -117,9 +118,9 @@ def unalias_name(message, user_name, alias_name=None):
     if alias_user_name:
         s.delete(alias_user_name)
         s.commit()
-        message.send('{}のエイリアス名から `{}` を削除しました'.format(user_name, alias_name))
+        botsend(message, '{}のエイリアス名から `{}` を削除しました'.format(user_name, alias_name))
     else:
-        message.send('{}のエイリアス名 `{}` は登録されていません'.format(user_name, alias_name))
+        botsend(message, '{}のエイリアス名 `{}` は登録されていません'.format(user_name, alias_name))
 
 
 @respond_to('^alias\s+help$')
@@ -128,4 +129,4 @@ def show_help_alias_commands(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    message.send(HELP)
+    botsend(message, HELP)

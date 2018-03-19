@@ -7,6 +7,7 @@ from slackbot.bot import listen_to, respond_to
 from slackbot_settings import REDMINE_URL
 
 from db import Session
+from haro.botmessage import botsend
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
 TICKET_INFO = '{}\n{}'
@@ -72,7 +73,7 @@ def user_from_message(message, session):
 def show_help_redmine_commands(message):
     """Redmineコマンドのhelpを表示
     """
-    message.send(HELP)
+    botsend(message, HELP)
 
 
 @listen_to('issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
@@ -100,7 +101,7 @@ def show_ticket_information(message, *ticket_ids):
         try:
             ticket = redmine.issue.get(ticket_id)
         except (ResourceNotFoundError, ForbiddenError):
-            message.send(RESPONSE_ERROR)
+            botsend(message, RESPONSE_ERROR)
             return
 
         proj_id = ticket.project.id
@@ -133,7 +134,7 @@ def show_ticket_information(message, *ticket_ids):
 
             sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
         else:
-            message.send(NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
+            botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
 
 @respond_to('^redmine\s+key\s+(\S+)$')
@@ -146,7 +147,7 @@ def register_key(message, api_key):
     # APIキーは最大40文字となっている。
     api_key = api_key[:40]
     if len(api_key) != 40:
-        message.send(INVALID_API_KEY)
+        botsend(message, INVALID_API_KEY)
         return
 
     user_id = message.body['user']
@@ -157,7 +158,7 @@ def register_key(message, api_key):
     else:
         user.api_key = api_key
     s.commit()
-    message.send(API_KEY_SET)
+    botsend(message, API_KEY_SET)
 
 
 @respond_to('^redmine\s+add\s+(\S+)$')
@@ -176,7 +177,7 @@ def register_room(message, project_identifier):
         return
     project, project_channel = project_channel_from_identifier(user.api_key, project_identifier, s)
     if not project:
-        message.send(PROJECT_NOT_FOUND)
+        botsend(message, PROJECT_NOT_FOUND)
         return
 
     if not project_channel:
@@ -189,9 +190,9 @@ def register_room(message, project_identifier):
         channels.append(channel_id)
         project_channel.channels = ",".join(channels)
         s.commit()
-        message.send(CHANNEL_REGISTERED.format(project.name))
+        botsend(message, CHANNEL_REGISTERED.format(project.name))
     else:
-        message.send(CHANNEL_ALREADY_REGISTERED)
+        botsend(message, CHANNEL_ALREADY_REGISTERED)
 
 
 @respond_to('^redmine\s+remove\s+(\S+)$')
@@ -207,7 +208,7 @@ def unregister_room(message, project_identifier):
 
     project, project_channel = project_channel_from_identifier(user.api_key, project_identifier, s)
     if not project:
-        message.send(PROJECT_NOT_FOUND)
+        botsend(message, PROJECT_NOT_FOUND)
         return
 
     if not project_channel:
@@ -218,6 +219,6 @@ def unregister_room(message, project_identifier):
         channels.remove(channel_id)
         project_channel.channels = ",".join(channels)
         s.commit()
-        message.send(CHANNEL_UNREGISTERED.format(project.name))
+        botsend(message, CHANNEL_UNREGISTERED.format(project.name))
     except ValueError:
-        message.send(CHANNEL_NOT_REGISTERED.format(project_identifier))
+        botsend(message, CHANNEL_NOT_REGISTERED.format(project_identifier))

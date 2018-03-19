@@ -9,6 +9,7 @@ from haro.arg_validator import (
     ValidationError,
     register_arg_validator,
 )
+from haro.botmessage import botsend
 from haro.plugins.create_models import CreateCommand, Term
 
 HELP = """
@@ -121,6 +122,7 @@ class ReturnTermCommandValidator(BaseCommandValidator):
     EXCEPT_1WORD_COMMANDS = ['random', 'lunch']
 
     def clean_command_name(self, command_name):
+
         """コマンド名に対してValidationを適用する
         """
 
@@ -157,7 +159,7 @@ def add_command(message, command_name):
 
     s.add(CreateCommand(name=command_name, creator=message.body['user']))
     s.commit()
-    message.send('`${}`コマンドを登録しました'.format(command_name))
+    botsend(message, '`${}`コマンドを登録しました'.format(command_name))
 
 
 @respond_to('^create\s+del\s+(\S+)$')
@@ -171,7 +173,7 @@ def del_command(message, command_name, command=None):
     s = Session()
     s.query(CreateCommand).filter(CreateCommand.id == command.id).delete()
     s.commit()
-    message.send('`${}`コマンドを削除しました'.format(command_name))
+    botsend(message, '`${}`コマンドを削除しました'.format(command_name))
 
 
 @respond_to('^(\S+)$')
@@ -186,9 +188,9 @@ def return_term(message, command_name, command=None):
         if command.terms:
             words = [term.word for term in command.terms]
             word = random.choice(words)
-            message.send(word)
+            botsend(message, word)
         else:
-            message.send('`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
+            botsend(message, '`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
 
 
 @respond_to('^(\S+)\s+(.+)')
@@ -229,7 +231,7 @@ def run_command(message, command_name, params, command=None):
             add_term(message, command, params)
     except IndexError:
         # ヘルプを返す
-        message.send(HELP)
+        botsend(message, HELP)
 
 
 def pop_term(message, command):
@@ -249,11 +251,11 @@ def pop_term(message, command):
     if term:
         s.delete(term)
         s.commit()
-        message.send('コマンド `${}` から「{}」を削除しました'.format(name, term.word))
+        botsend(message, 'コマンド `${}` から「{}」を削除しました'.format(name, term.word))
     else:
         msg = ('コマンド `${0}` にあなたは語録を登録していません\n'
                '`${0} add (語録)` で語録を登録してください'.format(name))
-        message.send(msg)
+        botsend(message, msg)
 
 
 def get_term(message, command):
@@ -268,11 +270,11 @@ def get_term(message, command):
             name, len(command.terms))]
         for t in command.terms:
             msg.append(t.word)
-        message.send('\n'.join(msg))
+        botsend(message, '\n'.join(msg))
     else:
         msg = ('コマンド `${0}` には語録が登録されていません\n'
                '`${0} add (語録)` で語録を登録してください'.format(name))
-        message.send(msg)
+        botsend(message, msg)
 
 
 def search_term(message, command, keyword):
@@ -293,9 +295,9 @@ def search_term(message, command, keyword):
             name, keyword, terms.count())]
         for t in terms:
             msg.append(t.word)
-        message.send('\n'.join(msg))
+        botsend(message, '\n'.join(msg))
     else:
-        message.send('コマンド `${}` に `{}` を含む語録はありません'.format(
+        botsend(message, 'コマンド `${}` に `{}` を含む語録はありません'.format(
             name, keyword))
 
 
@@ -316,9 +318,9 @@ def del_term(message, command, word):
     if term:
         s.delete(term)
         s.commit()
-        message.send('コマンド `${}` から「{}」を削除しました'.format(name, word))
+        botsend(message, 'コマンド `${}` から「{}」を削除しました'.format(name, word))
     else:
-        message.send('コマンド `${}` に「{}」は登録されていません'.format(name, word))
+        botsend(message, 'コマンド `${}` に「{}」は登録されていません'.format(name, word))
 
 
 def add_term(message, command, word):
@@ -337,11 +339,11 @@ def add_term(message, command, word):
 
     name = command.name
     if term:
-        message.send('コマンド `${}` に「{}」は登録済みです'.format(name, word))
+        botsend(message, 'コマンド `${}` に「{}」は登録済みです'.format(name, word))
     else:
         s.add(Term(create_command=command.id, creator=message.body['user'], word=word))
         s.commit()
-        message.send('コマンド `${}` に「{}」を追加しました'.format(name, word))
+        botsend(message, 'コマンド `${}` に「{}」を追加しました'.format(name, word))
 
 
 @respond_to('^create\s+help$')
@@ -350,4 +352,4 @@ def show_help_create_commands(message):
 
     :param message: slackbot.dispatcher.Message
     """
-    message.send(HELP)
+    botsend(message, HELP)

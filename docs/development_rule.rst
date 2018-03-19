@@ -63,12 +63,13 @@ HELPコマンドの実装
    HELP = """
    - `コマンド名`: コマンドの説明
    """
+   from haro.botmessage import botsend
 
    @respond_to('^hoge\s+help$')
    def show_help_hoge_commands(message):
        """hogeコマンドのhelpを表示
        """
-       message.send(HELP)
+       botsend(message, HELP)
 
 * 例
 
@@ -83,11 +84,13 @@ HELPコマンドの実装
    - `$redbull help`: redbullコマンドの使い方を返す
    """
 
+      from haro.botmessage import botsend
+
       @respond_to('^redbull\s+help$')
       def show_help_redbull_commands(message):
           """RedBullコマンドのhelpを表示
           """
-          message.send(HELP)
+          botsend(message, HELP)
 
 READMEにコマンドの説明を記載
 ---------------------------------------
@@ -199,6 +202,15 @@ SlackIDからユーザー名を取得する際は以下の関数を使ってく�
    - SlackのusersAPIのキャッシュから呼び出しているのでSlackに問い合わせを行いません
    - 上記の関数を使う事でAlias登録されているユーザー名からもSlackIDを引く事が可能
 
+Slackにメッセージを送信・返信する際は以下の関数を使ってください
+
+* ``src/haro/botmessage.py`` の ``botsend()`` 関数
+  - ``message.send()`` の代わりに使用する
+  - スレッド内でコマンドを実行したとき、メッセージをスレッド内に送信できます
+
+* ``src/haro/botmessage.py`` の ``botreply()`` 関数
+  - ``message.reply()`` の代わりに使用する
+  - スレッド内でコマンドを実行したとき、メッセージをスレッド内に返信できます
 
 テスト
 ========

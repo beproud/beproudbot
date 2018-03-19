@@ -5,6 +5,7 @@ from textwrap import dedent
 from slackbot.bot import Bot, default_reply
 
 from db import init_dbsession
+from haro.botmessage import botsend
 from slackbot_settings import (
     SQLALCHEMY_URL,
     SQLALCHEMY_ECHO,
@@ -34,7 +35,7 @@ def haro_default_replay(message):
 
     :param message: slackbot.dispatcher.Message
     """
-    message.send('コマンドが不明です')
+    botsend(message, 'コマンドが不明です')
 
 
 def main():

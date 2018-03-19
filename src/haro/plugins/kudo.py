@@ -2,6 +2,7 @@ from slackbot.bot import respond_to, listen_to
 from sqlalchemy import func
 
 from db import Session
+from haro.botmessage import botsend
 from haro.plugins.kudo_models import KudoHistory
 from haro.slack import get_user_name
 
@@ -55,7 +56,7 @@ def update_kudo(message, names):
         name_list.append((name, total_count))
 
     msg = ['({}: 通算 {})'.format(n, tc) for n, tc in name_list]
-    message.send('\n'.join(msg))
+    botsend(message, '\n'.join(msg))
 
 
 @respond_to('^kudo\s+help$')
@@ -64,4 +65,4 @@ def show_help_alias_commands(message):
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    message.send(HELP)
+    botsend(message, HELP)
