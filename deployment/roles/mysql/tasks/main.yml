@@ -1,18 +1,12 @@
 ---
 
-# MySQL5.6用の対応
-- name: apt-repository
-  apt_repository:
-    repo: deb http://archive.ubuntu.com/ubuntu trusty universe
-    state: present
-
 # MySQL client のインストール
 - name: install mysql client
   apt:
     name: "{{ item }}"
     update_cache: yes
   with_items:
-    - mysql-client-5.6
+    - mysql-client
 
 # MySQL server のインストール
 - name: install mysql server
@@ -20,7 +14,7 @@
     name: "{{ item }}"
     update_cache: yes
   with_items:
-    - mysql-server-5.6
+    - mysql-server
     - python-mysqldb
   notify:
     - "restart mysqld"
