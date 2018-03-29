@@ -20,24 +20,43 @@
     - "restart mysqld"
   when: use_local_mysql_server
 
-# MySQLのセットアップ
-- name: start mysqld
+# utf8mb4用の設定
+- name: ensure load config
+  lineinfile:
+    path: /etc/mysql/my.cnf
+    line: "!includedir /etc/mysql/bpproject.conf.d/"
+  tags: [configure]
+  when: use_local_mysql_server
+- name: ensure conf directory
+  file:
+    path: /etc/mysql/bpproject.conf.d/
+    state: directory
+  when: use_local_mysql_server
+- name: put bpproject.cnf
+  template:
+    src: bpproject.cnf
+    dest: /etc/mysql/bpproject.conf.d/bpproject.cnf
+  tags: [configure]
+  when: use_local_mysql_server
+- name: reload config
   service:
     name: mysql
-    state: started
+    state: restarted
   when: use_local_mysql_server
+
+# haro のDB設定
 - name: setup user for haro
   mysql_user:
     name: "{{ MYSQL.USER_NAME }}"
     priv: "{{ MYSQL.PRIVILEGE }}"
     host: "{{ MYSQL.HOSTS }}"
-  when: use_local_mysql_server
   tags: [configure]
+  when: use_local_mysql_server
 - name: setup db for haro
   mysql_db:
     login_user: "{{ MYSQL.USER_NAME }}"
     login_password: '{{ MYSQL.PASSWORD }}'
     name: "{{ MYSQL.DB_NAME }}"
     encoding: "{{ MYSQL.ENCODING }}"
-  when: use_local_mysql_server
   tags: [configure]
+  when: use_local_mysql_server
