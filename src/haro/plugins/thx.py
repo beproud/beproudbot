@@ -83,6 +83,10 @@ def update_thx(message):
     :param str user_name: ++するユーザー名
     :param str word: GJの内容
     """
+    # refs #113 ファイルアップロード時のタイトル名に++が含まれると、応答しないようにする
+    if "subtype" in message.body and message.body["subtype"] == "file_share":
+        return
+
     from_user_id = message.body['user']
     channel_id = message.body['channel']
     text = message.body['text']
