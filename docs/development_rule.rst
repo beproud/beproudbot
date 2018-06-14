@@ -248,17 +248,32 @@ Githubにサイト上から更新を行う手順
 
 * 実際のPR作成手順は以下画像を参考ください
 
+| STEP1
+|
+
 .. image:: images/for_update1.jpg
    :width: 50%
+
+| STEP2
+|
 
 .. image:: images/for_update2.jpg
    :width: 50%
 
+| STEP3
+|
+
 .. image:: images/for_update3.jpg
    :width: 50%
 
+| STEP4
+|
+
 .. image:: images/for_update4.jpg
    :width: 50%
+
+| STEP5
+|
 
 .. image:: images/for_update5.jpg
    :width: 50%
