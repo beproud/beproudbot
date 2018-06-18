@@ -279,3 +279,43 @@ Githubにサイト上から更新を行う手順
    :width: 50%
 
 * PRを作成したら、レビューワーにURLを共有します
+
+レビュー手順
+----------------------------------------
+
+* レビューはGithub上で行います
+
+* 実際のレビュー手順は以下画像を参考ください
+
+
+| STEP1
+| * GithubのPR画面に遷移します
+
+.. image:: images/for_review1.jpg
+   :width: 50%
+
+| STEP2
+| * 変更した内容を確認し、指摘がない場合はSTEP3~4の作業はスキップしてください
+
+.. image:: images/for_review2.jpg
+   :width: 50%
+
+| STEP3
+|
+
+.. image:: images/for_review3.jpg
+   :width: 50%
+
+| STEP4
+|
+
+.. image:: images/for_review4.jpg
+   :width: 50%
+
+| STEP5
+|
+
+.. image:: images/for_review5.jpg
+   :width: 50%
+
+* レビューが終了したら、レビュイーにPRのURLを共有します
