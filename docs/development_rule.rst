@@ -235,3 +235,88 @@ UnitTestの実行
 
 * tox の install はアプリケーションの virtualenv と同じである必要はありません
 * ``$ tox`` は ``tox.ini`` と同じディレクトリで実行してください
+
+
+更新者向け情報
+=======================
+
+Githubにサイト上から更新を行う手順
+----------------------------------------
+
+* 依頼はRedmineのチケット or Issue登録で行います
+   * 【注】外部公開されているので、機密情報が入る時はRedmineのチケットで依頼してください
+
+* 実際のPR作成手順は以下画像を参考ください
+
+| STEP1
+|
+
+.. image:: images/for_update1.jpg
+   :width: 50%
+
+| STEP2
+|
+
+.. image:: images/for_update2.jpg
+   :width: 50%
+
+| STEP3
+|
+
+.. image:: images/for_update3.jpg
+   :width: 50%
+
+| STEP4
+|
+
+.. image:: images/for_update4.jpg
+   :width: 50%
+
+| STEP5
+|
+
+.. image:: images/for_update5.jpg
+   :width: 50%
+
+* PRを作成したら、レビューワーにURLを共有します
+
+レビュー手順
+----------------------------------------
+
+* レビューはGithubのPRページから行います
+
+* 実際のレビュー手順は以下画像を参考ください
+   * ※ 変更した内容を確認し、指摘がない場合はSTEP3~4の作業はスキップしてください
+
+
+| STEP1
+|
+
+.. image:: images/for_review1.jpg
+   :width: 50%
+
+| STEP2
+|
+
+.. image:: images/for_review2.jpg
+   :width: 50%
+
+| STEP3
+|
+
+.. image:: images/for_review3.jpg
+   :width: 50%
+
+| STEP4
+|
+
+.. image:: images/for_review4.jpg
+   :width: 50%
+
+| STEP5
+|
+
+.. image:: images/for_review5.jpg
+   :width: 50%
+
+* レビューが終了したら、レビュイーにPRのURLを共有します
