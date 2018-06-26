@@ -6,6 +6,9 @@ Haro is [slackbot](https://github.com/lins05/slackbot "lins05/slackbot: A chat b
 
 ## 事前準備
 
+- Macのローカルで開発する場合、Docker、ansibleを構築する必要なし
+- 起動方法まで参照することで、ローカル環境が構築できる
+
 ### APIトークンの取得
 
 - https://my.slack.com/services/new/bot にアクセス
@@ -24,6 +27,7 @@ $ cd beproudbot
 $ source /path/env/bin/activate
 (env)$ cp env.sample .env
 (env)$ vi .env # API Token 等を記入する
+(env)$ export SLACK_API_TOKEN=xoxb-XXXX　# API Tokenがターミナルの環境変数で.envに反映されない場合
 (env)$ pip install -r src/requirements.txt
 ```
 
