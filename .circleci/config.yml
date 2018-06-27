@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.5
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "src/requirements.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+      - run:
+          name: Run tests & lint
+          command: |
+            python3 -m venv venv
+            source ./venv/bin/activate
+            pip install -U pip setuptools tox
+            tox -epy35,flake8_ci
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "src/requirements.txt" }}
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
