@@ -55,14 +55,12 @@ def get_ticket_information(message):
                 # else: 期限に余裕があるチケット
         　　　　　　　# continue
         　　　　　　
-
 """期限切れたチケットをチェックするFunction作成
    期限が切れていたらTrueを返す。それ以外はFalse
    
  
 　　:param tickets: redmineとslackチャンネルのデータを持ったlist
     
-   
 """
 
 """期限切そうなチケットをチェックするFunction
@@ -70,13 +68,4 @@ def get_ticket_information(message):
 
 
 　　:param tickets: redmineとslackチャンネルのデータを持ったlist
-
-
 """
-
-
-
-
-
-
-
