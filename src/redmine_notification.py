@@ -44,7 +44,6 @@ def get_ticket_information():
            # 辞書のkeyと値の例:{proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)'], xxx:['- xxxxxxx']}
             if proj_id not in projects_past_due_date.keys():
                 projects_past_due_date[proj_id] = [issue_display]
-                print(issue_display)
             else:
                 projects_past_due_date[proj_id].append(issue_display)
         # issueの期限が1週間以内の場合
@@ -57,8 +56,8 @@ def get_ticket_information():
             continue
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
-    send_ticket_info_to_channels(projects_past_due_date)
-    send_ticket_info_to_channels(projects_close_to_due_date)
+    send_ticket_info_to_channels(projects_past_due_date, 0)
+    send_ticket_info_to_channels(projects_close_to_due_date, 1)
 
 def display_issue(issue):
     """issueの詳細をSlackに表示用にフォーマットする。
@@ -72,44 +71,53 @@ def check_past_due_date(due_date):
     """期限切れたチケットをチェックするFunction
     期限が切れていたらTrueを返す。それ以外はFalse
 
-    :param due_date: チケットのdue_date
-
+    :param due_date: 各チケットのdue_date
     """
-    # TODO: due_dateが過ぎたチケットをチェックするコード作成
-    return True
+    today = datetime.now()
+    if datetime.combine(due_date, datetime.min.time()) < today:
+        return True
+    else:
+        return False
 
 def check_close_to_due_date(due_date):
     """期限が1週間以内に切れそうなチケットをチェックするFunction
     期限が切れていたらTrueを返す。それ以外はFalse
 
-    :param due_date: チケットのdue_date
-
+    :param due_date: 各チケットのdue_date
     """
-    # TODO: due_dateが1週間切ったチケットをチェックするコード作成
-    return True
+    today = datetime.now()
+    if datetime.combine(due_date, datetime.min.time()) < today - timedelta(7):
+        return True
+    else:
+        return False
 
-def send_ticket_info_to_channels(projects):
-    """期限が1週間以内に切れそうなチケットをチェックするFunction
-        期限が切れていたらTrueを返す。それ以外はFalse
+
+def send_ticket_info_to_channels(projects, type):
+    """チケット情報を各Slackチャンネルごとに通知する。
 
         :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
-
+        :param type: int type=0 -> 期限切れ type=1 ->期限切れそうなチケット
     """
     s = Session()
     sc = SlackClient(SLACK_API_TOKEN)
     for project in projects.keys():
         # 各プロジェクトのproj_roomを獲得する。
         proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == project).one_or_none()
-        # TODO: 各プロジェクトの通知チケット数をカウント
 
         # api_call()を使用し、すべてのSlackチャンネルに期限が切れたチケット、期限が切れそうな通知をチケットまとめて送る
         if proj_room:
-            # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対処
+            # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対応
             channels = proj_room.channels
+            # プロジェクトごとのチケット数カウントを取得
+            issue_count = len(projects[project])
+            if not type: # 期限切れチケット
+                message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
+            else: # 期限切れそうなチケット
+                message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
+                message += '\n'.join(projects[project])
             for channel in channels:
                 sc.api_call(
                     "chat.postMessage",
                     channel=channel,
-                    text='期限が切れたチケットは{}件です'.format(
-                        '、'.join(projects[project]))
+                    text= message
                 )
