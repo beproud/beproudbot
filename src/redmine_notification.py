@@ -10,81 +10,106 @@
 """
 
 from redminelib import Redmine
+from datetime import timedelta, datetime
+from slackclient import SlackClient
 
 from haro.plugins.redmine_models import ProjectChannel
 
 from slackbot_settings import REDMINE_URL, API_KEY
 from slackbot.bot import listen_to, respond_to
 
-from haro.botmessage import botsend
 from db import Session
 
 @respond_to('^redmine\s+test_daik$')
-def get_ticket_information(message):
+def get_ticket_information():
     """Redmineのチケット情報とチケットと結びついているSlackチャンネルを取得
 
     """
     redmine = Redmine(REDMINE_URL, key=API_KEY)
     # すべてのチケットを取得
     issues = redmine.issue.all(sort='subject:desc')
-    s = Session()
-    projects_past_due_date ={}
+
+    projects_past_due_date = {}
     projects_close_to_due_date = {}
     for issue in issues:
         # due_date属性とdue_dateがnoneの場合は除外
         if not getattr(issue, 'due_date', None):
             continue
-        # プロジェクトのroomを取得
         proj_id = issue.project.id
-
-        # TODO: redmineと関連付けられたSlackチャンネルがない場合の処理
-        # TODO: チケットごとに1query走るのは無駄だから、下記以外の方法でprojectのroomを取得する
-        # TODO: 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられている場合
-
-        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id).one_or_none()
-
-        # TODO: 各issueのチェンネルを取得する。方法はredmine.pyのshow_ticket_informationのチャンネル取得方法を参照。
-
-        if check_past_due_date(True): # due_dateがあるIssueを、リストの形で期限切れチケットと期限が切れそうなチケットを分別するFunctionに引き渡す。
-            # groupを利用し、同じプロジェクトのidでグループ化する。
-            # group issue projects_past_due_date[proj_id]
-
-        elif check_close_to_due_date(True): #  期限が切れそうなチケットをチェックするFunctionを実行
-            # groupを利用し、同じプロジェクトのidでグループ化する。
-            # group issue projects_close_to_due_date[proj_id]
-
-        else: #期限に余裕があるチケット
+        # issueのデータをSlack通知用にformatする。
+        issue_display = display_issue(issue)
+        # issueの期限が過ぎていた場合
+       if check_past_due_date(issue.due_date):
+           # proj_idをkeyにして値にformatしたIssue情報の値を入れる。
+           # 辞書のkeyと値の例:{proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)'], xxx:['- xxxxxxx']}
+            if proj_id not in projects_past_due_date.keys():
+                projects_past_due_date[proj_id] = [issue_display]
+                print(issue_display)
+            else:
+                projects_past_due_date[proj_id].append(issue_display)
+        # issueの期限が1週間以内の場合
+        elif check_close_to_due_date(issue.due_date):
+            if proj_id not in projects_close_to_due_date.keys():
+                 projects_close_to_due_date[proj_id] = [issue_display]
+            else:
+                projects_close_to_due_date[proj_id].append(issue_display)
+        else:
             continue
 
-    for project in projects_past_due_date:
-        #redmineプロジェクト単位で期限が過ぎたチケットをまとめて通知
-        # TODO: 期限切れのチケットカウント数取得
-        # (message, '期限が切れたチケットは{}件です'.format('、'.join(projects_past_due_date[project])))
-    for project in projects_close_to_due_date:
-        # redmineプロジェクト単位で期限が過ぎそうなチケットをまとめて通知
-        # TODO: 期限切れのチケットカウント数取得
-        # (message, 'もうすぐ期限切れチケットは{}件です'.format('、'.join( each projects_close_to_due_date[project])))
-        return True
+    # 各プロジェクトのチケット通知をSlackチャンネルに送る。
+    send_ticket_info_to_channels(projects_past_due_date)
+    send_ticket_info_to_channels(projects_close_to_due_date)
 
-def check_past_due_date(True):
-    """期限切れたチケットをチェックするFunction作成
-    期限が切れていたらTrueを返す。それ以外はFalse
+def display_issue(issue):
+    """issueの詳細をSlackに表示用にフォーマットする。
 
-    :param tickets: redmineとslackチャンネルのデータを持ったlist
-
+    　 :param issue: redmineのissue
     """
 
-    return True
+    return '- ' + str(issue.due_date) + ' ' + str(issue.id) + ': ' + str(issue.subject) + '(@' + str(issue.author) + ')'
 
-def check_close_to_due_date(True):
-    """期限切れたチケットをチェックするFunction作成
+def check_past_due_date(due_date):
+    """期限切れたチケットをチェックするFunction
     期限が切れていたらTrueを返す。それ以外はFalse
 
-    :param tickets: redmineとslackチャンネルのデータを持ったlist
+    :param due_date: チケットのdue_date
 
     """
-
+    # TODO: due_dateが過ぎたチケットをチェックするコード作成
     return True
-   
- 
 
+def check_close_to_due_date(due_date):
+    """期限が1週間以内に切れそうなチケットをチェックするFunction
+    期限が切れていたらTrueを返す。それ以外はFalse
+
+    :param due_date: チケットのdue_date
+
+    """
+    # TODO: due_dateが1週間切ったチケットをチェックするコード作成
+    return True
+
+def send_ticket_info_to_channels(projects):
+    """期限が1週間以内に切れそうなチケットをチェックするFunction
+        期限が切れていたらTrueを返す。それ以外はFalse
+
+        :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
+
+    """
+    s = Session()
+    sc = SlackClient(SLACK_API_TOKEN)
+    for project in projects.keys():
+        # 各プロジェクトのproj_roomを獲得する。
+        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == project).one_or_none()
+        # TODO: 各プロジェクトの通知チケット数をカウント
+
+        # api_call()を使用し、すべてのSlackチャンネルに期限が切れたチケット、期限が切れそうな通知をチケットまとめて送る
+        if proj_room:
+            # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対処
+            channels = proj_room.channels
+            for channel in channels:
+                sc.api_call(
+                    "chat.postMessage",
+                    channel=channel,
+                    text='期限が切れたチケットは{}件です'.format(
+                        '、'.join(projects[project]))
+                )
