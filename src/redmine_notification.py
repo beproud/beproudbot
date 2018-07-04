@@ -16,11 +16,12 @@ from configparser import ConfigParser, NoSectionError
 
 from haro.plugins.redmine_models import ProjectChannel
 
-from slackbot_settings import REDMINE_URL, API_KEY, SLACK_API_TOKEN
-from configparser import ConfigParser, NoSectionError
-
 from db import init_dbsession
+
 from slackbot_settings import (
+    REDMINE_URL,
+    API_KEY,
+    SLACK_API_TOKEN,
     SQLALCHEMY_URL,
     SQLALCHEMY_ECHO,
     SQLALCHEMY_POOL_SIZE,
@@ -28,8 +29,8 @@ from slackbot_settings import (
 
 from db import Session
 
+LIMIT = 7 # 期限が1週間以内のチケットを分別するために使用
 
-# @respond_to('^redmine\s+test_daik$')
 def get_ticket_information():
     """Redmineのチケット情報とチケットと結びついているSlackチャンネルを取得
     """
@@ -39,6 +40,7 @@ def get_ticket_information():
 
     projects_past_due_date = {}
     projects_close_to_due_date = {}
+    s = Session()
     for issue in issues:
         # due_date属性とdue_dateがnoneの場合は除外
         if not getattr(issue, 'due_date', None):
@@ -46,26 +48,31 @@ def get_ticket_information():
         proj_id = issue.project.id
         # issueのデータをSlack通知用にformatする。
         issue_display = display_issue(issue)
-        # issueの期限が過ぎていた場合
-        if is_past_due_date(issue.due_date):
-           # proj_idをkeyにして値にformatしたIssue情報の値を入れる。
-           # 辞書のkeyと値の例:{proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)'], xxx:['- xxxxxxx']}
-            if proj_id not in projects_past_due_date.keys():
-                projects_past_due_date[proj_id] = [issue_display]
-            else:
-                projects_past_due_date[proj_id].append(issue_display)
-        # issueの期限が1週間以内の場合
-        elif is_close_to_due_date(issue.due_date):
-            if proj_id not in projects_close_to_due_date.keys():
-                 projects_close_to_due_date[proj_id] = [issue_display]
-            else:
-                 projects_close_to_due_date[proj_id].append(issue_display)
-        else:
-            continue
+        proj_rooms = s.query(ProjectChannel).filter(
+            ProjectChannel.project_id == project).all()
+
+        for proj_room in proj_rooms:
+            channels = proj_room.channels
+            if len(channels) > 0: # only save issues that has slack channel
+                # issueの期限が過ぎていた場合
+                if is_past_due_date(issue.due_date):
+                   # proj_idをkeyにして値にformatしたIssue情報の値を入れる。
+                   # 辞書のkeyと値の例:{proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)'], xxx:['- xxxxxxx']}
+                    if proj_id not in projects_past_due_date.keys():
+                        projects_past_due_date[proj_id] = [issue_display]
+                    else:
+                        projects_past_due_date[proj_id].append(issue_display)
+                # issueの期限が1週間以内の場合
+                elif is_close_to_due_date(issue.due_date):
+                    if proj_id not in projects_close_to_due_date.keys():
+                         projects_close_to_due_date[proj_id] = [issue_display]
+                    else:
+                         projects_close_to_due_date[proj_id].append(issue_display)
+                else:
+                    continue
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
     send_ticket_info_to_channels(projects_past_due_date, 0)
-    print(projects_past_due_date)
     send_ticket_info_to_channels(projects_close_to_due_date, 1)
 
 
@@ -99,7 +106,7 @@ def is_close_to_due_date(due_date):
     """
     today = date.today()
 
-    return due_date < today - timedelta(7)
+    return due_date < today - timedelta(LIMIT)
 
 
 def send_ticket_info_to_channels(projects, type):
@@ -112,36 +119,28 @@ def send_ticket_info_to_channels(projects, type):
     sc = SlackClient(SLACK_API_TOKEN)
     for project in projects.keys():
         # 各プロジェクトのproj_roomを獲得する。
-        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == project).one_or_none()
-        # for testing only
-        issue_count = len(projects[project])
-        if not type:  # 期限切れチケット
-            message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
-        else:  # 期限切れそうなチケット
-            message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
-        message += '\n'.join(projects[project])
-        sc.api_call(
-            "chat.postMessage",
-            channel="CBEL53NPM",
-            text=message
-        )
+        proj_rooms = s.query(ProjectChannel).filter(
+            ProjectChannel.project_id == project).all()
+
         # api_call()を使用し、すべてのSlackチャンネルに期限が切れたチケット、期限が切れそうな通知をチケットまとめて送る
-        if proj_room:
-            # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対応
+        # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対応
+        for proj_room in proj_rooms:
             channels = proj_room.channels
             # プロジェクトごとのチケット数カウントを取得
             issue_count = len(projects[project])
-            if not type: # 期限切れチケット
+            if not type:  # 期限切れチケット
                 message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
-            else: # 期限切れそうなチケット
+            else:  # 期限切れそうなチケット
                 message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
-                message += '\n'.join(projects[project])
-            # for channel in channels:
-            #     sc.api_call(
-            #         "chat.postMessage",
-            #         channel=channel,
-            #         text= message
-            #     )
+            for issue in projects[project]:
+                message += display_issue(issue) + '\n'
+
+            for channel in channels:
+                sc.api_call(
+                    "chat.postMessage",
+                    channel=channel,
+                    text= message
+                )
 
 def get_argparser():
 
@@ -173,8 +172,8 @@ def main():
     # 環境変数で指定したいため ini ファイルでなくここで追記
     conf["alembic"]['sqlalchemy.url'] = SQLALCHEMY_URL
     conf["alembic"]['sqlalchemy.echo'] = SQLALCHEMY_ECHO
-    # if SQLALCHEMY_POOL_SIZE:
-    #     conf["alembic"]['sqlalchemy.pool_size'] = '20' #SQLALCHEMY_POOL_SIZE
+    if SQLALCHEMY_POOL_SIZE:
+        conf["alembic"]['sqlalchemy.pool_size'] = '20' #SQLALCHEMY_POOL_SIZE
     if not conf.has_section('alembic'):
         raise NoSectionError('alembic')
 
