@@ -29,7 +29,8 @@ from slackbot_settings import (
 
 from db import Session
 
-LIMIT = 7 # 期限が1週間以内のチケットを分別するために使用
+LIMIT = 7  # 期限が1週間以内のチケットを分別するために使用
+
 
 def get_ticket_information():
     """Redmineのチケット情報とチケットと結びついているSlackチャンネルを取得
@@ -49,15 +50,15 @@ def get_ticket_information():
         # issueのデータをSlack通知用にformatする。
         issue_display = display_issue(issue)
         proj_rooms = s.query(ProjectChannel).filter(
-            ProjectChannel.project_id == project).all()
+            ProjectChannel.project_id == proj_id).all()
 
         for proj_room in proj_rooms:
             channels = proj_room.channels
-            if len(channels) > 0: # only save issues that has slack channel
+            if len(channels) > 0:  # slack channelがあるIssueのみ残す
                 # issueの期限が過ぎていた場合
                 if is_past_due_date(issue.due_date):
-                   # proj_idをkeyにして値にformatしたIssue情報の値を入れる。
-                   # 辞書のkeyと値の例:{proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)'], xxx:['- xxxxxxx']}
+                    # proj_idをkeyにして値にformatしたIssue情報の値を入れる。
+                    # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
                     if proj_id not in projects_past_due_date.keys():
                         projects_past_due_date[proj_id] = [issue_display]
                     else:
@@ -65,9 +66,10 @@ def get_ticket_information():
                 # issueの期限が1週間以内の場合
                 elif is_close_to_due_date(issue.due_date):
                     if proj_id not in projects_close_to_due_date.keys():
-                         projects_close_to_due_date[proj_id] = [issue_display]
+                        projects_close_to_due_date[proj_id] = [issue_display]
                     else:
-                         projects_close_to_due_date[proj_id].append(issue_display)
+                        projects_close_to_due_date[proj_id].append(
+                            issue_display)
                 else:
                     continue
 
@@ -84,7 +86,8 @@ def display_issue(issue):
     :param issue: redmineのissue
     """
 
-    return '{} {} {}: {} (@{})'.format('-', issue.due_date, issue.id, issue.subject, issue.author)
+    return '{} {} {}: {} (@{})'.format('-', issue.due_date, issue.id,
+                                       issue.subject, issue.author)
 
 
 def is_past_due_date(due_date):
@@ -106,7 +109,7 @@ def is_close_to_due_date(due_date):
     """
     today = date.today()
 
-    return due_date < today - timedelta(LIMIT)
+    return due_date < today + timedelta(LIMIT)
 
 
 def send_ticket_info_to_channels(projects, type):
@@ -139,11 +142,11 @@ def send_ticket_info_to_channels(projects, type):
                 sc.api_call(
                     "chat.postMessage",
                     channel=channel,
-                    text= message
+                    text=message
                 )
 
-def get_argparser():
 
+def get_argparser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent('''\
@@ -156,6 +159,7 @@ def get_argparser():
                         help='ini形式のファイルをファイルパスで指定します')
 
     return parser
+
 
 def main():
     """設定ファイルをparseして、slackbotを起動します
@@ -173,7 +177,7 @@ def main():
     conf["alembic"]['sqlalchemy.url'] = SQLALCHEMY_URL
     conf["alembic"]['sqlalchemy.echo'] = SQLALCHEMY_ECHO
     if SQLALCHEMY_POOL_SIZE:
-        conf["alembic"]['sqlalchemy.pool_size'] = '20' #SQLALCHEMY_POOL_SIZE
+        conf["alembic"]['sqlalchemy.pool_size'] = SQLALCHEMY_POOL_SIZE
     if not conf.has_section('alembic'):
         raise NoSectionError('alembic')
 
@@ -183,4 +187,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
