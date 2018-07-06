@@ -13,6 +13,7 @@ from slackclient import SlackClient
 import argparse
 from textwrap import dedent
 from configparser import ConfigParser, NoSectionError
+from collections import defaultdict
 
 from haro.plugins.redmine_models import ProjectChannel
 
@@ -39,16 +40,16 @@ def get_ticket_information():
     # すべてのチケットを取得
     issues = redmine.issue.all(sort='subject:desc')
 
-    projects_past_due_date = {}
-    projects_close_to_due_date = {}
+    projects_past_due_date = defaultdict(list)
+    projects_close_to_due_date = defaultdict(list)
     s = Session()
     for issue in issues:
+        # TODO: JSONでattachmentsを送信する
         # due_date属性とdue_dateがnoneの場合は除外
         if not getattr(issue, 'due_date', None):
             continue
         proj_id = issue.project.id
         # issueのデータをSlack通知用にformatする。
-        issue_display = display_issue(issue)
         proj_rooms = s.query(ProjectChannel).filter(
             ProjectChannel.project_id == proj_id).all()
 
@@ -56,26 +57,19 @@ def get_ticket_information():
             channels = proj_room.channels
             if len(channels) > 0:  # slack channelがあるIssueのみ残す
                 # issueの期限が過ぎていた場合
-                if is_past_due_date(issue.due_date):
+                if issue.due_date < date.today():
                     # proj_idをkeyにして値にformatしたIssue情報の値を入れる。
                     # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
-                    if proj_id not in projects_past_due_date.keys():
-                        projects_past_due_date[proj_id] = [issue_display]
-                    else:
-                        projects_past_due_date[proj_id].append(issue_display)
+                    projects_past_due_date[proj_id].append(issue)
                 # issueの期限が1週間以内の場合
-                elif is_close_to_due_date(issue.due_date):
-                    if proj_id not in projects_close_to_due_date.keys():
-                        projects_close_to_due_date[proj_id] = [issue_display]
-                    else:
-                        projects_close_to_due_date[proj_id].append(
-                            issue_display)
+                elif issue.due_date < (date.today() + timedelta(LIMIT)):
+                    projects_close_to_due_date[proj_id].append(issue)
                 else:
                     continue
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
-    send_ticket_info_to_channels(projects_past_due_date, 0)
-    send_ticket_info_to_channels(projects_close_to_due_date, 1)
+    send_ticket_info_to_channels(projects_past_due_date, True)
+    send_ticket_info_to_channels(projects_close_to_due_date, False)
 
 
 def display_issue(issue):
@@ -90,29 +84,7 @@ def display_issue(issue):
                                        issue.subject, issue.author)
 
 
-def is_past_due_date(due_date):
-    """期限切れたチケットをチェックするFunction
-    期限が切れていたらTrueを返す。それ以外はFalse
-
-    :param due_date: 各チケットのdue_date
-    """
-    today = date.today()
-
-    return due_date < today
-
-
-def is_close_to_due_date(due_date):
-    """期限が1週間以内に切れそうなチケットをチェックするFunction
-    期限が切れていたらTrueを返す。それ以外はFalse
-
-    :param due_date: 各チケットのdue_date
-    """
-    today = date.today()
-
-    return due_date < today + timedelta(LIMIT)
-
-
-def send_ticket_info_to_channels(projects, type):
+def send_ticket_info_to_channels(projects, is_past_due_date):
     """チケット情報を各Slackチャンネルごとに通知する。
 
         :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
@@ -131,7 +103,7 @@ def send_ticket_info_to_channels(projects, type):
             channels = proj_room.channels
             # プロジェクトごとのチケット数カウントを取得
             issue_count = len(projects[project])
-            if not type:  # 期限切れチケット
+            if is_past_due_date:  # 期限切れチケット
                 message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
             else:  # 期限切れそうなチケット
                 message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
