@@ -14,6 +14,7 @@ import argparse
 from textwrap import dedent
 from configparser import ConfigParser, NoSectionError
 from collections import defaultdict
+import time
 
 from haro.plugins.redmine_models import ProjectChannel
 
@@ -111,11 +112,38 @@ def send_ticket_info_to_channels(projects, is_past_due_date):
                 message += display_issue(issue) + '\n'
 
             for channel in channels:
-                sc.api_call(
-                    "chat.postMessage",
-                    channel=channel,
-                    text=message
-                )
+                send_slack_message_per_sec(channel, message)
+
+
+def send_slack_message(channel, message):
+    sc = SlackClient(SLACK_API_TOKEN)
+    return sc.api_call(
+        "chat.postMessage",
+        channel=channel,
+        text=message
+    )
+
+
+
+def send_slack_message_per_sec(channel, message):
+    """API rate limitに対処する
+
+        :param channel: Slack channel
+        :param message:
+    """
+    response = send_slack_message(channel, message)
+
+    #メッセージが通知されたかをチェックする
+    #メッセージ通知が成功なら、response["ok"]がTrue
+    if response["ok"]:
+        print("Message posted successfully: " + response["message"]["ts"])
+        # 通知が失敗なら, responseのrate limit headersをチェック
+    elif response["ok"] is False and response["headers"]["Retry-After"]:
+        # Retry-After headerがどのくらいのdelayが必要かの数値を持っている
+        delay = int(response["headers"]["Retry-After"])
+        print("Rate limited. Retrying in " + str(delay) + " seconds")
+        time.sleep(delay)
+        send_slack_message(message, channel)
 
 
 def get_argparser():
@@ -134,12 +162,12 @@ def get_argparser():
 
 
 def main():
-    """設定ファイルをparseして、slackbotを起動します
+    """設定ファイルをparseして、get_ticket_information()を実行する
 
     1. configparserで設定ファイルを読み込む
     2. 設定ファイルに `alembic` セクションが設定されているかチェック
     3. 設定ファイルの情報でDB周りの設定を初期化
-    4. slackbotの処理を開始
+    4. get_ticket_information()を実行する
     """
     parser = get_argparser()
     args = parser.parse_args()
