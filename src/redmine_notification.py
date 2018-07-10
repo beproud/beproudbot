@@ -39,7 +39,7 @@ def get_ticket_information():
     """
     redmine = Redmine(REDMINE_URL, key=API_KEY)
     # すべてのチケットを取得
-    issues = redmine.issue.filter(status_id='open', sort='due_date:desc')
+    issues = redmine.issue.filter(status_id='open', sort='due_date')
 
     projects_past_due_date = defaultdict(list)
     projects_close_to_due_date = defaultdict(list)
@@ -77,8 +77,8 @@ def display_issue(issue):
     :param issue: redmineのissue
     """
 
-    return '{} {} {}: {} (@{})'.format('-', issue.due_date, issue.id,
-                                       issue.subject, issue.author)
+    return '- {} {}: {} (@{})'.format(issue.due_date, issue.id,
+                                      issue.subject, issue.author)
 
 
 def send_ticket_info_to_channels(projects, is_past_due_date):
