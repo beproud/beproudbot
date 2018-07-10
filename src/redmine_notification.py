@@ -39,34 +39,30 @@ def get_ticket_information():
     """
     redmine = Redmine(REDMINE_URL, key=API_KEY)
     # すべてのチケットを取得
-    issues = redmine.issue.all(sort='subject:desc')
+    issues = redmine.issue.filter(status_id='open', sort='due_date:desc')
 
     projects_past_due_date = defaultdict(list)
     projects_close_to_due_date = defaultdict(list)
-    s = Session()
+    today = date.today()
+    close_to_today = today + timedelta(LIMIT)
     for issue in issues:
-        # TODO: JSONでattachmentsを送信する
         # due_date属性とdue_dateがnoneの場合は除外
         if not getattr(issue, 'due_date', None):
             continue
         proj_id = issue.project.id
         # issueのデータをSlack通知用にformatする。
-        proj_rooms = s.query(ProjectChannel).filter(
-            ProjectChannel.project_id == proj_id).all()
+        proj_rooms = get_proj_room(proj_id)
 
         for proj_room in proj_rooms:
             channels = proj_room.channels
-            if len(channels) > 0:  # slack channelがあるIssueのみ残す
-                # issueの期限が過ぎていた場合
-                if issue.due_date < date.today():
-                    # proj_idをkeyにして値にformatしたIssue情報の値を入れる。
-                    # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
-                    projects_past_due_date[proj_id].append(issue)
-                # issueの期限が1週間以内の場合
-                elif issue.due_date < (date.today() + timedelta(LIMIT)):
-                    projects_close_to_due_date[proj_id].append(issue)
-                else:
-                    continue
+            if not channels:  # slack channelが設定されていないissueは無視する
+                continue
+            elif issue.due_date < today:
+                # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
+                projects_past_due_date[proj_id].append(issue)
+            # issueの期限が1週間以内の場合
+            elif issue.due_date < close_to_today:
+                projects_close_to_due_date[proj_id].append(issue)
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
     send_ticket_info_to_channels(projects_past_due_date, True)
@@ -91,12 +87,10 @@ def send_ticket_info_to_channels(projects, is_past_due_date):
         :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
         :param type: int type=0 -> 期限切れ type=1 ->期限切れそうなチケット
     """
-    s = Session()
-    sc = SlackClient(SLACK_API_TOKEN)
     for project in projects.keys():
         # 各プロジェクトのproj_roomを獲得する。
-        proj_rooms = s.query(ProjectChannel).filter(
-            ProjectChannel.project_id == project).all()
+        # TODO: 毎回DBを検索してredmineに紐付いたSlackのチャンネルを取得せず、最初にまとめて取得する
+        proj_rooms = get_proj_room(project)
 
         # api_call()を使用し、すべてのSlackチャンネルに期限が切れたチケット、期限が切れそうな通知をチケットまとめて送る
         # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対応
@@ -109,10 +103,18 @@ def send_ticket_info_to_channels(projects, is_past_due_date):
             else:  # 期限切れそうなチケット
                 message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
             for issue in projects[project]:
+                # 通知メッセージをformatする。
                 message += display_issue(issue) + '\n'
 
             for channel in channels:
+                # TODO: JSONでattachmentsを送信する
                 send_slack_message_per_sec(channel, message)
+
+
+def get_proj_room(project_id):
+    s = Session()
+    return s.query(ProjectChannel).filter(
+        ProjectChannel.project_id == project_id).all()
 
 
 def send_slack_message(channel, message):
@@ -124,7 +126,6 @@ def send_slack_message(channel, message):
     )
 
 
-
 def send_slack_message_per_sec(channel, message):
     """API rate limitに対処する
 
@@ -133,8 +134,8 @@ def send_slack_message_per_sec(channel, message):
     """
     response = send_slack_message(channel, message)
 
-    #メッセージが通知されたかをチェックする
-    #メッセージ通知が成功なら、response["ok"]がTrue
+    # メッセージが通知されたかをチェックする
+    # メッセージ通知が成功なら、response["ok"]がTrue
     if response["ok"]:
         print("Message posted successfully: " + response["message"]["ts"])
         # 通知が失敗なら, responseのrate limit headersをチェック
