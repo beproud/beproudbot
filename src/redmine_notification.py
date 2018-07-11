@@ -95,7 +95,8 @@ def send_ticket_info_to_channels(projects, is_past_due_date):
         # api_call()を使用し、すべてのSlackチャンネルに期限が切れたチケット、期限が切れそうな通知をチケットまとめて送る
         # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対応
         for proj_room in proj_rooms:
-            channels = proj_room.channels
+            channels = proj_room.channels.split(
+                ",") if proj_room.channels else []
             # プロジェクトごとのチケット数カウントを取得
             issue_count = len(projects[project])
             if is_past_due_date:  # 期限切れチケット
@@ -146,13 +147,14 @@ def send_slack_message_per_sec(channel, message):
     # メッセージが通知されたかをチェックする
     # メッセージ通知が成功なら、response["ok"]がTrue
     if response["ok"]:
-        # TODO loggin 対応
+        # TODO logging 対応
         print("Message posted successfully: " + response["message"]["ts"])
         # 通知が失敗なら, responseのrate limit headersをチェック
-    elif response["ok"] is False and response["headers"]["Retry-After"]:
+    elif response["ok"] is False and getattr(response["headers"],
+                                             "Retry-After", None):
         # Retry-After headerがどのくらいのdelayが必要かの数値を持っている
         delay = int(response["headers"]["Retry-After"])
-        # TODO loggin 対応
+        # TODO logging 対応
         print("Rate limited. Retrying in " + str(delay) + " seconds")
         time.sleep(delay)
         send_slack_message(message, channel)
@@ -163,7 +165,7 @@ def get_argparser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent('''\
             説明:
-            haroの設定ファイルを読み込んだ後にslackbotを起動します'''))
+            haroの設定ファイルを読み込んだ後にredmine_notificationを'''))
 
     parser.add_argument('-c', '--config',
                         type=argparse.FileType('r'),
