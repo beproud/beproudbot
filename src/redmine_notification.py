@@ -82,10 +82,10 @@ def display_issue(issue):
 
 
 def send_ticket_info_to_channels(projects, is_past_due_date):
-    """チケット情報を各Slackチャンネルごとに通知する。
+    """チャンネルを取得し、チケット情報を各Slackチャンネルごとに通知する。
 
-        :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
-        :param type: int type=0 -> 期限切れ type=1 ->期限切れそうなチケット
+    :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
+    :param is_past_due_date: 期限切れチケットはTrue,期限が近いチケットはFalse
     """
     for project in projects.keys():
         # 各プロジェクトのproj_roomを獲得する。
@@ -112,12 +112,21 @@ def send_ticket_info_to_channels(projects, is_past_due_date):
 
 
 def get_proj_room(project_id):
+    """project_roomを取得する
+
+    :param project_id: Redmine issue project_id
+    """
     s = Session()
     return s.query(ProjectChannel).filter(
         ProjectChannel.project_id == project_id).all()
 
 
 def send_slack_message(channel, message):
+    """各チャンネルに通知を送る
+
+    :param channel: Slack channel
+    :param message: 通知メッセージ
+    """
     sc = SlackClient(SLACK_API_TOKEN)
     return sc.api_call(
         "chat.postMessage",
@@ -129,19 +138,21 @@ def send_slack_message(channel, message):
 def send_slack_message_per_sec(channel, message):
     """API rate limitに対処する
 
-        :param channel: Slack channel
-        :param message:
+    :param channel: Slack channel
+    :param message:
     """
     response = send_slack_message(channel, message)
 
     # メッセージが通知されたかをチェックする
     # メッセージ通知が成功なら、response["ok"]がTrue
     if response["ok"]:
+        # TODO loggin 対応
         print("Message posted successfully: " + response["message"]["ts"])
         # 通知が失敗なら, responseのrate limit headersをチェック
     elif response["ok"] is False and response["headers"]["Retry-After"]:
         # Retry-After headerがどのくらいのdelayが必要かの数値を持っている
         delay = int(response["headers"]["Retry-After"])
+        # TODO loggin 対応
         print("Rate limited. Retrying in " + str(delay) + " seconds")
         time.sleep(delay)
         send_slack_message(message, channel)

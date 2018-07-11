@@ -36,14 +36,6 @@ $ source /path/env/bin/activate
 (env)$ cd src && python run.py
 ```
 
-### Redmine チケット情報通知
-```bash
-$ source /path/env/bin/activate
-# configには環境変数を指定します
-(env)$ export $(cat .env |grep -v '#')
-(env)$ cd src && python redmine_notification.py
-```
-
 ### Docker
 
 ```bash
