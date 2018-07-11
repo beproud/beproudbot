@@ -102,7 +102,7 @@ def send_ticket_info_to_channels(projects, is_past_due_date):
             if is_past_due_date:  # 期限切れチケット
                 message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
             else:  # 期限切れそうなチケット
-                message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
+                message = 'もうすぐ期限が切ケットは' + str(issue_count) + ' 件です\n'
             for issue in projects[project]:
                 # 通知メッセージをformatする。
                 message += display_issue(issue) + '\n'
@@ -165,7 +165,7 @@ def get_argparser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent('''\
             説明:
-            haroの設定ファイルを読み込んだ後にredmine_notificationを'''))
+            haroの設定ファイルを読み込んだ後にredmine_notificationを実行'''))
 
     parser.add_argument('-c', '--config',
                         type=argparse.FileType('r'),
