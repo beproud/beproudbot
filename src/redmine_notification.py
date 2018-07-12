@@ -31,6 +31,23 @@ from slackbot_settings import (
 
 from db import Session
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# file headerを作る
+handler = logging.FileHandler('redmine_notification.log')
+handler.setLevel(logging.INFO)
+
+# logging formatを作る
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# handlerをloggerに加える
+logger.addHandler(handler)
+
 LIMIT = 7  # 期限が1週間以内のチケットを分別するために使用
 
 
@@ -45,28 +62,29 @@ def get_ticket_information():
     projects_close_to_due_date = defaultdict(list)
     today = date.today()
     close_to_today = today + timedelta(LIMIT)
+    s = Session()
+    all_proj_channels = s.query(ProjectChannel).all()
     for issue in issues:
         # due_date属性とdue_dateがnoneの場合は除外
         if not getattr(issue, 'due_date', None):
             continue
         proj_id = issue.project.id
         # issueのデータをSlack通知用にformatする。
-        proj_rooms = get_proj_room(proj_id)
-
-        for proj_room in proj_rooms:
-            channels = proj_room.channels
-            if not channels:  # slack channelが設定されていないissueは無視する
-                continue
-            elif issue.due_date < today:
-                # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
-                projects_past_due_date[proj_id].append(issue)
-            # issueの期限が1週間以内の場合
-            elif issue.due_date < close_to_today:
-                projects_close_to_due_date[proj_id].append(issue)
+        channels = get_proj_channels(proj_id, all_proj_channels)
+        if not channels:  # slack channelが設定されていないissueは無視する
+            continue
+        elif issue.due_date < today:
+            # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
+            projects_past_due_date[proj_id].append(issue)
+        # issueの期限が1週間以内の場合
+        elif issue.due_date < close_to_today:
+            projects_close_to_due_date[proj_id].append(issue)
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
-    send_ticket_info_to_channels(projects_past_due_date, True)
-    send_ticket_info_to_channels(projects_close_to_due_date, False)
+    send_ticket_info_to_channels(projects_past_due_date, all_proj_channels,
+                                 True)
+    send_ticket_info_to_channels(projects_close_to_due_date, all_proj_channels,
+                                 False)
 
 
 def display_issue(issue):
@@ -81,22 +99,18 @@ def display_issue(issue):
                                       issue.subject, issue.author)
 
 
-def send_ticket_info_to_channels(projects, is_past_due_date):
+def send_ticket_info_to_channels(projects, all_proj_channels,
+                                 is_past_due_date):
     """チャンネルを取得し、チケット情報を各Slackチャンネルごとに通知する。
 
     :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
     :param is_past_due_date: 期限切れチケットはTrue,期限が近いチケットはFalse
     """
     for project in projects.keys():
-        # 各プロジェクトのproj_roomを獲得する。
-        # TODO: 毎回DBを検索してredmineに紐付いたSlackのチャンネルを取得せず、最初にまとめて取得する
-        proj_rooms = get_proj_room(project)
-
         # api_call()を使用し、すべてのSlackチャンネルに期限が切れたチケット、期限が切れそうな通知をチケットまとめて送る
         # 1つのredmineプロジェクトが複数のslackチャンネルに関連付けられているケースに対応
-        for proj_room in proj_rooms:
-            channels = proj_room.channels.split(
-                ",") if proj_room.channels else []
+        channels = get_proj_channels(project, all_proj_channels)
+        if channels:
             # プロジェクトごとのチケット数カウントを取得
             issue_count = len(projects[project])
             if is_past_due_date:  # 期限切れチケット
@@ -107,19 +121,19 @@ def send_ticket_info_to_channels(projects, is_past_due_date):
                 # 通知メッセージをformatする。
                 message += display_issue(issue) + '\n'
 
-            for channel in channels:
-                # TODO: JSONでattachmentsを送信する
-                send_slack_message_per_sec(channel, message)
+        for channel in channels:
+            # TODO: JSONでattachmentsを送信する
+            send_slack_message_per_sec(channel, message)
 
 
-def get_proj_room(project_id):
-    """project_roomを取得する
-
-    :param project_id: Redmine issue project_id
+def get_proj_channels(project_id, all_proj_channels):
+    """ 全てのプロジェクトチャンネルを獲得
+    :param project_id: Redmine project id
+    :param all_proj_channels: 全てのSlack channel
     """
-    s = Session()
-    return s.query(ProjectChannel).filter(
-        ProjectChannel.project_id == project_id).all()
+    for proj_room in all_proj_channels:
+        if project_id == proj_room.project_id:
+            return proj_room.channels.split(",") if proj_room.channels else []
 
 
 def send_slack_message(channel, message):
@@ -147,15 +161,14 @@ def send_slack_message_per_sec(channel, message):
     # メッセージが通知されたかをチェックする
     # メッセージ通知が成功なら、response["ok"]がTrue
     if response["ok"]:
-        # TODO logging 対応
-        print("Message posted successfully: " + response["message"]["ts"])
+        logger.info(
+            "Message posted successfully: " + response["message"]["ts"])
         # 通知が失敗なら, responseのrate limit headersをチェック
     elif response["ok"] is False and getattr(response["headers"],
                                              "Retry-After", None):
         # Retry-After headerがどのくらいのdelayが必要かの数値を持っている
         delay = int(response["headers"]["Retry-After"])
-        # TODO logging 対応
-        print("Rate limited. Retrying in " + str(delay) + " seconds")
+        logger.info("Rate limited. Retrying in " + str(delay) + " seconds")
         time.sleep(delay)
         send_slack_message(message, channel)
 
