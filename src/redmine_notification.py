@@ -49,6 +49,8 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 LIMIT = 7  # 期限が1週間以内のチケットを分別するために使用
+BOTNAME = "REDMINE_BOT"  # 通知を送るBOTの名前
+EMOJI = ":ghost:"  # BOTの絵文字
 
 
 def get_ticket_information():
@@ -88,15 +90,23 @@ def get_ticket_information():
 
 
 def display_issue(issue):
-    """issueの詳細をSlackに表示用にフォーマットする。
+    """issueの詳細をSlackの表示のため、JSONフォーマットにしてattachmentに格納
 
     フォーマット例:
-    - 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)
+    63358
+　　 - 2018-07-10: Slack-Channelへのチケット期限通知のためのテスト (@Dai.K)
+
     :param issue: redmineのissue
     """
+    attachment = {
+        "fallback": issue.description,
+        "title": issue.id,
+        "title_link": issue.url,
+        "text": '- {}: {} (@{})'.format(issue.due_date, issue.subject,
+                                        issue.author)
 
-    return '- {} {}: {} (@{})'.format(issue.due_date, issue.id,
-                                      issue.subject, issue.author)
+    }
+    return attachment
 
 
 def send_ticket_info_to_channels(projects, all_proj_channels,
@@ -117,13 +127,12 @@ def send_ticket_info_to_channels(projects, all_proj_channels,
                 message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
             else:  # 期限切れそうなチケット
                 message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
+            attachments = []
             for issue in projects[project]:
                 # 通知メッセージをformatする。
-                message += display_issue(issue) + '\n'
-
+                attachments.append(display_issue(issue))
         for channel in channels:
-            # TODO: JSONでattachmentsを送信する
-            send_slack_message_per_sec(channel, message)
+            send_slack_message_per_sec(channel, attachments, message)
 
 
 def get_proj_channels(project_id, all_proj_channels):
@@ -136,7 +145,7 @@ def get_proj_channels(project_id, all_proj_channels):
             return proj_room.channels.split(",") if proj_room.channels else []
 
 
-def send_slack_message(channel, message):
+def send_slack_message(channel, attachments, message):
     """各チャンネルに通知を送る
 
     :param channel: Slack channel
@@ -146,17 +155,21 @@ def send_slack_message(channel, message):
     return sc.api_call(
         "chat.postMessage",
         channel=channel,
-        text=message
+        text=message,
+        as_user="false",
+        icon_emoji=EMOJI,
+        username=BOTNAME,
+        attachments=attachments
     )
 
 
-def send_slack_message_per_sec(channel, message):
+def send_slack_message_per_sec(channel, attachments, message):
     """API rate limitに対処する
 
     :param channel: Slack channel
     :param message:
     """
-    response = send_slack_message(channel, message)
+    response = send_slack_message(channel, attachments, message)
 
     # メッセージが通知されたかをチェックする
     # メッセージ通知が成功なら、response["ok"]がTrue
@@ -170,7 +183,7 @@ def send_slack_message_per_sec(channel, message):
         delay = int(response["headers"]["Retry-After"])
         logger.info("Rate limited. Retrying in " + str(delay) + " seconds")
         time.sleep(delay)
-        send_slack_message(message, channel)
+        send_slack_message(channel, attachments, message)
 
 
 def get_argparser():
