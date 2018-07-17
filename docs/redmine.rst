@@ -63,3 +63,12 @@ Slackのチャンネルidが redmine_projectchannel テーブルに登録され�
 -------------
 
 REDMINE_URL: チケットのURLの元 例: https://project.beproud.jp/redmine/issues/
+
+Redmineの期限切れ、期限切れそうなチケット通知の設定方法
+--------------------------------------------------
+
+$redmine add <redmine_project_identifier> コマンドでSlackチャンネルとRedmineプロジェクトを紐付けると自動で通知が設定されます。
+
+- Redmineチケットの期日を登録しないと、通知は来ないです。
+- チケットの通知は毎週月曜日の午前9時です。
+- 期限切れそうなチケットは、1週間以内で期限を過ぎるチケットです。
