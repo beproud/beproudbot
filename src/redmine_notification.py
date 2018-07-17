@@ -71,7 +71,7 @@ def get_ticket_information():
         if not getattr(issue, 'due_date', None):
             continue
         proj_id = issue.project.id
-        # issueのデータをSlack通知用にformatする。
+        # 全てのプロジェクトチャンネルを獲得
         channels = get_proj_channels(proj_id, all_proj_channels)
         if not channels:  # slack channelが設定されていないissueは無視する
             continue
@@ -127,6 +127,7 @@ def send_ticket_info_to_channels(projects, all_proj_channels,
                 message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
             else:  # 期限切れそうなチケット
                 message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
+            # TODO: 1チケット単位でattachement作らず、1つのattachementの中全通知する
             attachments = []
             for issue in projects[project]:
                 # 通知メッセージをformatする。
