@@ -103,7 +103,7 @@ def display_issue(issue):
         "title": issue.id,
         "title_link": issue.url,
         "text": '- {}: {} (@{})'.format(issue.due_date, issue.subject,
-                                        issue.author)
+                                        getattr(issue, 'assigned_to', None))
 
     }
     return attachment
