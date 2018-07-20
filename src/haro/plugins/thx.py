@@ -62,7 +62,7 @@ def find_thx(s, text):
     return word_map_names_dict, hint_names, not_matched
 
 
-@listen_to('.*\s*\+\+\s+.+')
+@listen_to('.*\s*(?<!\+)\+\+\s+.+')
 def update_thx(message):
     """指定したSlackのユーザーにGJを行う
 

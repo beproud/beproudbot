@@ -52,6 +52,7 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.pytest_cache/
 
 # Translations
 *.mo
@@ -95,3 +96,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# SQLite3 testing database file
+test.sqlite
