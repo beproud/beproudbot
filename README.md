@@ -8,7 +8,7 @@ Haro is [slackbot](https://github.com/lins05/slackbot "lins05/slackbot: A chat b
 
 ### Pre-requirements
 
-- SlackのAPIトークン ([取得方法](#APIトークンの取得))
+- SlackのAPIトークン ([取得方法](#apiトークンの取得))
 - botをinviteしたSlackのチャンネル
 - Docker (tested: 17.05.0-ce)
 - docker-compose (tested: 1.21.2)
@@ -27,7 +27,7 @@ $ cp env.sample .env
 $ editor .env
 ```
 
-[`.env`](#.envリファレンス) を編集して、以下の環境変数を設定する:
+[`.env`](#envリファレンス) を編集して、以下の環境変数を設定する:
 
 - `SLACK_API_TOKEN`
 - `SLACK_ERRORS_TO`
@@ -260,9 +260,8 @@ http://localhost:9000/redmine/issues/12345
 
 ## .envリファレンス
 
-+---------------------------+-------------------------------------------------------------------------------+
 | 環境変数                  | 説明                                                                          |
-+===========================+===============================================================================+
+|---------------------------|-------------------------------------------------------------------------------|
 | `SLACK_API_TOKEN`         | SlackのAPIトークン                                                            |
 | `SLACK_ERRORS_TO`         | エラーの通知先チャンネル。botユーザーがinvite済みの必要がある。               |
 | `REDMINE_URL`             | RedmineのURL                                                                  |
@@ -270,7 +269,6 @@ http://localhost:9000/redmine/issues/12345
 | `SQLALCHEMY_URL`          | データベースのURL (e.g. `mysql+pymysql://root:example@db/haro?charset=utf8`)  |
 | `SQLALCHEMY_ECHO`         | TODO: 書く。 `True` または `False`                                            |
 | `SQLALCHEMY_POOL_SIZE`    | TODO: 書く。                                                                  |
-+---------------------------+-------------------------------------------------------------------------------+
 
 ## ドキュメント
 
