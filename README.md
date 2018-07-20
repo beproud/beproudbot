@@ -71,6 +71,8 @@ $ docker-compose run --rm bot tox
 ### Pre-requirements
 
 - Python 3.5.2 or later.
+- SlackのAPIトークン ([取得方法](#apiトークンの取得))
+- botをinviteしたSlackのチャンネル
 
 ### 事前準備
 
