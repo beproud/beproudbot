@@ -15,11 +15,6 @@ class TestUpdateKudo:
         args, _ = mock_listen_to.call_args
         return re.compile(*args)
 
-    @pytest.fixture
-    def mock_message(self):
-        from slackbot.dispatcher import Message
-        return mock.Mock(Message)
-
     @pytest.mark.parametrize(
         'message,expected',
         [
