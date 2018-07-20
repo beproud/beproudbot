@@ -4,90 +4,109 @@
 
 Haro is [slackbot](https://github.com/lins05/slackbot "lins05/slackbot: A chat bot for Slack (https://slack.com).") based beproud bot system.
 
-## 事前準備
+## Quickstart
 
-- Macのローカルで開発する場合、Docker、ansibleを構築する必要なし
-- 起動方法まで参照することで、ローカル環境が構築できる
+### Pre-requirements
 
-### APIトークンの取得
+- SlackのAPIトークン ([取得方法](#APIトークンの取得))
+- botをinviteしたSlackのチャンネル
+- Docker (tested: 17.05.0-ce)
+- docker-compose (tested: 1.21.2)
 
-- https://my.slack.com/services/new/bot にアクセス
-- botの名前を適当に指定して「Add bot integration」ボタンをクリックする
-- 「Save Integration」ボタンをクリックして保存する
-  - API Token(``xoxb-XXXXXXX-XXXXXXX``)をこのあと使用するので、コピーしておく
+### リポジトリのチェックアウト
 
-### Requirements
+```bash
+$ git clone git@github.com:beproud/beproudbot.git
+$ cd beproudbot
+```
+
+### .envの作成と設定
+
+```bash
+$ cp env.sample .env
+$ editor .env
+```
+
+[`.env`](#.envリファレンス) を編集して、以下の環境変数を設定する:
+
+- `SLACK_API_TOKEN`
+- `SLACK_ERRORS_TO`
+- `HARO_DEBUG`
+- `SQLALCHEMY_ECHO`
+
+### 起動
+
+コンテナの起動:
+
+```bash
+$ docker-compose up -d --build
+```
+
+DBマイグレーションの実行:
+
+```bash
+$ docker-compose run --rm bot bash -c 'cd src/ && alembic --config alembic/conf.ini upgrade head'
+```
+
+Haroの起動:
+
+```bash
+$ docker-compose run --rm bot bash -c 'cd src/ && python run.py'
+```
+
+### マイグレーションファイルの生成
+
+```bash
+$ docker-compose run --rm bot bash -c 'cd src/ && alembic --config alembic/conf.ini revision --autogenerate -m "EINTER-YOUR-MIGRATION-MESSAGE"'
+```
+
+## テストの実行
+
+```bash
+$ docker-compose run --rm bot tox
+```
+
+## Slow start
+
+### Pre-requirements
 
 - Python 3.5.2 or later.
 
+### 事前準備
+
 ```bash
 $ python3 -m venv env
-$ git clone git@github.com:beproud/beproudbot.git
-$ cd beproudbot
 $ source /path/env/bin/activate
 (env)$ cp env.sample .env
-(env)$ vi .env # API Token 等を記入する
-(env)$ export SLACK_API_TOKEN=xoxb-XXXX　# API Tokenがターミナルの環境変数で.envに反映されない場合
-(env)$ pip install -r src/requirements.txt
+(env)$ editor .env # API Token 等を記入する
+(env)$ pip install honcho -r src/requirements.txt
 ```
 
-## 起動方法
+### 起動
 
-```bash
-$ source /path/env/bin/activate
-# configには環境変数を指定します
-(env)$ export $(cat .env |grep -v '#')
-(env)$ cd src && python run.py
+DBマイグレーションの実行:
+
+```
+$ honcho start migrate
 ```
 
-### Docker
+Haroの起動:
 
 ```bash
-# MySQL を使用する場合先に立ち上げておく
-# docker-compose up -d db
-# bot の起動
-$ docker-compose build bot
-$ docker-compose run -d bot
-# コンテナにはいる
-$ docker-compose run --rm bot bash
-# 終了
-# docker-compose down
+(env)$ honcho start bot  # bot
 ```
 
-## DB操作
+DBマイグレーションファイルの生成:
 
-alembic を使用します
-
-### マイグレーション
-
-```bash
-(env)$ export $(cat .env |grep -v '#')
-(env)$ cd src && alembic --config alembic/conf.ini upgrade head
 ```
-
-### マイグレーションファイル作成
-
-`env.py`の設定を読み込み、`versions`以下にマイグレーションファイルが書き出されます
-
-```bash
-(env)$ export $(cat .env |grep -v '#')
-(env)$ cd src && alembic --config alembic/conf.ini revision --autogenerate -m "my message"
-```
-
-#### Procfile 使用
-
-マイグレーション等の操作は `honcho` を使用して操作することができます。
-
-honchoは .env を自動的に読み込み、スクリプトを開始することができます。
-
-```bash
-(env)$ pip install honcho
-# honcho start bot
-# honcho start migrate
-# honcho start makemigrations
+$ honcho start makemigrations
 ```
 
 ## 環境構築
+
+デプロイ用の環境構築方法 (開発時は不要)
+
+### プロビジョニング
 
 ansible の `configure` タグを使用します。
 
@@ -99,7 +118,7 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=configure -e "use_local_mysql_server=$use_local_mysql_server")
 ```
 
-## デプロイ
+### デプロイ
 
 ansible の `deploy` タグを使用します
 
@@ -238,3 +257,30 @@ http://localhost:9000/redmine/issues/12345
 - `$lunch <keyword>`: 指定したキーワードのお店情報を返す
 - `$lunch <keyword> <distance>`: 指定したキーワードと検索距離のお店情報を返す
 - `$lunch help`: このコマンドの使い方を返す
+
+## .envリファレンス
+
++---------------------------+-------------------------------------------------------------------------------+
+| 環境変数                  | 説明                                                                          |
++===========================+===============================================================================+
+| `SLACK_API_TOKEN`         | SlackのAPIトークン                                                            |
+| `SLACK_ERRORS_TO`         | エラーの通知先チャンネル。botユーザーがinvite済みの必要がある。               |
+| `REDMINE_URL`             | RedmineのURL                                                                  |
+| `HARO_DEBUG`              | デバッグモード。 `True` または `False`                                        |
+| `SQLALCHEMY_URL`          | データベースのURL (e.g. `mysql+pymysql://root:example@db/haro?charset=utf8`)  |
+| `SQLALCHEMY_ECHO`         | TODO: 書く。 `True` または `False`                                            |
+| `SQLALCHEMY_POOL_SIZE`    | TODO: 書く。                                                                  |
++---------------------------+-------------------------------------------------------------------------------+
+
+## ドキュメント
+
+`docs/` ディレクトリ下を参照
+
+## Note
+
+### APIトークンの取得
+
+- https://my.slack.com/services/new/bot にアクセス
+- botの名前を適当に指定して *Add bot integration* ボタンをクリックする
+- *Save Integration* ボタンをクリックして保存する
+- APIトークンが表示される (`xoxb-XXXXXXX-XXXXXXX` 形式)
