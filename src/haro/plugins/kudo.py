@@ -12,7 +12,7 @@ HELP = """
 """
 
 
-@listen_to('^(.*)\s*\+\+$')
+@listen_to('^(.*)\s*(?<!\+)\+\+$')
 def update_kudo(message, names):
     """ 指定された名前に対して ++ する
 
