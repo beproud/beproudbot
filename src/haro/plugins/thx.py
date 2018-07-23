@@ -27,7 +27,7 @@ def find_thx(s, text):
 
     :param s: sqlalchemy.orm.session.Session
     :param str text: ユーザーが投稿した内容
-    :return dict word_map_names_dict:
+    :return Dict[str, List[Tuple[str, str]]] word_map_names_dict:
        キーがthx内容、バリューが対象Slackユーザーのリスト
     :return list hint_names: Slackユーザーに似た名前が存在する名前一覧
     :return list not_matched: Slackユーザーとして存在しなかった名前の一覧
@@ -36,7 +36,7 @@ def find_thx(s, text):
     hint_names = []
     not_matched = []
 
-    thx_matcher = re.compile('(?P<user_names>.+)[ \t\f\v]*\+\+[ \t\f\v]+(?P<word>.+)',
+    thx_matcher = re.compile('(?P<user_names>.+)[ \t\f\v]*(?<!\+)\+\+[ \t\f\v]+(?P<word>.+)',
                              re.MULTILINE)
     for thx in thx_matcher.finditer(text):
         user_names = [x for x in thx.group('user_names').split(' ') if x]

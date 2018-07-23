@@ -9,7 +9,7 @@ class TestUpdateKudo:
     @pytest.fixture(scope='class')
     def target_pattern(self):
         with mock.patch('slackbot.bot.listen_to') as mock_listen_to:
-            from haro.plugins import kudo  # noqa: F401
+            from haro.plugins import kudo
             imp.reload(kudo)  # ensure applying the decorator
 
         args, _ = mock_listen_to.call_args
@@ -24,8 +24,6 @@ class TestUpdateKudo:
             ('name ++', True),
             # スペース * 2
             ('name  ++', True),
-            # 全角スペース
-            ('name\N{IDEOGRAPHIC SPACE}++', True),
             # @あり
             ('@name++', True),
             # @とスペースあり
