@@ -1,62 +1,64 @@
 """
 スクリプト概要
-~~~~~~~~~~
-systemdでtimerを作成し、定期的に実行するPython
-1,Redmineから期限切れ、期限切れそうなチケットを取得する
-2,チケットの期限によって分類
-3,各チャンネルに期限切れ、期限が切れそうなチケットの情報を通知する。
+================
+
+systemdでtimerを作成し、定期的に実行
+
+1. Redmineから期限切れ、期限切れそうなチケットを取得
+2. チケットの期限によって分類
+3. 各チャンネルに期限切れ、期限が切れそうなチケットの情報を通知
 """
 
-from redminelib import Redmine
-from datetime import timedelta, date
-from slackclient import SlackClient
 import argparse
-from textwrap import dedent
+import time
+import logging
 from configparser import ConfigParser, NoSectionError
 from collections import defaultdict
-import time
+from datetime import timedelta, date, datetime, timezone
+from textwrap import dedent
 
-from haro.plugins.redmine_models import ProjectChannel
+from redminelib import Redmine
+from slackclient import SlackClient
 
-from db import init_dbsession
-
+from db import (
+    init_dbsession,
+    Session,
+    ProjectChannel,
+)
 from slackbot_settings import (
     REDMINE_URL,
-    API_KEY,
-    SLACK_API_TOKEN,
+    REDMINE_API_KEY,
+    API_TOKEN,
     SQLALCHEMY_URL,
     SQLALCHEMY_ECHO,
     SQLALCHEMY_POOL_SIZE,
 )
 
-from db import Session
-
-import logging
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # file headerを作る
-handler = logging.FileHandler('redmine_notification.log')
+handler = logging.FileHandler('../logs/redmine_notification.log')
 handler.setLevel(logging.INFO)
 
 # logging formatを作る
 formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 handler.setFormatter(formatter)
 
 # handlerをloggerに加える
 logger.addHandler(handler)
 
 LIMIT = 7  # 期限が1週間以内のチケットを分別するために使用
-BOTNAME = "REDMINE_BOT"  # 通知を送るBOTの名前
-EMOJI = ":ghost:"  # BOTの絵文字
+BOTNAME = "Redmine BOT"  # 通知を送るBOTの名前
+EMOJI = ":redmine:"  # BOTの絵文字
 
 
 def get_ticket_information():
     """Redmineのチケット情報とチケットと結びついているSlackチャンネルを取得
     """
-    redmine = Redmine(REDMINE_URL, key=API_KEY)
+    redmine = Redmine(REDMINE_URL, key=REDMINE_API_KEY)
     # すべてのチケットを取得
     issues = redmine.issue.filter(status_id='open', sort='due_date')
 
@@ -83,29 +85,32 @@ def get_ticket_information():
             projects_close_to_due_date[proj_id].append(issue)
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
-    send_ticket_info_to_channels(projects_past_due_date, all_proj_channels,
+    send_ticket_info_to_channels(projects_past_due_date,
+                                 all_proj_channels,
                                  True)
-    send_ticket_info_to_channels(projects_close_to_due_date, all_proj_channels,
+    send_ticket_info_to_channels(projects_close_to_due_date,
+                                 all_proj_channels,
                                  False)
 
 
-def display_issue(issue):
-    """issueの詳細をSlackの表示のため、JSONフォーマットにしてattachmentに格納
+def display_issue(issues):
+    """issueをSlackのattachmentに格納
 
-    フォーマット例:
-    63358
-　　 - 2018-07-10: Slack-Channelへのチケット期限通知のためのテスト (@Dai.K)
+    :See: https://api.slack.com/docs/message-attachments
 
-    :param issue: redmineのissue
+    :param list issues: [redminelib.resources.Issue]
     """
-    attachment = {
-        "fallback": issue.description,
-        "title": issue.id,
-        "title_link": issue.url,
-        "text": '- {}: {} (@{})'.format(issue.due_date, issue.subject,
-                                        issue.author)
-
-    }
+    text = []
+    for issue in issues:
+        text.append('- {}: <{}|#{}> {} (<@{}>)'.format(issue.due_date,
+                                                       issue.url,
+                                                       issue.id,
+                                                       issue.subject,
+                                                       issue.assigned_to))
+    attachment = [{
+        "color": "#F44336",
+        "text": "\n".join(text)
+    }]
     return attachment
 
 
@@ -124,26 +129,24 @@ def send_ticket_info_to_channels(projects, all_proj_channels,
             # プロジェクトごとのチケット数カウントを取得
             issue_count = len(projects[project])
             if is_past_due_date:  # 期限切れチケット
-                message = '期限が切れたチケットは' + str(issue_count) + ' 件です\n'
+                message = '期限が切れたチケットは{}件です\n'.format(issue_count)
             else:  # 期限切れそうなチケット
-                message = 'もうすぐ期限が切れそうなチケットは' + str(issue_count) + ' 件です\n'
-            # TODO: 1チケット単位でattachement作らず、1つのattachementの中全通知する
-            attachments = []
-            for issue in projects[project]:
-                # 通知メッセージをformatする。
-                attachments.append(display_issue(issue))
+                message = 'もうすぐ期限が切れそうなチケットは{}件です\n'.format(issue_count)
+            # 通知メッセージをformat
+            attachments = display_issue(projects[project])
         for channel in channels:
             send_slack_message_per_sec(channel, attachments, message)
 
 
 def get_proj_channels(project_id, all_proj_channels):
-    """ 全てのプロジェクトチャンネルを獲得
+    """全てのプロジェクトチャンネルを獲得
+
     :param project_id: Redmine project id
     :param all_proj_channels: 全てのSlack channel
     """
     for proj_room in all_proj_channels:
         if project_id == proj_room.project_id:
-            return proj_room.channels.split(",") if proj_room.channels else []
+            return proj_room.channels.split(',') if proj_room.channels else []
 
 
 def send_slack_message(channel, attachments, message):
@@ -152,9 +155,9 @@ def send_slack_message(channel, attachments, message):
     :param channel: Slack channel
     :param message: 通知メッセージ
     """
-    sc = SlackClient(SLACK_API_TOKEN)
+    sc = SlackClient(API_TOKEN)
     return sc.api_call(
-        "chat.postMessage",
+        'chat.postMessage',
         channel=channel,
         text=message,
         as_user="false",
@@ -175,14 +178,20 @@ def send_slack_message_per_sec(channel, attachments, message):
     # メッセージが通知されたかをチェックする
     # メッセージ通知が成功なら、response["ok"]がTrue
     if response["ok"]:
+        JST = timezone(timedelta(hours=+9), 'JST')
+        time_stamp = datetime.fromtimestamp(
+            float(response["message"]["ts"]),
+            JST
+        )
         logger.info(
-            "Message posted successfully: " + response["message"]["ts"])
+            "Message posted successfully: {}".format(time_stamp)
+        )
         # 通知が失敗なら, responseのrate limit headersをチェック
     elif response["ok"] is False and getattr(response["headers"],
                                              "Retry-After", None):
         # Retry-After headerがどのくらいのdelayが必要かの数値を持っている
         delay = int(response["headers"]["Retry-After"])
-        logger.info("Rate limited. Retrying in " + str(delay) + " seconds")
+        logger.info("Rate limited. Retrying in {} seconds".format(delay))
         time.sleep(delay)
         send_slack_message(channel, attachments, message)
 
@@ -192,7 +201,7 @@ def get_argparser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=dedent('''\
             説明:
-            haroの設定ファイルを読み込んだ後にredmine_notificationを'''))
+            haroの設定ファイルを読み込んだ後にredmine_notification.pyを実行'''))
 
     parser.add_argument('-c', '--config',
                         type=argparse.FileType('r'),
