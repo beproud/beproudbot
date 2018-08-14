@@ -115,7 +115,7 @@ def show_ticket_information(message, *ticket_ids):
                 "author_name": str(ticket.author),
                 "title": ticket.subject,
                 "title_link": ticket.url,
-                "text": ticket.description,
+                # "text": ticket.description,
                 "fields": [],
             }]
 
@@ -132,7 +132,9 @@ def show_ticket_information(message, *ticket_ids):
                         "short": True,
                     })
 
-            sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
+
+            m = sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
+            sc.chat.post_message(channel_id, ticket.description, as_user=True, thread_ts=m.body['ts'])
         else:
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
