@@ -113,7 +113,8 @@ def show_ticket_information(message, *ticket_ids):
             attachments = [{
                 "fallback": ticket.description,
                 "author_name": str(ticket.author),
-                "title": "[{assigned_to}][{priority}][{status}] {title}".format(
+                "title": "#{ticketno}: [{assigned_to}][{priority}][{status}] {title}".format(
+                    ticketno=ticket_id,
                     assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
                     priority=ticket.priority if getattr(ticket, "priority", False) else "-",
                     status=ticket.status if getattr(ticket, "status", False) else "-",
