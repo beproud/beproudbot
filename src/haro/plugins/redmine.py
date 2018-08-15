@@ -110,20 +110,16 @@ def show_ticket_information(message, *ticket_ids):
 
         if proj_room and channel_id in proj_room.channels.split(','):
             sc = message._client.webapi
-            attachments = [{
-                "fallback": ticket.description,
-                "author_name": str(ticket.author),
-                "title": "#{ticketno}: [{assigned_to}][{priority}][{status}] {title}".format(
-                    ticketno=ticket_id,
-                    assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
-                    priority=ticket.priority if getattr(ticket, "priority", False) else "-",
-                    status=ticket.status if getattr(ticket, "status", False) else "-",
-                    title=ticket.subject,
-                    ),
-                "title_link": ticket.url,
+            p = "#{ticketno}: [{assigned_to}][{priority}][{status}] {title}".format(
+                ticketno=ticket_id,
+                assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
+                priority=ticket.priority if getattr(ticket, "priority", False) else "-",
+                status=ticket.status if getattr(ticket, "status", False) else "-",
+                title=ticket.subject,
+            )
+#                "title_link": ticket.url,
                 # "text": ticket.description,
                 #"fields": [],
-            }]
 
             # fields = (("担当者", 'assigned_to'),
             #           ("ステータス", "status"),
@@ -139,8 +135,11 @@ def show_ticket_information(message, *ticket_ids):
             #         })
 
 
-            m = sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
-            sc.chat.post_message(channel_id, ticket.description, as_user=True, thread_ts=m.body['ts'])
+            #import pdb;pdb.set_trace()
+            #botsend(message, "<{}|{}>".format(ticket.url, p))
+            sc.chat.post_message(channel_id, "<{}|{}>".format(ticket.url, p), as_user=True) #, thread_ts=message.thread_ts, reply_broadcast=True)
+            #sc.chat.post_message(channel_id, p, as_user=True, thread_ts=message.thread_ts, reply_broadcast=True)
+            sc.chat.post_message(channel_id, ticket.description, as_user=True, thread_ts=message.thread_ts)
         else:
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
