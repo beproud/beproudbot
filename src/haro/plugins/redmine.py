@@ -137,9 +137,9 @@ def show_ticket_information(message, *ticket_ids):
 
             #import pdb;pdb.set_trace()
             #botsend(message, "<{}|{}>".format(ticket.url, p))
-            sc.chat.post_message(channel_id, "<{}|{}>".format(ticket.url, p), as_user=True) #, thread_ts=message.thread_ts, reply_broadcast=True)
+            m = sc.chat.post_message(channel_id, "<{}|{}>".format(ticket.url, p), as_user=True) #, thread_ts=message.thread_ts, reply_broadcast=True)
             #sc.chat.post_message(channel_id, p, as_user=True, thread_ts=message.thread_ts, reply_broadcast=True)
-            sc.chat.post_message(channel_id, ticket.description, as_user=True, thread_ts=message.thread_ts)
+            sc.chat.post_message(channel_id, ticket.description, as_user=True, thread_ts=m.body['ts']) # message.thread_ts)
         else:
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
