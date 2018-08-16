@@ -100,8 +100,6 @@ def show_ticket_information(message, *ticket_ids):
             continue
 
         noteno = None
-        description = None
-
         if '#note-' in ticket_id:
             ticket_id, noteno = ticket_id.split('#note-')
 
@@ -117,19 +115,23 @@ def show_ticket_information(message, *ticket_ids):
 
         if proj_room and channel_id in proj_room.channels.split(','):
             sc = message._client.webapi
-            if noteno:
+
+            description = None
+            # デフォルトでは説明欄の本文を使用する
+            if not noteno:
+                description = ticket.description
+            else:
                 # NOTE: Redmine 側で変更がなければ問題ないけど、
                 #       values には #note-n に相当するidがはいっていないので
                 #       id でソートして順番を保証したほうがよさそう
                 for i, v in enumerate(ticket.journals.values(), start=1):
                     if str(i) == noteno:
-                        # noteの本文があれば取得する
+                        # コメントの本文があれば取得する
                         if v.get('notes'):
                             description = v['notes']
-
-            # デフォルトでは説明欄の本文を使用する
-            if not description:
-                description = ticket.description
+                # コメント本文がなかったら書き換えられるよう仮文言としている
+                if not description:
+                    description = "(本文なし)"
 
             p = "#{ticketno}: [{assigned_to}][{priority}][{status}] {title}".format(
                 ticketno=ticket_id,
