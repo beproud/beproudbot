@@ -138,29 +138,8 @@ def show_ticket_information(message, *ticket_ids):
                 status=ticket.status if getattr(ticket, "status", False) else "-",
                 title=ticket.subject,
             )
-#                "title_link": ticket.url,
-                # "text": ticket.description,
-                #"fields": [],
-
-            # fields = (("担当者", 'assigned_to'),
-            #           ("ステータス", "status"),
-            #           ("優先", "priority"), )
-
-            # for title, attr in fields:
-            #     value = getattr(ticket, attr, False)
-            #     if value:
-            #         attachments[0]["fields"].append({
-            #             "title": title,
-            #             "value": str(value),
-            #             "short": True,
-            #         })
-
-
-            #import pdb;pdb.set_trace()
-            #botsend(message, "<{}|{}>".format(ticket.url, p))
-            m = sc.chat.post_message(channel_id, "<{}|{}>".format(ticket.url, p), as_user=True) #, thread_ts=message.thread_ts, reply_broadcast=True)
-            #sc.chat.post_message(channel_id, p, as_user=True, thread_ts=message.thread_ts, reply_broadcast=True)
-            sc.chat.post_message(channel_id, description, as_user=True, thread_ts=m.body['ts']) # message.thread_ts)
+            m = sc.chat.post_message(channel_id, "<{}|{}>".format(ticket.url, p), as_user=True)
+            sc.chat.post_message(channel_id, description, as_user=True, thread_ts=m.body['ts'])
         else:
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
