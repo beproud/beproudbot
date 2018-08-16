@@ -76,7 +76,7 @@ def show_help_redmine_commands(message):
     botsend(message, HELP)
 
 
-@listen_to('issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
+@listen_to('issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
 def show_ticket_information(message, *ticket_ids):
     """Redmineのチケット情報を参照する.
 
@@ -98,6 +98,13 @@ def show_ticket_information(message, *ticket_ids):
     for ticket_id in ticket_ids:
         if not ticket_id:
             continue
+
+        noteno = None
+        description = None
+
+        if '#note-' in ticket_id:
+            ticket_id, noteno = ticket_id.split('#note-')
+
         try:
             ticket = redmine.issue.get(ticket_id)
         except (ResourceNotFoundError, ForbiddenError):
@@ -110,6 +117,20 @@ def show_ticket_information(message, *ticket_ids):
 
         if proj_room and channel_id in proj_room.channels.split(','):
             sc = message._client.webapi
+            if noteno:
+                # NOTE: Redmine 側で変更がなければ問題ないけど、
+                #       values には #note-n に相当するidがはいっていないので
+                #       id でソートして順番を保証したほうがよさそう
+                for i, v in enumerate(ticket.journals.values(), start=1):
+                    if str(i) == noteno:
+                        # noteの本文があれば取得する
+                        if v.get('notes'):
+                            description = v['notes']
+
+            # デフォルトでは説明欄の本文を使用する
+            if not description:
+                description = ticket.description
+
             p = "#{ticketno}: [{assigned_to}][{priority}][{status}] {title}".format(
                 ticketno=ticket_id,
                 assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
@@ -139,7 +160,7 @@ def show_ticket_information(message, *ticket_ids):
             #botsend(message, "<{}|{}>".format(ticket.url, p))
             m = sc.chat.post_message(channel_id, "<{}|{}>".format(ticket.url, p), as_user=True) #, thread_ts=message.thread_ts, reply_broadcast=True)
             #sc.chat.post_message(channel_id, p, as_user=True, thread_ts=message.thread_ts, reply_broadcast=True)
-            sc.chat.post_message(channel_id, ticket.description, as_user=True, thread_ts=m.body['ts']) # message.thread_ts)
+            sc.chat.post_message(channel_id, description, as_user=True, thread_ts=m.body['ts']) # message.thread_ts)
         else:
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
