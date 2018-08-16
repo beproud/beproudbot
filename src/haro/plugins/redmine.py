@@ -121,10 +121,11 @@ def show_ticket_information(message, *ticket_ids):
             if not noteno:
                 description = ticket.description
             else:
-                # NOTE: Redmine 側で変更がなければ問題ないけど、
-                #       values には #note-n に相当するidがはいっていないので
-                #       id でソートして順番を保証したほうがよさそう
-                for i, v in enumerate(ticket.journals.values(), start=1):
+                # Redmine 側で変更がなければ問題ないけど、
+                # values には #note-n に相当するidがはいっていないので
+                # id でソートして順番を保証している
+                notes = sorted(ticket.journals.values(), key=lambda d: d['id'])
+                for i, v in enumerate(notes, start=1):
                     if str(i) == noteno:
                         # コメントの本文があれば取得する
                         if v.get('notes'):
