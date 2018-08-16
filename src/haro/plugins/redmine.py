@@ -1,5 +1,3 @@
-import json
-
 from redminelib import Redmine
 from redminelib.exceptions import ForbiddenError, ResourceNotFoundError
 
@@ -113,44 +111,44 @@ def show_ticket_information(message, *ticket_ids):
         proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id)\
             .one_or_none()
 
-        if proj_room and channel_id in proj_room.channels.split(','):
-
-            description = None
-            # デフォルトでは説明欄の本文を使用する
-            if not noteno:
-                description = ticket.description
-            else:
-                # Redmine 側で変更がなければ問題ないけど、
-                # values には #note-n に相当するidがはいっていないので
-                # id でソートして順番を保証している
-                notes = sorted(ticket.journals.values(), key=lambda d: d['id'])
-                for i, v in enumerate(notes, start=1):
-                    if str(i) == noteno:
-                        # コメントの本文があれば取得する
-                        if v.get('notes'):
-                            description = v['notes']
-                # コメント本文がなかったら書き換えられるよう仮文言としている
-                if not description:
-                    description = NO_COMMENT_BODY
-
-            text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
-                ticketno=ticket_id,
-                noteno=note_suffix if noteno else "",
-                assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
-                priority=ticket.priority if getattr(ticket, "priority", False) else "-",
-                status=ticket.status if getattr(ticket, "status", False) else "-",
-                title=ticket.subject,
-            )
-            if noteno:
-                url = "{}{}".format(ticket.url, note_suffix)
-            else:
-                url = ticket.url
-
-            sc = message._client.webapi
-            res = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
-            sc.chat.post_message(channel_id, description, as_user=True, thread_ts=res.body['ts'])
-        else:
+        if not proj_room or channel_id not in proj_room.channels.split(','):
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
+            return
+
+        if noteno:
+            description = None
+            # Redmine 側で変更がなければ問題ないけど、
+            # values には #note-n に相当するidがはいっていないので
+            # id でソートして順番を保証している
+            notes = sorted(ticket.journals.values(), key=lambda d: d['id'])
+            for i, v in enumerate(notes, start=1):
+                if str(i) == noteno:
+                    # コメントの本文があれば取得する
+                    if v.get('notes'):
+                        description = v['notes']
+            # コメント本文がなかったら書き換えられるよう仮文言としている
+            if not description:
+                description = NO_COMMENT_BODY
+        else:
+            # デフォルトでは説明欄の本文を使用する
+            description = ticket.description
+
+        text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
+            ticketno=ticket_id,
+            noteno=note_suffix if noteno else "",
+            assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
+            priority=ticket.priority if getattr(ticket, "priority", False) else "-",
+            status=ticket.status if getattr(ticket, "status", False) else "-",
+            title=ticket.subject,
+        )
+        if noteno:
+            url = "{}{}".format(ticket.url, note_suffix)
+        else:
+            url = ticket.url
+
+        sc = message._client.webapi
+        res = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
+        sc.chat.post_message(channel_id, description, as_user=True, thread_ts=res.body['ts'])
 
 
 @respond_to('^redmine\s+key\s+(\S+)$')

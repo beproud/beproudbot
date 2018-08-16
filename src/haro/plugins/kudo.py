@@ -58,6 +58,7 @@ def update_kudo(message, names):
     msg = ['({}: 通算 {})'.format(n, tc) for n, tc in name_list]
     botsend(message, '\n'.join(msg))
 
+
 @respond_to('^kudo\s+help$')
 def show_help_alias_commands(message):
     """Kudoコマンドのhelpを表示
