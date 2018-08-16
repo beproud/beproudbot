@@ -10,12 +10,11 @@ from db import Session
 from haro.botmessage import botsend
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
-TICKET_INFO = '{}\n{}'
 RESPONSE_ERROR = 'Redmineにアクセスできませんでした。'
 NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
+NO_COMMENT_BODY = '(本文なし)'
 
 API_KEY_SET = 'APIキーを保存しました。'
-API_KEY_RESET = 'APIキーを削除しました。'
 INVALID_API_KEY = 'APIキーは無効です。'
 CHANNEL_REGISTERED = 'Redmineの{}プロジェクトをチャンネルに追加しました。'
 CHANNEL_UNREGISTERED = 'Redmineの{}プロジェクトをチャンネルから削除しました。'
@@ -132,7 +131,7 @@ def show_ticket_information(message, *ticket_ids):
                             description = v['notes']
                 # コメント本文がなかったら書き換えられるよう仮文言としている
                 if not description:
-                    description = "(本文なし)"
+                    description = NO_COMMENT_BODY
 
             text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
                 ticketno=ticket_id,
@@ -148,8 +147,8 @@ def show_ticket_information(message, *ticket_ids):
                 url = ticket.url
 
             sc = message._client.webapi
-            m = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
-            sc.chat.post_message(channel_id, description, as_user=True, thread_ts=m.body['ts'])
+            res = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
+            sc.chat.post_message(channel_id, description, as_user=True, thread_ts=res.body['ts'])
         else:
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
 
