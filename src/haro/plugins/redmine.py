@@ -102,6 +102,7 @@ def show_ticket_information(message, *ticket_ids):
         noteno = None
         if '#note-' in ticket_id:
             ticket_id, noteno = ticket_id.split('#note-')
+            note_suffix = "#note-{}".format(noteno)
 
         try:
             ticket = redmine.issue.get(ticket_id)
@@ -114,7 +115,6 @@ def show_ticket_information(message, *ticket_ids):
             .one_or_none()
 
         if proj_room and channel_id in proj_room.channels.split(','):
-            sc = message._client.webapi
 
             description = None
             # デフォルトでは説明欄の本文を使用する
@@ -133,14 +133,21 @@ def show_ticket_information(message, *ticket_ids):
                 if not description:
                     description = "(本文なし)"
 
-            p = "#{ticketno}: [{assigned_to}][{priority}][{status}] {title}".format(
+            text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
                 ticketno=ticket_id,
+                noteno=note_suffix if noteno else "",
                 assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
                 priority=ticket.priority if getattr(ticket, "priority", False) else "-",
                 status=ticket.status if getattr(ticket, "status", False) else "-",
                 title=ticket.subject,
             )
-            m = sc.chat.post_message(channel_id, "<{}|{}>".format(ticket.url, p), as_user=True)
+            if noteno:
+                url = "{}{}".format(ticket.url, note_suffix)
+            else:
+                url = ticket.url
+
+            sc = message._client.webapi
+            m = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
             sc.chat.post_message(channel_id, description, as_user=True, thread_ts=m.body['ts'])
         else:
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
