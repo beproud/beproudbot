@@ -10,7 +10,7 @@ from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
 RESPONSE_ERROR = 'Redmineにアクセスできませんでした。'
 NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
-NO_COMMENT_BODY = '(本文なし)'
+NO_TEXT = '(本文なし)'
 
 API_KEY_SET = 'APIキーを保存しました。'
 INVALID_API_KEY = 'APIキーは無効です。'
@@ -129,10 +129,10 @@ def show_ticket_information(message, *ticket_ids):
                         description = v['notes']
             # コメント本文がなかったら書き換えられるよう仮文言としている
             if not description:
-                description = NO_COMMENT_BODY
+                description = NO_TEXT
         else:
             # デフォルトでは説明欄の本文を使用する
-            description = ticket.description
+            description = ticket.description or NO_TEXT
 
         text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
             ticketno=ticket_id,
