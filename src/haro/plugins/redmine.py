@@ -161,7 +161,7 @@ def register_key(message, api_key):
     botsend(message, API_KEY_SET)
 
 
-@respond_to('^redmine\s+add\s+(\S+)$')
+@respond_to('^redmine\s+add\s+([a-zA-Z0-9_-]+)$')
 def register_room(message, project_identifier):
     """RedmineのプロジェクトとSlackチャンネルを繋ぐ.
 
@@ -195,7 +195,7 @@ def register_room(message, project_identifier):
         botsend(message, CHANNEL_ALREADY_REGISTERED)
 
 
-@respond_to('^redmine\s+remove\s+(\S+)$')
+@respond_to('^redmine\s+remove\s+([a-zA-Z0-9_-]+)$')
 def unregister_room(message, project_identifier):
     s = Session()
 
