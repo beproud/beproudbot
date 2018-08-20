@@ -96,7 +96,8 @@ def show_ticket_information(message, *ticket_ids):
         if not ticket_id:
             continue
 
-        noteno, note_suffix = None, ""
+        noteno = None
+        note_suffix = ""
         if '#note-' in ticket_id:
             ticket_id, noteno = ticket_id.split('#note-')
             note_suffix = "#note-{}".format(noteno)
@@ -135,7 +136,7 @@ def show_ticket_information(message, *ticket_ids):
 
         text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
             ticketno=ticket_id,
-            noteno=note_suffix or "",
+            noteno=note_suffix,
             assigned_to=getattr(ticket, "assigned_to", "担当者なし"),
             priority=getattr(ticket, "priority", "-"),
             status=getattr(ticket, "status", "-"),
