@@ -96,7 +96,7 @@ def show_ticket_information(message, *ticket_ids):
         if not ticket_id:
             continue
 
-        noteno = None
+        noteno, note_suffix = None, ""
         if '#note-' in ticket_id:
             ticket_id, noteno = ticket_id.split('#note-')
             note_suffix = "#note-{}".format(noteno)
@@ -135,16 +135,13 @@ def show_ticket_information(message, *ticket_ids):
 
         text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
             ticketno=ticket_id,
-            noteno=note_suffix if noteno else "",
-            assigned_to=ticket.assigned_to if getattr(ticket, "assigned_to", False) else "担当者なし",
-            priority=ticket.priority if getattr(ticket, "priority", False) else "-",
-            status=ticket.status if getattr(ticket, "status", False) else "-",
+            noteno=note_suffix or "",
+            assigned_to=getattr(ticket, "assigned_to", "担当者なし"),
+            priority=getattr(ticket, "priority", "-"),
+            status=getattr(ticket, "status", "-"),
             title=ticket.subject,
         )
-        if noteno:
-            url = "{}{}".format(ticket.url, note_suffix)
-        else:
-            url = ticket.url
+        url = "{}{}".format(ticket.url, note_suffix)
 
         sc = message._client.webapi
         res = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
