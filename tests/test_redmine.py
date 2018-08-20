@@ -96,7 +96,9 @@ def test_no_channel_permissions_response(db, slack_message, redmine_user, redmin
 def test_successful_response(db, slack_message, redmine_user, redmine_project):
     with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
 
-        client, web_api, chat, post_message = Mock(), Mock(), Mock(), Mock()
+        client, web_api, chat, post_message, res = Mock(), Mock(), Mock(), Mock(), Mock()
+        res.body = {'ts': 123}
+        post_message.return_value = res
         chat.post_message = post_message
         web_api.chat = chat
         client.webapi = web_api

@@ -1,5 +1,3 @@
-import json
-
 from redminelib import Redmine
 from redminelib.exceptions import ForbiddenError, ResourceNotFoundError
 
@@ -10,12 +8,11 @@ from db import Session
 from haro.botmessage import botsend
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
-TICKET_INFO = '{}\n{}'
 RESPONSE_ERROR = 'Redmineにアクセスできませんでした。'
 NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
+NO_TEXT = '(本文なし)'
 
 API_KEY_SET = 'APIキーを保存しました。'
-API_KEY_RESET = 'APIキーを削除しました。'
 INVALID_API_KEY = 'APIキーは無効です。'
 CHANNEL_REGISTERED = 'Redmineの{}プロジェクトをチャンネルに追加しました。'
 CHANNEL_UNREGISTERED = 'Redmineの{}プロジェクトをチャンネルから削除しました。'
@@ -76,7 +73,7 @@ def show_help_redmine_commands(message):
     botsend(message, HELP)
 
 
-@listen_to('issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
+@listen_to('issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')  # NOQA: R701,C901,E501
 def show_ticket_information(message, *ticket_ids):
     """Redmineのチケット情報を参照する.
 
@@ -98,6 +95,13 @@ def show_ticket_information(message, *ticket_ids):
     for ticket_id in ticket_ids:
         if not ticket_id:
             continue
+
+        noteno = None
+        note_suffix = ""
+        if '#note-' in ticket_id:
+            ticket_id, noteno = ticket_id.split('#note-')
+            note_suffix = "#note-{}".format(noteno)
+
         try:
             ticket = redmine.issue.get(ticket_id)
         except (ResourceNotFoundError, ForbiddenError):
@@ -108,33 +112,41 @@ def show_ticket_information(message, *ticket_ids):
         proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id)\
             .one_or_none()
 
-        if proj_room and channel_id in proj_room.channels.split(','):
-            sc = message._client.webapi
-            attachments = [{
-                "fallback": ticket.description,
-                "author_name": str(ticket.author),
-                "title": ticket.subject,
-                "title_link": ticket.url,
-                "text": ticket.description,
-                "fields": [],
-            }]
-
-            fields = (("担当者", 'assigned_to'),
-                      ("ステータス", "status"),
-                      ("優先", "priority"), )
-
-            for title, attr in fields:
-                value = getattr(ticket, attr, False)
-                if value:
-                    attachments[0]["fields"].append({
-                        "title": title,
-                        "value": str(value),
-                        "short": True,
-                    })
-
-            sc.chat.post_message(channel_id, "", as_user=True, attachments=json.dumps(attachments))
-        else:
+        if not proj_room or channel_id not in proj_room.channels.split(','):
             botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
+            return
+
+        if noteno:
+            description = None
+            # Redmine 側で変更がなければ問題ないけど、
+            # values には #note-n に相当するidがはいっていないので
+            # id でソートして順番を保証している
+            notes = sorted(ticket.journals.values(), key=lambda d: d['id'])
+            for i, v in enumerate(notes, start=1):
+                if str(i) == noteno:
+                    # コメントの本文があれば取得する
+                    if v.get('notes'):
+                        description = v['notes']
+            # コメント本文がなかったら書き換えられるよう仮文言としている
+            if not description:
+                description = NO_TEXT
+        else:
+            # デフォルトでは説明欄の本文を使用する
+            description = ticket.description or NO_TEXT
+
+        text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
+            ticketno=ticket_id,
+            noteno=note_suffix,
+            assigned_to=getattr(ticket, "assigned_to", "担当者なし"),
+            priority=getattr(ticket, "priority", "-"),
+            status=getattr(ticket, "status", "-"),
+            title=ticket.subject,
+        )
+        url = "{}{}".format(ticket.url, note_suffix)
+
+        sc = message._client.webapi
+        res = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
+        sc.chat.post_message(channel_id, description, as_user=True, thread_ts=res.body['ts'])
 
 
 @respond_to('^redmine\s+key\s+(\S+)$')
