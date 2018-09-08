@@ -26,3 +26,19 @@ def botreply(message, text):
     else:
         # 親メッセージの場合
         message.reply(text=text)
+
+
+def webapisend(message, text):
+    """
+    botsendのwebapi版
+
+    see https://api.slack.com/methods/chat.postMessage
+    """
+    sc = message._client.webapi
+    channel = message.channel
+    channel_id = channel._body['id']
+    if 'thread_ts' in message.body:
+        sc.chat.post_message(channel_id, text=text, as_user=True,
+                             unfurl_links=True, thread_ts=message.thread_ts)
+    else:
+        sc.chat.post_message(channel_id, text=text, as_user=True, unfurl_links=True)
