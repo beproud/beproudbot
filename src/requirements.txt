@@ -13,3 +13,5 @@ slackclient
 
 geopy
 kml2geojson
+
+pillow

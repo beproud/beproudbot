@@ -7,6 +7,7 @@ idna==2.6
 kml2geojson==4.0.2
 Mako==1.0.7
 MarkupSafe==1.0
+Pillow==5.2.0
 prettytable==0.7.2
 PyMySQL==0.7.11
 python-dateutil==2.6.1
