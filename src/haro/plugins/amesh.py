@@ -53,7 +53,7 @@ def amesh(message):
         merged2.save(tmpname)
 
         # せっかくなので天気もみれるようにしてる
-        comment = "時刻: {}{}\n".format(n.strftime("%Y年%m月%m日 %H"), mm) + \
+        comment = "時刻: {}:{}\n".format(n.strftime("%Y年%m月%m日 %H"), mm) + \
                   "公式: http://tokyo-ame.jwa.or.jp/\n" + \
                   "天気: https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区"
         # 外部サイトに投稿してURLを貼る方法(S3とか)だとaccesskey設定等いるのでslackに直接アップロード
