@@ -238,3 +238,7 @@ http://localhost:9000/redmine/issues/12345
 - `$lunch <keyword>`: 指定したキーワードのお店情報を返す
 - `$lunch <keyword> <distance>`: 指定したキーワードと検索距離のお店情報を返す
 - `$lunch help`: このコマンドの使い方を返す
+
+### amesh コマンド
+
+- $amesh : http://tokyo-ame.jwa.or.jp/ の雨雲画像を返す
