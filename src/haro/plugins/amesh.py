@@ -33,7 +33,7 @@ def amesh(message):
     # 現状不便ないので特に対応をいれていない
     n = datetime.now()
     yyyymmddhh = n.strftime("%Y%m%d%H")
-    mm = "{:02d}".format(n.minute // 5 * 5))
+    mm = "{:02d}".format(n.minute // 5 * 5)
 
     # 画像の合成
     # 000 はエリアごとの固定値で050,100,150があるけど決め打ちで
@@ -53,7 +53,7 @@ def amesh(message):
         # せっかくなので天気もみれるようにしてる
         comment = "時刻: {:%Y年%m月%d日 %H}:{}\n".format(n, mm) + \
                   "公式: http://tokyo-ame.jwa.or.jp/\n" + \
-                  "<渋谷区の天気|https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区>"
+                  "渋谷区の天気: https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区"
         # 外部サイトに投稿してURLを貼る方法(S3とか)だとaccesskey設定等いるのでslackに直接アップロード
         sc = message._client.webapi
         sc.files.upload(
