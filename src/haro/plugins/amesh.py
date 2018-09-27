@@ -11,6 +11,7 @@ HELP = """
 amesh(http://tokyo-ame.jwa.or.jp/)の天気を表示したい
 """
 
+
 @contextmanager
 def _get_image(url):
     # URLから画像合成準備できたPIL.Imageを返すショートカット関数
@@ -39,8 +40,9 @@ def amesh(message):
     # 画像の合成
     # 000 はエリアごとの固定値で050,100,150があるけど決め打ちで
     with _get_image("http://tokyo-ame.jwa.or.jp/map/msk000.png") as image_msk, \
-         _get_image("http://tokyo-ame.jwa.or.jp/map/map000.jpg") as image_map, \
-         _get_image("http://tokyo-ame.jwa.or.jp/mesh/000/{}{}.gif".format(yyyymmddhh, mm)) as image_weather:
+        _get_image("http://tokyo-ame.jwa.or.jp/map/map000.jpg") as image_map, \
+        _get_image("http://tokyo-ame.jwa.or.jp/mesh/000/{}{}.gif".format(
+            yyyymmddhh, mm)) as image_weather:
         merged = Image.alpha_composite(image_map, image_weather)
         merged2 = Image.alpha_composite(merged, image_msk)
 
@@ -63,4 +65,3 @@ def amesh(message):
             filename=name,
             channels=message.channel._body["name"],
         )
-
