@@ -14,11 +14,11 @@ amesh(http://tokyo-ame.jwa.or.jp/)の天気を表示したい
 @contextmanager
 def _get_image(url):
     # URLから画像合成準備できたPIL.Imageを返すショートカット関数
-    res = requests.get()
+    res = requests.get(url)
     b = io.BytesIO(res.content)
     try:
         original_image = Image.open(b)
-        converted_image = original_imageimage.convert("RGBA")
+        converted_image = original_image.convert("RGBA")
         yield converted_image
     finally:
         original_image.close()
@@ -41,7 +41,7 @@ def amesh(message):
     with _get_image("http://tokyo-ame.jwa.or.jp/map/msk000.png") as image_msk, \
          _get_image("http://tokyo-ame.jwa.or.jp/map/map000.jpg") as image_map, \
          _get_image("http://tokyo-ame.jwa.or.jp/mesh/000/{}{}.gif".format(yyyymmddhh, mm)) as image_weather:
-        merged = Image.alpha_composite(image_map, converted3)
+        merged = Image.alpha_composite(image_map, image_weather)
         merged2 = Image.alpha_composite(merged, image_msk)
 
     # slack にアップロードするために一時的にtmpfileに書き出す
@@ -50,9 +50,9 @@ def amesh(message):
         tmpname = "{}.png".format(tmp.name)
         merged2.save(tmpname)
 
+        # せっかくなので天気もみれるようにしてる
         comment = "時刻: {}{}\n".format(n.strftime("%Y年%m月%m日 %H"), mm) + \
                   "公式: http://tokyo-ame.jwa.or.jp/\n" + \
-                  # せっかくなので天気もみれるようにしてる
                   "天気: https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区"
         # 外部サイトに投稿してURLを貼る方法(S3とか)だとaccesskey設定等いるのでslackに直接アップロード
         sc = message._client.webapi
