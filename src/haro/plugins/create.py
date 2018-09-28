@@ -9,7 +9,7 @@ from haro.arg_validator import (
     ValidationError,
     register_arg_validator,
 )
-from haro.botmessage import botsend
+from haro.botmessage import botsend, webapisend
 from haro.plugins.create_models import CreateCommand, Term
 
 HELP = """
@@ -188,7 +188,8 @@ def return_term(message, command_name, command=None):
         if command.terms:
             words = [term.word for term in command.terms]
             word = random.choice(words)
-            botsend(message, word)
+            # #116 URLが展開されて欲しいのでpostMessageで返す
+            webapisend(message, word)
         else:
             botsend(message, '`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
 
