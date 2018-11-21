@@ -1,6 +1,7 @@
 src/.env
 src/*.db
 src/*.sqlite
+.DS_Store
 
 .vagrant/
 *.diff
