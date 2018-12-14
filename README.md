@@ -242,3 +242,10 @@ http://localhost:9000/redmine/issues/12345
 ### amesh コマンド
 
 - $amesh : http://tokyo-ame.jwa.or.jp/ の雨雲画像を返す
+
+
+def test():
+    """
+    http://13d20f10.ngrok.io/s/330b5aa531ed47e0a830308c435a9dd0
+    """
+    pass
