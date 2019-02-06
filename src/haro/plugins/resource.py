@@ -83,11 +83,8 @@ def add_resource(message, name):
     show_resources(message)
 
 
-@respond_to('^status\s+del\s+(\S+)$')
-@respond_to('^status\s+delete\s+(\S+)$')
-@respond_to('^status\s+rm\s+(\S+)$')
-@respond_to('^status\s+remove\s+(\S+)$')
-def remove_resource(message, name):
+@respond_to('^status\s+(del|delete|rm|remove)\s+(\S+)$')
+def remove_resource(message, _, name):
     """リソースの削除
 
     :param message: slackbot.dispatcher.Message
