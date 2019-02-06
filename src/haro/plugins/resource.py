@@ -1,5 +1,5 @@
 """
-$status (<list>): リソース一覧表示
+$status: リソース一覧表示
 $status <add> <name>: リソース追加
 $status <del,delte,rm,remove> <name>: リソース削除
 $status <name>: リソースのステータスをデフォルトに戻す
@@ -16,7 +16,6 @@ from haro.plugins.resource_models import Resource
 
 HELP = __doc__
 COMMANDS = (
-    "list",
     "add",
     "del", "delete", "rm", "remove",
 )
@@ -57,7 +56,6 @@ def show_resources(message):
     botsend(message, "\n".join(statuses))
 
 respond_to('^status$')(show_resources)
-respond_to('^status\slist$')(show_resources)
 
 
 @respond_to('^status\s+add\s+(\S+)$')
