@@ -51,7 +51,7 @@ def show_resources(message):
             status = resource.status
         statuses.append("* [{}] {}".format(status, resource.name))
     if not statuses:
-        example = random.choices(["なにか", "サーバー", "VM", "ひと", "もの", "こと"])[0]
+        example = random.choice(["なにか", "サーバー", "VM", "ひと", "もの", "こと"])
         statuses = ["これから追加しよう: $status add {}".format(example)]
 
     botsend(message, "\n".join(statuses))
