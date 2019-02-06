@@ -16,6 +16,7 @@ from haro.plugins.resource_models import Resource
 
 HELP = __doc__
 COMMANDS = (
+    "help",
     "add",
     "del", "delete", "rm", "remove",
 )
