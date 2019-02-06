@@ -241,4 +241,12 @@ http://localhost:9000/redmine/issues/12345
 
 ### amesh コマンド
 
-- $amesh : http://tokyo-ame.jwa.or.jp/ の雨雲画像を返す
+- `$amesh` : http://tokyo-ame.jwa.or.jp/ の雨雲画像を返す
+
+### status コマンド
+
+- `$status`: リソース一覧表示
+- `$status <add> <name>`: リソース追加
+- `$status <del,delte,rm,remove> <name>`: リソース削除
+- `$status <name>`: リソースのステータスをデフォルトに戻す
+- `$status <name> <value>`: リソースのステータス設定
