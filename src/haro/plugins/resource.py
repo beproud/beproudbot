@@ -56,6 +56,7 @@ def show_resources(message):
 
     botsend(message, "\n".join(statuses))
 
+
 respond_to('^status$')(show_resources)
 
 
@@ -151,4 +152,3 @@ def set_resource_status(message, name, value):
         s.commit()
 
     show_resources(message)
-
