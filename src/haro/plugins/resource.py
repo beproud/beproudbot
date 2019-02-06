@@ -1,9 +1,9 @@
 """
-$status: リソース一覧表示
-$status <add> <name>: リソース追加
-$status <del,delte,rm,remove> <name>: リソース削除
-$status <name>: リソースのステータスをデフォルトに戻す
-$status <name> <value>: リソースのステータス設定
+`$status`: リソース一覧表示
+`$status <add> <name>`: リソース追加
+`$status <del,delte,rm,remove> <name>`: リソース削除
+`$status <name>`: リソースのステータスをデフォルトに戻す
+`$status <name> <value>`: リソースのステータス設定
 """
 import random
 
@@ -52,7 +52,7 @@ def show_resources(message):
         statuses.append("* [{}] {}".format(status, resource.name))
     if not statuses:
         example = random.choice(["なにか", "サーバー", "VM", "ひと", "もの", "こと"])
-        statuses = ["これから追加しよう: $status add {}".format(example)]
+        statuses = ["これから追加しよう: `$status add {}`".format(example)]
 
     botsend(message, "\n".join(statuses))
 
