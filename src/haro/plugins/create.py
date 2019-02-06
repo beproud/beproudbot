@@ -119,7 +119,7 @@ class RunCommandValidator(BaseCommandValidator):
 
 
 class ReturnTermCommandValidator(BaseCommandValidator):
-    EXCEPT_1WORD_COMMANDS = ['random', 'lunch', 'amesh']
+    EXCEPT_1WORD_COMMANDS = ['random', 'lunch', 'amesh', 'status']
 
     def clean_command_name(self, command_name):
 
