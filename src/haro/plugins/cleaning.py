@@ -8,7 +8,7 @@ from db import Session
 from haro.alias import get_slack_id
 from haro.botmessage import botsend
 from haro.plugins.cleaning_models import Cleaning
-from haro.slack import get_user_name
+from haro.slack import get_user_display_name
 
 HELP = """
 - `$cleaning task`: 掃除作業の一覧を表示する
@@ -68,7 +68,7 @@ def show_cleaning_list(message):
     dow2users = OrderedDict()
     cleaning = s.query(Cleaning).order_by(Cleaning.day_of_week.asc(), Cleaning.id.asc())
     for c in cleaning:
-        user = get_user_name(c.slack_id)
+        user = get_user_display_name(c.slack_id)
         dow2users.setdefault(c.day_of_week, []).append(user)
 
     pt = PrettyTable(['曜日', '掃除当番'])
@@ -89,7 +89,7 @@ def show_today_cleaning_list(message):
     dow = datetime.datetime.today().weekday()
 
     s = Session()
-    users = [get_user_name(c.slack_id) for
+    users = [get_user_display_name(c.slack_id) for
              c in s.query(Cleaning).filter(Cleaning.day_of_week == dow)]
     botsend(message, '今日の掃除当番は{}です'.format('、'.join(users)))
 
