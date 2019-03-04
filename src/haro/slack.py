@@ -39,6 +39,8 @@ def get_user_name(user_id):
     """
     users = get_users_info()
     profile = users.get(user_id)
+    if not profile:
+        return
     return profile['name']
 
 
