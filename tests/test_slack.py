@@ -26,6 +26,16 @@ class TestGetUserName:
 
         assert name == actual
 
+    def test_get_user_name_with_none(self, target):
+        """存在しないユーザー名であればNoneが返る事
+        """
+        user_id = 'U41NH7LFJ'
+
+        with patch('haro.slack.get_users_info', return_value={}):
+            actual = target(user_id)
+
+        assert None is actual
+
 
 class TestGetUserDisplayName:
 
