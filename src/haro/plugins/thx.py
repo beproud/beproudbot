@@ -52,9 +52,7 @@ def find_thx(s, text):
                 ).append((slack_id, name))
             else:
                 # 一番近いユーザー名を算出
-                names = []
-                for profile in get_users_info().values():
-                    names.append(profile['name'])
+                names = [profile['name'] for profile in get_users_info().values()]
                 hint = get_close_matches(name, names)
                 if hint:
                     hint_names.append(hint[0])
