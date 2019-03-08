@@ -14,8 +14,12 @@ RUN pip install --upgrade pip\
         python3-dev \
     && pip install -r src/requirements.txt\
     && rm -rf ~/.cache/pip \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && touch /var/log/cron.log
+
+COPY conf/python/app-cron /etc/cron.d/
+RUN  chmod 0644 /etc/cron.d/app-cron
 
 COPY . /proj/
 
-CMD python3
+CMD cron && python3
