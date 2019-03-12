@@ -1,3 +1,6 @@
+.PHONY: help build deploy mirations migrate\
+       test down destroy clean\
+
 DC := docker-compose
 
 MYSQL_EXPOSE_PORT := 33061
