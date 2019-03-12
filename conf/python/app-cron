@@ -1,0 +1,1 @@
+# 0 10 * * 1  root /usr/local/bin/python /proj/src/redmine_notification.py

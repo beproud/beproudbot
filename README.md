@@ -6,7 +6,7 @@ Haro is [slackbot](https://github.com/lins05/slackbot "lins05/slackbot: A chat b
 
 ## 事前準備
 
-- Macのローカルで開発する場合、Docker、ansibleを構築する必要なし
+- 開発環境には、Dockerを利用します
 - 起動方法まで参照することで、ローカル環境が構築できる
 
 ### APIトークンの取得
@@ -16,42 +16,23 @@ Haro is [slackbot](https://github.com/lins05/slackbot "lins05/slackbot: A chat b
 - 「Save Integration」ボタンをクリックして保存する
   - API Token(``xoxb-XXXXXXX-XXXXXXX``)をこのあと使用するので、コピーしておく
 
-### Requirements
 
-- Python 3.5.2 or later.
+## 開発方法
 
-```bash
-$ python3 -m venv env
-$ git clone git@github.com:beproud/beproudbot.git
-$ cd beproudbot
-$ source /path/env/bin/activate
-(env)$ cp env.sample .env
-(env)$ vi .env # API Token 等を記入する
-(env)$ export SLACK_API_TOKEN=xoxb-XXXX　# API Tokenがターミナルの環境変数で.envに反映されない場合
-(env)$ pip install -r src/requirements.txt
+- 開発に必要な操作はMakefileを参照
+
 ```
-
-## 起動方法
-
-```bash
-$ source /path/env/bin/activate
-# configには環境変数を指定します
-(env)$ export $(cat .env |grep -v '#')
-(env)$ cd src && python run.py
-```
-
-### Docker
-
-```bash
-# MySQL を使用する場合先に立ち上げておく
-# docker-compose up -d db
-# bot の起動
-$ docker-compose build bot
-$ docker-compose run -d bot
-# コンテナにはいる
-$ docker-compose run --rm bot bash
-# 終了
-# docker-compose down
+Makefile
+$ make
+Please use `make <target>' where <target> is one of
+  build           to build docker images.
+  deploy          to deploy apps (local or dev)
+  test            to excute all tests.
+  flake8          to excute flake8 to python codes.
+  clean           to remove all docker containers, images
+  destroy         to remove all docker containers, images, and all volumes
+  down            to down all docker containers, images
+  help            to show this help messages
 ```
 
 ## DB操作
@@ -81,7 +62,6 @@ alembic を使用します
 honchoは .env を自動的に読み込み、スクリプトを開始することができます。
 
 ```bash
-(env)$ pip install honcho
 # honcho start bot
 # honcho start migrate
 # honcho start makemigrations
