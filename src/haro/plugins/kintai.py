@@ -68,7 +68,7 @@ def register_worktime(user_id, is_workon=True):
     """出社、退社時間をDBに登録する
 
     :param str user_id: Slackのuser_id
-    :param bool is_workon: 出社か退社かのフラグ、defaltは出社
+    :param bool is_workon: 出社か退社かのフラグ、defaultは出社
     """
     today = datetime.date.today()
     s = Session()
@@ -105,7 +105,7 @@ def show_kintai_history(message):
     for q in qs:
         day_of_week = DAY_OF_WEEK[q.registered_at.date().weekday()]
         prefix_day = '{:%Y年%m月%d日}({})'.format(q.registered_at, day_of_week)
-        registered_at = '{:%I:%M:%S}'.format(q.registered_at)
+        registered_at = '{:%H:%M:%S}'.format(q.registered_at)
         kind = '出社' if q.is_workon else '退社'
         kintai.setdefault(prefix_day, []).append('{}  {}'.format(kind,
                                                                  registered_at))
@@ -152,7 +152,7 @@ def show_kintai_history_csv(message, time=None):
     for q in qs:
         registered_at = q.registered_at.strftime('%Y-%m-%d')
         kintai[registered_at].append((q.is_workon,
-                                      '{:%I:%M:%S}'.format(q.registered_at)))
+                                      '{:%H:%M:%S}'.format(q.registered_at)))
 
     rows = []
     for day in range(1, monthrange(year, month)[1] + 1):
