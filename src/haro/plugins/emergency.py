@@ -44,7 +44,7 @@ def show_help_redmine_commands(message):
 
 def get_active_emergency(session, channel_id):
     return session.query(Timeline).filter(Timeline.room == channel_id,
-                                          Timeline.is_closed == False).one_or_none()
+                                          Timeline.is_closed.is_(False)).one_or_none()
 
 
 @respond_to('^emergency\s+start\s+(\S+)$')
@@ -169,13 +169,12 @@ def show_timeline(message, timeline_id):
         return
 
     entries = (s.query(TimelineEntry)
-                 .filter(TimelineEntry.timeline_id == timeline.id)
-                 .order_by(TimelineEntry.ctime))
+               .filter(TimelineEntry.timeline_id == timeline.id)
+               .order_by(TimelineEntry.ctime))
 
-    rows = ['- {} {} {}'.format(
-                entry.ctime.strftime("%Y/%m/%d %H:%M"),
-                entry.entry,
-                get_user_display_name(entry.created_by))
+    rows = ['- {} {} {}'.format(entry.ctime.strftime("%Y/%m/%d %H:%M"),
+                                entry.entry,
+                                get_user_display_name(entry.created_by))
             for entry in entries]
 
     contents = MARKDOWN_TEMPLATE.format(timeline.title, '\n'.join(rows))
