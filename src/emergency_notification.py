@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # file headerを作る
-handler = logging.FileHandler('../logs/redmine_notification.log')
+handler = logging.FileHandler('../logs/emergency_notification.log')
 handler.setLevel(logging.INFO)
 
 # logging formatを作る
@@ -49,7 +49,7 @@ logger.addHandler(handler)
 # Slackクライアント
 slack_client = SlackClient(API_TOKEN)
 
-KEEP_ALIVE_MINUTES = 60  # 何分更新がなかったら通知するか(デフォルト)
+KEEP_ALIVE_MINUTES = 1  # 何分更新がなかったら通知するか(デフォルト)
 BOT_NAME = 'Emergency BOT'  # 通知を送るBOTの名前
 MESSAGE_EMOJI = ':rotating_light:'  # メッセージの絵文字
 ICON_EMOJI = ':rotating_light:'  # BOTの絵文字
@@ -60,7 +60,7 @@ def send_keep_alive_message():
     keep_alive_target_time = datetime.now() - timedelta(minutes=KEEP_ALIVE_MINUTES)
     s = Session()
     timelines = (s.query(Timeline)
-                 .filter(Timeline.is_closed is False)
+                 .filter(Timeline.is_closed == False)
                  .filter(Timeline.utime < keep_alive_target_time))
     for timeline in timelines:
         channel = timeline.room
@@ -77,8 +77,8 @@ def get_history_as_attachment(timeline):
                  .filter(TimelineEntry.timeline_id == timeline.id)
                  .order_by('utime'))
     texts = [
-        '- {} {} <@{}>'.format(history.utime.format('%Y/%m/%d %H:%M'),
-                               history.extry,
+        '- {} {} <@{}>'.format(history.utime.strftime('%Y/%m/%d %H:%M'),
+                               history.entry,
                                get_user_name(history.created_by))
         for history in histories
     ]
@@ -136,10 +136,6 @@ def get_argparser():
                         type=argparse.FileType('r'),
                         default='alembic/conf.ini',
                         help='ini形式のファイルをファイルパスで指定します')
-    parser.add_argument('-k', '--keep-alive-minutes',
-                        type=int,
-                        default=KEEP_ALIVE_MINUTES,
-                        help='何分更新がなかったら通知するか')
     return parser
 
 
