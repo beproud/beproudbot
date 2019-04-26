@@ -5,7 +5,9 @@ from haro.botmessage import botsend
 from haro.plugins.emergency_models import Timeline, TimelineEntry
 
 
-ACTIVE_EMERGENCY = '同時に複数緊急タスクを管理できません。'
+NO_ACTIVE_EMERGENCY = '緊急タスクを監視されていません。'
+ACTIVE_EMERGENCY = '同時に複数緊急タスクを監視できません。'
+ADDED_TO_TIMELINE = '「{}」に追加しました。'
 TIMELINE_START = '「{}」という緊急タスクを監視し始めます。'
 TIMELINE_END = '「{}」を終了しました。'
 
@@ -57,6 +59,32 @@ def start_emergency(message, title):
 
     s.commit()
     botsend(message, entry_msg)
+
+
+@respond_to('^emergency\s+update\s+(\S+)$')
+def update_emergency(message, entry_msg):
+    s = Session()
+
+    entry_msg = entry_msg.strip()
+    if not entry_msg:
+        return
+
+    user_id = message.body.get('user')
+    if not user_id:
+        return
+
+    channel_id = message.channel._body['id']
+
+    active_emergency = get_active_emergency(s, channel_id)
+    if not active_emergency:
+        botsend(message, NO_ACTIVE_EMERGENCY)
+        return
+
+    entry = TimelineEntry(created_by=user_id, timeline_id=active_emergency.id, entry=entry_msg)
+    s.add(entry)
+
+    s.commit()
+    botsend(message, ADDED_TO_TIMELINE.format(active_emergency.title))
 
 
 @respond_to('^emergency\s+end$')
