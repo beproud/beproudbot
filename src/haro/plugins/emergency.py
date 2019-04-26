@@ -1,4 +1,9 @@
+import csv
+from io import StringIO
+
+import requests
 from slackbot.bot import respond_to
+from slackbot import settings
 
 from db import Session
 from haro.botmessage import botsend
@@ -109,3 +114,33 @@ def end_emergency(message):
     s.commit()
 
     botsend(message, entry_msg)
+
+
+@respond_to('^emergency\s+list$')
+def list_emergencies(message):
+    s = Session()
+
+    channel_id = message.channel._body['id']
+    channel_name = message.channel._body['name']
+
+    timelines = (s.query(Timeline)
+                 .filter(Timeline.room == channel_id)
+                 .order_by(Timeline.id.desc()))
+    rows = [["id", "登録日時", "タイトル"]]
+    for t in timelines:
+        rows.append([t.id, t.ctime.strftime("%Y/%m/%d %H:%M"), t.title])
+
+    output = StringIO()
+    w = csv.writer(output)
+    w.writerows(rows)
+
+    param = {
+        'token': settings.API_TOKEN,
+        'channels': channel_id,
+        'title': '{}の緊急タスク一覧'.format(channel_name)
+    }
+    requests.post(settings.FILE_UPLOAD_URL,
+                  params=param,
+                  files={'file': ("%s_emergencies.csv" % channel_name, output.getvalue(),
+                                  'text/csv', )})
+
