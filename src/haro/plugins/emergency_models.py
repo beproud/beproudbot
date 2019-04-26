@@ -44,7 +44,7 @@ class TimelineEntry(Base):
     __tablename__ = "timeline_log"
 
     id = Column(Integer, primary_key=True)
-    timeline_id = Column(Integer, ForeignKey('timeline.id'), nullable=False)
+    timeline_id = Column(Integer, ForeignKey('emergency_timeline.id'), nullable=False)
     created_by = Column(Unicode(9), nullable=False, doc="""
     Slackのユーザid
     例: U023BECGF
