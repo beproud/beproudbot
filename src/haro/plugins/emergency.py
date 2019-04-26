@@ -47,10 +47,9 @@ def get_active_emergency(session, channel_id):
                                           Timeline.is_closed.is_(False)).one_or_none()
 
 
-@respond_to('^emergency\s+start\s+(\S+)$')
+@respond_to('^emergency\s+start\s+(.+)$')
 def start_emergency(message, title):
     s = Session()
-
     title = title.strip()
     if not title:
         return
@@ -77,7 +76,7 @@ def start_emergency(message, title):
     botsend(message, entry_msg)
 
 
-@respond_to('^emergency\s+update\s+(\S+)$')
+@respond_to('^emergency\s+update\s+(.+)$')
 def update_emergency(message, entry_msg):
     s = Session()
 
