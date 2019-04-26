@@ -193,6 +193,59 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 - `$<command> search <keyword>`: 語録の一覧からキーワードを含むものを返す
 - `$create help`: createコマンドの使い方を返す
 
+### emergency コマンド
+
+- `$emergency start <title>`: 緊急タスクを開始する
+- `$emergency update <entry>`: 緊急タスクのタイムラインを更新
+- `$emergency end`: 緊急タスクを終了する
+- `$emergency list`: 緊急タスクの一覧を表示
+- `$emergency timeline <timeline_id>`: 緊急タスクのタイムラインの内容を表示
+- `$emergency help`: emergencyコマンドの使い方を返す
+
+<details>
+<summary>emergency コマンド使用例</summary>
+
+緊急タスクを開始する
+```
+> $emergency start 本番のDBに接続できない
+< 「本番のDBに接続できない」の登録しました
+```
+
+緊急タスクのタイムラインを更新
+```
+> $emergency update 原因がわかりました。だれだれさんが直している
+< タイムラインに追加しました。
+```
+
+緊急タスクを終了する
+```
+> $emergency end
+< 「本番のDBに接続できない」を終了しました。
+<タイムラインを出力する>
+```
+
+緊急タスクの一覧を表示
+```
+> $emergency list
+< 
+1 2019/04/01   本番のDBに接続できない
+3 2019/04/07   ダッシュボードはタイムアウトしてる
+```
+
+緊急タスクのタイムラインの内容を表示
+```
+> $emergency timeline  1
+< 
+- 2019/04/01  10:00  「本番のDBに接続できない」登録しました  @james
+- 2019/04/01  10:20  原因がわかりました。だれだれさんが直している  @takana
+- 2019/04/01  10:30  サーバーを再起動して、回復したようです。1時間監視する @tanaka
+- 2019/04/01  11:00 DBを監視していて、大丈夫そう。@tanaka
+- 2019/04/01  11:30 「本番のDBに接続できない」を終了しました @james
+```
+
+</details>
+
+
 ### kudo コマンド
 
 - `<name>++`: 指定された名称に対して++します
