@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Unicode, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, BOOLEAN, Unicode, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from db import Base
 
@@ -23,6 +23,10 @@ class Timeline(Base):
     title = Column(Unicode(128), nullable=False, doc="""
     緊急タスクのタイトル
     例: 本番のDBに接続できない
+    """)
+
+    is_closed = Column(BOOLEAN, nullable=False, doc="""
+    緊急タスクがクローズされているか
     """)
 
     ctime = Column(DateTime, default=datetime.now, nullable=False, doc="""

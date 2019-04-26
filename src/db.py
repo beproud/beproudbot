@@ -19,6 +19,7 @@ from haro.plugins.kudo_models import KudoHistory  # noqa
 from haro.plugins.thx_models import ThxHistory  # noqa
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel  # noqa
 from haro.plugins.resource_models import Resource  # noqa
+from haro.plugins.emergency_models import Timeline, TimelineEntry  # noqa
 
 
 def init_dbsession(config, prefix='sqlalchemy.'):
