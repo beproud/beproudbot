@@ -138,7 +138,7 @@ def list_emergencies(message):
                  .order_by(Timeline.id.desc()))
     rows = [["id", "登録日時", "タイトル"]]
     for t in timelines:
-        rows.append([t.id, t.ctime.strftime("%Y/%m/%d %H:%M"), t.title])
+        rows.append([t.id, t.ctime.strftime("%Y/%m/%d"), t.title])
 
     output = StringIO()
     w = csv.writer(output)

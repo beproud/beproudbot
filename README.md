@@ -198,8 +198,8 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 - `$emergency start <title>`: 緊急タスクを開始する
 - `$emergency update <entry>`: 緊急タスクのタイムラインを更新
 - `$emergency end`: 緊急タスクを終了する
-- `$emergency list`: 緊急タスクの一覧を表示
-- `$emergency timeline <timeline_id>`: 緊急タスクのタイムラインの内容を表示
+- `$emergency list`: 緊急タスクの一覧を返す
+- `$emergency timeline <timeline_id>`: 緊急タスクのタイムラインの内容を返す
 - `$emergency help`: emergencyコマンドの使い方を返す
 
 <details>
@@ -224,7 +224,7 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 <タイムラインを出力する>
 ```
 
-緊急タスクの一覧を表示
+緊急タスクの一覧を返す
 ```
 > $emergency list
 < 
