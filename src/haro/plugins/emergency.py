@@ -13,7 +13,8 @@ TIMELINE_END = '「{}」を終了しました。'
 
 HELP = """
 - `$emergency start <タイトル>`: コマンドを実行したSlackチャンネルに緊急タスク監視ボットを開始される
-
+- `$emergency update <進捗>`: コマンドを実行したSlackチャンネルに緊急タスクのタイムラインに進捗メッセージを追加する
+- `$emergency end`: コマンドを実行したSlackチャンネルに緊急タスク監視ボットを終了される
 
 - `$emergency help`: emergencyのコマンドの使い方を返す
 """
