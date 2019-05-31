@@ -196,7 +196,7 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 ### emergency コマンド
 
 - `$emergency start <title>`: 緊急タスクを開始する
-- `$emergency update <entry>`: 緊急タスクのタイムラインを更新
+- `$emergency update <entry>`: 緊急タスクのタイムラインを更新する
 - `$emergency end`: 緊急タスクを終了する
 - `$emergency list`: 緊急タスクの一覧を返す
 - `$emergency timeline <timeline_id>`: 緊急タスクのタイムラインの内容を返す
@@ -208,10 +208,10 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 緊急タスクを開始する
 ```
 > $emergency start 本番のDBに接続できない
-< 「本番のDBに接続できない」の登録しました
+< 「本番のDBに接続できない」という緊急タスクの監視を開始しました。
 ```
 
-緊急タスクのタイムラインを更新
+緊急タスクのタイムラインを更新する
 ```
 > $emergency update 原因がわかりました。だれだれさんが直している
 < タイムラインに追加しました。
@@ -232,7 +232,7 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 3 2019/04/07   ダッシュボードはタイムアウトしてる
 ```
 
-緊急タスクのタイムラインの内容を表示
+緊急タスクのタイムラインの内容を表示する
 ```
 > $emergency timeline  1
 < 
