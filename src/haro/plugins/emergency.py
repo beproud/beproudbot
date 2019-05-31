@@ -11,10 +11,10 @@ from haro.plugins.emergency_models import Timeline, TimelineEntry
 from haro.slack import get_user_display_name
 
 
-NO_ACTIVE_EMERGENCY = '緊急タスクを監視されていません。'
-ACTIVE_EMERGENCY = '同時に複数緊急タスクを監視できません。'
+NO_ACTIVE_EMERGENCY = '緊急タスクは監視されていません。'
+ACTIVE_EMERGENCY = '緊急タスクは複数同時に監視できません。'
 ADDED_TO_TIMELINE = '「{}」に追加しました。'
-TIMELINE_START = '「{}」という緊急タスクを監視し始めます。'
+TIMELINE_START = '「{}」という緊急タスクの監視を開始しました。'
 TIMELINE_END = '「{}」を終了しました。'
 
 MARKDOWN_TEMPLATE = """# {}
@@ -25,11 +25,11 @@ MARKDOWN_TEMPLATE = """# {}
 """
 
 HELP = """
-- `$emergency start <タイトル>`: コマンドを実行したSlackチャンネルに緊急タスク監視ボットを開始される
-- `$emergency update <進捗>`: 監視中緊急タスクのタイムラインに進捗メッセージを追加する
-- `$emergency end`: 緊急タスク監視を終了する
-- `$emergency list`: コマンドを実行したSlackチャンネルに監視された緊急タスクを一覧に表示をする
-- `$emergency timeline <timeline_id>`: 指定したタイムラインをmarkdownで表示される
+- `$emergency start <タイトル>`: コマンドを実行したSlackチャンネルで、緊急タスクの監視を開始する
+- `$emergency update <進捗>`: 監視中の緊急タスクのタイムラインに進捗メッセージを追加する
+- `$emergency end`: 緊急タスクの監視を終了する
+- `$emergency list`: コマンドを実行したSlackチャンネルの過去の緊急タスクを一覧表示する
+- `$emergency timeline <timeline_id>`: 指定した緊急タスクのタイムラインをmarkdownで表示する
 
 - `$emergency help`: emergencyのコマンドの使い方を返す
 """
@@ -146,7 +146,7 @@ def list_emergencies(message):
     param = {
         'token': settings.API_TOKEN,
         'channels': channel_id,
-        'title': '{}の緊急タスク一覧'.format(channel_name)
+        'title': '「{}」の緊急タスク一覧'.format(channel_name)
     }
     requests.post(settings.FILE_UPLOAD_URL,
                   params=param,
@@ -181,7 +181,7 @@ def show_timeline(message, timeline_id):
     param = {
         'token': settings.API_TOKEN,
         'channels': channel_id,
-        'title': '{}のタイムライン'.format(timeline.title)
+        'title': '「{}」のタイムライン'.format(timeline.title)
     }
     requests.post(settings.FILE_UPLOAD_URL,
                   params=param,
