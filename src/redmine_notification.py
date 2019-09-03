@@ -12,6 +12,7 @@ systemdでtimerを作成し、定期的に実行
 import argparse
 import time
 import logging
+import traceback
 from configparser import ConfigParser, NoSectionError
 from collections import defaultdict
 from datetime import timedelta, date, datetime, timezone
@@ -64,6 +65,7 @@ def get_ticket_information():
 
     projects_past_due_date = defaultdict(list)
     projects_close_to_due_date = defaultdict(list)
+    projects_assigned_to_is_none = defaultdict(list)
     today = date.today()
     close_to_today = today + timedelta(LIMIT)
     s = Session()
@@ -77,6 +79,9 @@ def get_ticket_information():
         channels = get_proj_channels(proj_id, all_proj_channels)
         if not channels:  # slack channelが設定されていないissueは無視する
             continue
+        elif not getattr(issue, 'assigned_to', None):
+            # 担当者が設定されていないチケットを各プロジェクトごとに抽出
+            projects_assigned_to_is_none[issue.project.id].append(issue)
         elif issue.due_date < today:
             # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
             projects_past_due_date[proj_id].append(issue)
@@ -91,22 +96,32 @@ def get_ticket_information():
     send_ticket_info_to_channels(projects_close_to_due_date,
                                  all_proj_channels,
                                  False)
+    send_assigned_to_is_not_set_tickets(projects_assigned_to_is_none,
+                                        all_proj_channels)
 
 
-def display_issue(issues):
+def display_issue(issues, has_assigned_to=True):
     """issueをSlackのattachmentに格納
 
     :See: https://api.slack.com/docs/message-attachments
 
     :param list issues: [redminelib.resources.Issue]
+    :param boolean has_assigned_to: issue.assigned_toを表示から除く場合、False
     """
     text = []
     for issue in issues:
-        text.append('- {}: <{}|#{}> {} (<@{}>)'.format(issue.due_date,
-                                                       issue.url,
-                                                       issue.id,
-                                                       issue.subject,
-                                                       issue.assigned_to))
+        if has_assigned_to:
+            text.append('- {}: <{}|#{}> {} (<@{}>)'.format(issue.due_date,
+                                                           issue.url,
+                                                           issue.id,
+                                                           issue.subject,
+                                                           issue.assigned_to))
+        else:
+            text.append('- {}: <{}|#{}> {}'.format(issue.due_date,
+                                                   issue.url,
+                                                   issue.id,
+                                                   issue.subject))
+
     attachment = [{
         "color": "#F44336",
         "text": "\n".join(text)
@@ -134,6 +149,17 @@ def send_ticket_info_to_channels(projects, all_proj_channels,
                 message = 'もうすぐ期限が切れそうなチケットは{}件です\n'.format(issue_count)
             # 通知メッセージをformat
             attachments = display_issue(projects[project])
+        for channel in channels:
+            send_slack_message_per_sec(channel, attachments, message)
+
+
+def send_assigned_to_is_not_set_tickets(projects, all_proj_channels):
+    """ 担当者が設定されていないチケット一覧を通知する """
+    for project in projects.keys():
+        channels = get_proj_channels(project, all_proj_channels)
+        if channels:
+            message = "担当者が設定されていないチケット一覧"
+            attachments = display_issue(projects[project], has_assigned_to=False)
         for channel in channels:
             send_slack_message_per_sec(channel, attachments, message)
 
@@ -211,6 +237,16 @@ def get_argparser():
     return parser
 
 
+def notify_error(text):
+    message = "期限切れチケット通知処理でエラーが発生しました"
+    attachment = [{
+        "color": "#F44336",
+        "text": text
+    }]
+    # p-bp-beproudbot-devチャンネルに通知
+    send_slack_message('G0291Q891', attachment, message)
+
+
 def main():
     """設定ファイルをparseして、get_ticket_information()を実行する
 
@@ -236,4 +272,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        notify_error(traceback.format_exc())
