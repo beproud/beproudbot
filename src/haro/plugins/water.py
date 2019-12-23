@@ -64,7 +64,6 @@ def manage_water_stock(message, delta):
     q = s.query(func.sum(WaterHistory.delta).label('stock_number'))
     stock_number = q.one().stock_number
 
-    text = None
     if delta < 0:
         text = 'ウォーターサーバーのボトルを{}本取りかえました。'
         if stock_number <= WATER_ORDER_NUM and WATER_EMPTY_TO:
