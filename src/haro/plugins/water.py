@@ -66,7 +66,7 @@ def manage_water_stock(message, delta):
 
     if delta < 0:
         text = 'ウォーターサーバーのボトルを{}本取りかえました。'
-        if stock_number <= WATER_ORDER_NUM and WATER_EMPTY_TO:
+        if stock_number <= int(WATER_ORDER_NUM) and WATER_EMPTY_TO:
             text += '\n <!subteam^' + WATER_EMPTY_TO + '> 残数: {}です。注文お願いします。'
         else:
             text += '(残数: {}本)'
