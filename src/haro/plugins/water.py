@@ -6,6 +6,7 @@ from sqlalchemy import func, case
 from db import Session
 from haro.botmessage import botsend
 from haro.plugins.water_models import WaterHistory
+from slackbot_settings import WATER_EMPTY_TO, WATER_ORDER_NUM
 
 HELP = '''
 - `$water count`: 現在の残数を返す
@@ -64,8 +65,12 @@ def manage_water_stock(message, delta):
     stock_number = q.one().stock_number
 
     if delta < 0:
-        botsend(message, 'ウォーターサーバーのボトルを{}本取りかえました。(残数: {}本)'
-                .format(-delta, stock_number))
+        text = 'ウォーターサーバーのボトルを{}本取りかえました。'
+        if stock_number <= WATER_ORDER_NUM and WATER_EMPTY_TO:
+            text += '\n <!subteam^' + WATER_EMPTY_TO + '> 残数: {}です。注文お願いします。'
+        else:
+            text += '(残数: {}本)'
+        botsend(message, text.format(-delta, stock_number))
     else:
         botsend(message, 'ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)'
                 .format(delta, stock_number))

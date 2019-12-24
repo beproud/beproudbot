@@ -46,3 +46,7 @@ if DEBUG:
 SQLALCHEMY_URL = os.environ['SQLALCHEMY_URL']
 SQLALCHEMY_ECHO = os.environ['SQLALCHEMY_ECHO']
 SQLALCHEMY_POOL_SIZE = os.environ.get('SQLALCHEMY_POOL_SIZE')
+
+# Waterコマンドメンション先
+WATER_EMPTY_TO = os.environ.get('WATER_EMPTY_TO')
+WATER_ORDER_NUM = os.environ.get('WATER_ORDER_NUM', 2)
