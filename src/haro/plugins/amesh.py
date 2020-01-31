@@ -80,9 +80,9 @@ def amesh(message):
         except Exception:
             logger.exception("amesh exception")
             if i == MAX_RETRY_NUM:
-                botsend(message, "{}回目: だめでした…また動かしてみてね".format(i))
+                botsend(message, "{}回目: だめでした…またためしてね".format(i))
             else:
-                botsend(message, "{}回目: だめでした…ちょっと待ちます".format(i))
+                botsend(message, "{}回目: だめでした…ちょっとまってね".format(i))
                 # 特定の分数(5で割れる分?)だと取得できないことが多いので、30秒ずつ空けてみてる
                 time.sleep(1 * 60 / 2)
         else:
