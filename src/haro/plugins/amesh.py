@@ -65,11 +65,10 @@ def amesh(message):
                 merged2.save(tmpname)
 
                 # せっかくなので天気もみれるようにしてる
-                comment = (
-                    "時刻: {:%Y年%m月%d日 %H}:{}\n".format(n, mm)
-                    + "公式: http://tokyo-ame.jwa.or.jp/\n"
-                    + "渋谷区の天気: https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区"
-                )
+                comment = "時刻: {:%Y年%m月%d日 %H}:{}\n".format(n, mm) + \
+                          "公式: http://tokyo-ame.jwa.or.jp/\n" + \
+                          "渋谷区の天気: https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区"
+
                 # 外部サイトに投稿してURLを貼る方法(S3とか)だとaccesskey設定等いるのでslackに直接アップロード
                 sc = message._client.webapi
                 sc.files.upload(
@@ -79,7 +78,7 @@ def amesh(message):
                     filename=name,
                     channels=message.channel._body["name"],
                 )
-        except Exception as e:
+        except Exception:
             logger.exception("amesh exception")
             if i == MAX_RETRY_NUM:
                 botsend(message, "{}回目: だめでした…また動かしてみてね".format(i))
