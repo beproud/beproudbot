@@ -16,6 +16,7 @@ amesh(http://tokyo-ame.jwa.or.jp/)の天気を表示したい
 """
 
 logger = logging.getLogger(__name__)
+MAX_RETRY_NUM = 3
 
 
 @contextmanager
@@ -42,7 +43,6 @@ def amesh(message):
     mm = "{:02d}".format(n.minute // 5 * 5)
 
     # 雑リトライ
-    MAX_RETRY_NUM = 3
     for i in range(1, MAX_RETRY_NUM + 1):
 
         logger.info("amesh:: trying ... {}/{}".format(i, MAX_RETRY_NUM))
