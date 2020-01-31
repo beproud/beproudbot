@@ -1,15 +1,15 @@
-import logging
-import time
 import io
+import logging
 import tempfile
-from datetime import datetime
+import time
 from contextlib import contextmanager
+from datetime import datetime
 
 import requests
 from PIL import Image
-from slackbot.bot import respond_to
 
 from haro.botmessage import botsend
+from slackbot.bot import respond_to
 
 HELP = """
 amesh(http://tokyo-ame.jwa.or.jp/)の天気を表示したい
@@ -31,7 +31,7 @@ def _get_image(url):
         original_image.close()
 
 
-@respond_to('^amesh$')
+@respond_to("^amesh$")
 def amesh(message):
 
     # ameshでは5分ごとにデータが作成されるため、桁を揃えてからリクエストしたい
@@ -43,17 +43,18 @@ def amesh(message):
 
     # 雑リトライ
     MAX_RETRY_NUM = 3
-    for i in range(1, MAX_RETRY_NUM+1):
+    for i in range(1, MAX_RETRY_NUM + 1):
 
         logger.info("amesh:: trying ... {}/{}".format(i, MAX_RETRY_NUM))
 
         try:
             # 画像の合成
             # 000 はエリアごとの固定値で050,100,150があるけど決め打ちで
-            with _get_image("http://tokyo-ame.jwa.or.jp/map/msk000.png") as image_msk, \
-                _get_image("http://tokyo-ame.jwa.or.jp/map/map000.jpg") as image_map, \
-                _get_image("http://tokyo-ame.jwa.or.jp/mesh/000/{}{}.gif".format(
-                    yyyymmddhh, mm)) as image_weather:
+            with _get_image("http://tokyo-ame.jwa.or.jp/map/msk000.png") as image_msk, _get_image(
+                "http://tokyo-ame.jwa.or.jp/map/map000.jpg"
+            ) as image_map, _get_image(
+                "http://tokyo-ame.jwa.or.jp/mesh/000/{}{}.gif".format(yyyymmddhh, mm)
+            ) as image_weather:
                 merged = Image.alpha_composite(image_map, image_weather)
                 merged2 = Image.alpha_composite(merged, image_msk)
 
@@ -64,9 +65,11 @@ def amesh(message):
                 merged2.save(tmpname)
 
                 # せっかくなので天気もみれるようにしてる
-                comment = "時刻: {:%Y年%m月%d日 %H}:{}\n".format(n, mm) + \
-                          "公式: http://tokyo-ame.jwa.or.jp/\n" + \
-                          "渋谷区の天気: https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区"
+                comment = (
+                    "時刻: {:%Y年%m月%d日 %H}:{}\n".format(n, mm)
+                    + "公式: http://tokyo-ame.jwa.or.jp/\n"
+                    + "渋谷区の天気: https://weathernews.jp/onebox/35.679311/139.710717/temp=c&q=東京都渋谷区"
+                )
                 # 外部サイトに投稿してURLを貼る方法(S3とか)だとaccesskey設定等いるのでslackに直接アップロード
                 sc = message._client.webapi
                 sc.files.upload(
