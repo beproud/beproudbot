@@ -1,3 +1,4 @@
+import logging
 import random
 
 from slackbot.bot import respond_to
@@ -13,6 +14,8 @@ HELP = '''
 - `$random help`: randomコマンドの使い方を返す
 '''
 
+logger = logging.getLogger(__name__)
+
 
 @respond_to('^random$')
 @respond_to('^random\s+(active|help)$')
@@ -20,7 +23,7 @@ def random_command(message, subcommand=None):
     """
     チャンネルにいるメンバーからランダムに一人を選んで返す
     - https://github.com/os/slacker
-    - https://api.slack.com/methods/channels.info
+    - https://api.slack.com/methods/conversations.members
     - https://api.slack.com/methods/users.getPresence
     - https://api.slack.com/methods/users.info
     """
@@ -33,16 +36,11 @@ def random_command(message, subcommand=None):
     channel = message.body['channel']
     webapi = slacker.Slacker(settings.API_TOKEN)
     try:
-        cinfo = webapi.channels.info(channel)
-        members = cinfo.body['channel']['members']
+        cinfo = webapi.conversations.members(channel)
+        members = cinfo.body['members']
     except slacker.Error:
-        try:
-            cinfo = webapi.groups.info(channel)
-            members = cinfo.body['group']['members']
-        except slacker.Error:
-            # TODO: 例外で判定しないように修正する
-            # チャンネルに紐付かない場合はreturn
-            return
+        logger.exception('An error occurred while fetching members: channel=%s', channel)
+        return
 
     # bot の id は除く
     bot_id = message._client.login_data['self']['id']
