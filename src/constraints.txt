@@ -15,7 +15,7 @@ python-editor==1.0.3
 requests==2.18.4
 six==1.11.0
 slackbot==1.0.0
-slacker==0.9.60
+slacker==0.14.0
 SQLAlchemy==1.2.2
 urllib3==1.22
 websocket-client==0.44.0
