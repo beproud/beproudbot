@@ -14,7 +14,7 @@ python-dateutil==2.6.1
 python-editor==1.0.3
 requests==2.18.4
 six==1.11.0
-slackbot==0.5.1
+slackbot==1.0.0
 slacker==0.9.60
 SQLAlchemy==1.2.2
 urllib3==1.22
