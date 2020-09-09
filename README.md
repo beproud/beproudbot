@@ -149,7 +149,7 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 
 - `$water count`: 現在の残数を返す
 - `$water num`: 水を取り替えた時に使用。指定した数だけ残数を減らす(numが負数の場合、増やす)
-- `$water hitsory <num>`: 指定した件数分の履歴を返す(default=10)
+- `$water history <num>`: 指定した件数分の履歴を返す(default=10)
 - `$water help`: このコマンドの使い方を返す
 
 ### kintai コマンド
