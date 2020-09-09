@@ -118,7 +118,7 @@ $ git pull
 # ※ライブラリ更新が必要な場合のみ※
 # 仮装環境を有効化
 $ source /home/haro/venv/bin/activate
-# ライブラリを upgrade
+# ライブラリを更新
 $ pip install -r /home/haro/beproudbot/src/requirements.txt
 
 # デプロイ実行
