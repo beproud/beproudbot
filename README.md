@@ -110,10 +110,19 @@ $ ssh haro
 $ su - beproud
 パスワード: (いつものあれ)
 $ sudo -iH
+
 # haro リポジトリから最新の master を pull する
 $ cd beproudbot/deployment
 $ git pull
+
+# ※ライブラリ更新が必要な場合のみ※
+# 仮装環境を有効化
+$ source /home/haro/venv/bin/activate
+# ライブラリを upgrade
+$ pip install -U -r /home/haro/beproudbot/src/requirements.txt
+
 # デプロイ実行
+$ cd beproudbot/deployment
 $ ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy
 # デプロイ実行 (上記の venv がない場合)
 $ /home/altnight/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags deploy -e "use_local_mysql_server=false"
