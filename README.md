@@ -104,7 +104,20 @@ $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --co
 ansible の `deploy` タグを使用します
 
 ```bash
-$ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy)
+# 自分のユーザーで haro サーバーに ssh 
+$ ssh haro
+# root ユーザーになる (以下は beproud ユーザー経由で root になる例)
+$ su - beproud
+パスワード: (いつものあれ)
+$ sudo -iH
+# haro リポジトリから最新の master を pull する
+$ cd beproudbot/deployment
+$ git pull
+# デプロイ実行
+$ ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy
+# デプロイ実行 (上記の venv がない場合)
+$ /home/altnight/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags deploy -e "use_local_mysql_server=false"
+
 # `git_version` でブランチ/タグ/リビジョンを指定することができます
 $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_version=branch_name")
 # VM開発時は `git_sync_local` でローカルファイルを配備することができます
