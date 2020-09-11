@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "bento/ubuntu-16.04"
-  config.vm.box_url = "https://atlas.hashicorp.com/bento/boxes/ubuntu-16.04"
+  config.vm.box = "bento/ubuntu-18.04"
+  config.vm.box_url = "https://vagrantcloud.com/bento/boxes/ubuntu-18.04/versions/202008.16.0/providers/virtualbox.box"
 
   if ENV['VAGRANT_BOOT'].nil?
     config.vm.provider "virtualbox" do |vm|
