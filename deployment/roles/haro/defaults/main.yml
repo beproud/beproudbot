@@ -4,6 +4,7 @@ SYSTEMD_SERVICE_FILE: "{{ APP_NAME }}.service"
 ALEMBIC_CONF_PATH: "{{ REPOSITORY_PATH }}/src/alembic/conf.ini"
 REPOSITORY_URL: "https://github.com/beproud/beproudbot.git"
 ENVIRONMENT_FILE_PATH: "{{ REPOSITORY_PATH }}/.env"
+HARO_PYTHON_VERSION: "python3.8"
 
 local_repository_path: /home/vagrant/beproudbot
 git_version: master
