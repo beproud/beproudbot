@@ -57,7 +57,7 @@
 # 関連プロセスの再起動
 - name: "restart {{ APP_NAME }}"
   systemd:
-   state: restarted
-   daemon_reload: yes
-   name: "{{ APP_NAME }}"
+    state: restarted
+    daemon_reload: yes
+    name: "{{ APP_NAME }}"
   tags: [deploy]
