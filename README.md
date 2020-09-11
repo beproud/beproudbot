@@ -115,7 +115,7 @@ $ sudo -iH
 $ cd beproudbot/deployment
 $ ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy
 # デプロイ実行 (上記の venv がない場合)
-$ /home/altnight/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags deploy -e "use_local_mysql_server=false"
+$ /home/altnight/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags deploy
 
 # `git_version` でブランチ/タグ/リビジョンを指定することができます
 $ (cd beproudbot/deployment && ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy -e "git_version=branch_name")
