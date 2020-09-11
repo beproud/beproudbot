@@ -9,6 +9,8 @@
 - name: update pip
   command: pip3 install -U pip
 - name: install virtualenv
+  # Ubuntu の venv は挙動がおかしい場合があるため、
+  # haro の仮想環境は virtualenv で作成する
   pip:
     name: virtualenv
 
