@@ -111,16 +111,6 @@ $ su - beproud
 パスワード: (いつものあれ)
 $ sudo -iH
 
-# haro リポジトリから最新の master を pull する
-$ cd beproudbot/deployment
-$ git pull
-
-# ※ライブラリ更新が必要な場合のみ※
-# 仮装環境を有効化
-$ source /home/haro/venv/bin/activate
-# ライブラリを更新
-$ pip install -r /home/haro/beproudbot/src/requirements.txt
-
 # デプロイ実行
 $ cd beproudbot/deployment
 $ ~/venv_ansible/bin/ansible-playbook -i hosts --connection local site.yml --tags=deploy
