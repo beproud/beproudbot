@@ -18,7 +18,7 @@ Haro is [slackbot](https://github.com/lins05/slackbot "lins05/slackbot: A chat b
 
 ### Requirements
 
-- Python 3.5.2 or later.
+- Python 3.6.9 or later.
 
 ```bash
 $ python3 -m venv env
