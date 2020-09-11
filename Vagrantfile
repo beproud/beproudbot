@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
     sudo apt update -y
-    sudo apt install -y build-essential python3 python3-dev libssl-dev libffi-dev python3-pip aptitude  python3-venv
+    sudo apt install -y build-essential python3 python3-dev libssl-dev libffi-dev python3-pip aptitude
     sudo pip3 install -U pip
     sudo pip3 install virtualenv
 
