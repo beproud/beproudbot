@@ -9,6 +9,8 @@
 - name: update pip
   command: pip3 install -U pip
 - name: install virtualenv
+  # Ubuntu の venv は挙動がおかしい場合があるため、
+  # haro の仮想環境は virtualenv で作成する
   pip:
     name: virtualenv
 
@@ -57,7 +59,7 @@
 # 関連プロセスの再起動
 - name: "restart {{ APP_NAME }}"
   systemd:
-   state: restarted
-   daemon_reload: yes
-   name: "{{ APP_NAME }}"
+    state: restarted
+    daemon_reload: yes
+    name: "{{ APP_NAME }}"
   tags: [deploy]
