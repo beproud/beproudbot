@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.6
+      - image: circleci/python:3.8
     steps:
       - checkout
       # Download and cache dependencies
@@ -17,7 +17,7 @@ jobs:
             python3 -m venv venv
             source ./venv/bin/activate
             pip install -U pip setuptools tox
-            tox -epy36,flake8_ci
+            tox -epy38,flake8_ci
       - save_cache:
           paths:
             - ./venv
