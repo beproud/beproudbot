@@ -12,7 +12,6 @@ from haro.plugins.redmine import (
 )
 
 from tests.factories.redmine import ProjectChannelFactory, RedmineUserFactory
-from tests.db import db
 
 USER_NAME = "Emmanuel Goldstein"
 
