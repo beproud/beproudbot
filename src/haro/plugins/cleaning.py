@@ -113,7 +113,7 @@ def cleaning_add(message, user_name, day_of_week):
 
     q = s.query(Cleaning).filter(Cleaning.slack_id == slack_id)
     if s.query(q.exists()).scalar():
-        botsend(message, '{}は既に登録されています'.format(user_name, day_of_week))
+        botsend(message, '{}は既に登録されています'.format(user_name))
         return
 
     s.add(Cleaning(slack_id=slack_id, day_of_week=DAY_OF_WEEK.index(day_of_week)))
