@@ -1,8 +1,8 @@
 import re
 import random
+import xml.dom.minidom as md
 
 import requests
-import xml.dom.minidom as md
 import kml2geojson as k2g
 from geopy.distance import vincenty
 from slackbot.bot import respond_to
