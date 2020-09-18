@@ -41,7 +41,10 @@ def redmine_project(db, project_id=265, channels="C0AGP8QQH,C0AGP8QQZ"):
 
 
 @pytest.fixture
-def slack_message(channel="C0AGP8QQH", user_id="U023BECGF"):
+def slack_message():
+    channel = "C0AGP8QQH"
+    user_id = "U023BECGF"
+
     channel_mock = Mock()
     channel_mock._body = {"id": channel, "name": "test_channel"}
     configure = {
@@ -57,7 +60,20 @@ def slack_message(channel="C0AGP8QQH", user_id="U023BECGF"):
 
 @pytest.fixture
 def no_channel_slack_message():
-    return slack_message(channel="111111111")
+    channel = "111111111"
+    user_id = "U023BECGF"
+
+    channel_mock = Mock()
+    channel_mock._body = {"id": channel, "name": "test_channel"}
+    configure = {
+        "channel": channel_mock
+    }
+
+    message = MagicMock()
+    message.configure_mock(**configure)
+    message.body = {"user": user_id}
+    message.send = Mock()
+    return message
 
 
 def test_invalid_user_response(db, slack_message):
