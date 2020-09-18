@@ -1,5 +1,5 @@
 import re
-import imp
+import importlib
 
 from unittest import mock
 import pytest
@@ -10,7 +10,7 @@ class TestUpdateKudo:
     def target_pattern(self):
         with mock.patch('slackbot.bot.listen_to') as mock_listen_to:
             from haro.plugins import kudo
-            imp.reload(kudo)  # ensure applying the decorator
+            importlib.reload(kudo)  # ensure applying the decorator
 
         args, _ = mock_listen_to.call_args
         return re.compile(*args)
