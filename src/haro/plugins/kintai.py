@@ -42,7 +42,7 @@ def replay_you_did_good_today(message):
     botreply(message, random.choice(messages))
 
 
-@respond_to('^kintai\s+start$')
+@respond_to(r'^kintai\s+start$')
 def register_workon_time(message):
     """出社時刻を記録して挨拶を返すコマンド
 
@@ -53,7 +53,7 @@ def register_workon_time(message):
     botreply(message, '出社時刻を記録しました')
 
 
-@respond_to('^kintai\s+end$')
+@respond_to(r'^kintai\s+end$')
 def register_workoff_time(message):
     """退社時刻を記録して挨拶を返すコマンド
 
@@ -85,7 +85,7 @@ def register_worktime(user_id, is_workon=True):
     s.commit()
 
 
-@respond_to('^kintai\s+show$')
+@respond_to(r'^kintai\s+show$')
 def show_kintai_history(message):
     """直近40日分の勤怠記録を表示します
 
@@ -122,8 +122,8 @@ def show_kintai_history(message):
     botsend(message, '{}の勤怠:\n{}'.format(user_name, '\n'.join(rows)))
 
 
-@respond_to('^kintai\s+csv$')
-@respond_to('^kintai\s+csv\s+(\d{4}/\d{1,2})$')
+@respond_to(r'^kintai\s+csv$')
+@respond_to(r'^kintai\s+csv\s+(\d{4}/\d{1,2})$')
 def show_kintai_history_csv(message, time=None):
     """指定した月の勤怠記録をCSV形式で返す
 
@@ -179,7 +179,7 @@ def show_kintai_history_csv(message, time=None):
                   files={'file': output.getvalue()})
 
 
-@respond_to('^kintai\s+help$')
+@respond_to(r'^kintai\s+help$')
 def show_help_kintai_commands(message):
     """勤怠コマンドのhelpを表示
 

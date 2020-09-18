@@ -5,7 +5,7 @@ from slackbot.bot import respond_to
 from haro.botmessage import botsend
 
 
-@respond_to('^shuffle\s+(.*)')
+@respond_to(r'^shuffle\s+(.*)')
 def shuffle(message, words):
     """指定したキーワードをシャッフルして返す
     """
@@ -17,7 +17,7 @@ def shuffle(message, words):
         botsend(message, ' '.join(words))
 
 
-@respond_to('^choice\s+(.*)')
+@respond_to(r'^choice\s+(.*)')
 def choice(message, words):
     """指定したキーワードから一つを選んで返す
     """

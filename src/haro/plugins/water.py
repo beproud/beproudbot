@@ -16,7 +16,7 @@ HELP = '''
 '''
 
 
-@respond_to('^water\s+count$')
+@respond_to(r'^water\s+count$')
 def count_water_stock(message):
     """現在の水の在庫本数を返すコマンド
 
@@ -41,7 +41,7 @@ def count_water_stock(message):
         botsend(message, '管理履歴はありません')
 
 
-@respond_to('^water\s+(-?\d+)$')
+@respond_to(r'^water\s+(-?\d+)$')
 def manage_water_stock(message, delta):
     """水の本数の増減を行うコマンド
 
@@ -76,8 +76,8 @@ def manage_water_stock(message, delta):
                 .format(delta, stock_number))
 
 
-@respond_to('^water\s+history$')
-@respond_to('^water\s+history\s+(\d+)$')
+@respond_to(r'^water\s+history$')
+@respond_to(r'^water\s+history\s+(\d+)$')
 def show_water_history(message, limit='10'):
     """水の管理履歴を返すコマンド
 
@@ -104,7 +104,7 @@ def show_water_history(message, limit='10'):
     botsend(message, '水の管理履歴:\n{}'.format(ret))
 
 
-@respond_to('^water\s+help$')
+@respond_to(r'^water\s+help$')
 def show_help_water_commands(message):
     """waterコマンドのhelpを表示
 

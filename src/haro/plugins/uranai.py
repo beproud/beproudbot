@@ -30,7 +30,7 @@ def uranai(birthday):
 {content}""".format(**d)
 
 
-@respond_to('^uranai\s+(\d{4})$')
+@respond_to(r'^uranai\s+(\d{4})$')
 def show_uranai_commands(message, birthday):
     """Uranaiコマンドの結果を表示
 

@@ -110,8 +110,8 @@ def lunch(keyword, distance=500):  # NOQA: ignore=C901
 
 
 @respond_to('^lunch$')
-@respond_to('^lunch\s+(\S+)$')
-@respond_to('^lunch\s+(\S+)\s+(\d+)$')
+@respond_to(r'^lunch\s+(\S+)$')
+@respond_to(r'^lunch\s+(\S+)\s+(\d+)$')
 def show_lunch(message, keyword=None, distance=500):
     """Lunchコマンドの結果を表示する
 
@@ -127,7 +127,7 @@ def show_lunch(message, keyword=None, distance=500):
     botsend(message, lunch(keyword, distance))
 
 
-@respond_to('^lunch\s+help$')
+@respond_to(r'^lunch\s+help$')
 def show_help_lunch_commands(message):
     """lunchコマンドのhelpを表示
 

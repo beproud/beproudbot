@@ -35,7 +35,7 @@ def command_patterns(message):
     commands = set()
     for deco in ['respond_to', 'listen_to']:
         for re_compile in message._plugins.commands.get(deco):
-            commands.add(re_compile.pattern.split('\s')[0].lstrip('^').rstrip('$'))
+            commands.add(re_compile.pattern.split('\\s')[0].lstrip('^').rstrip('$'))
     return commands
 
 
@@ -147,7 +147,7 @@ class ReturnTermCommandValidator(BaseCommandValidator):
         return self.get_command(command_name)
 
 
-@respond_to('^create\s+add\s+(\S+)$')
+@respond_to(r'^create\s+add\s+(\S+)$')
 @register_arg_validator(AddCommandValidator)
 def add_command(message, command_name):
     """新たにコマンドを作成する
@@ -162,7 +162,7 @@ def add_command(message, command_name):
     botsend(message, '`${}`コマンドを登録しました'.format(command_name))
 
 
-@respond_to('^create\s+del\s+(\S+)$')
+@respond_to(r'^create\s+del\s+(\S+)$')
 @register_arg_validator(DelCommandValidator, ['command'])
 def del_command(message, command_name, command=None):
     """コマンドを削除する
@@ -176,7 +176,7 @@ def del_command(message, command_name, command=None):
     botsend(message, '`${}`コマンドを削除しました'.format(command_name))
 
 
-@respond_to('^(\S+)$')
+@respond_to(r'^(\S+)$')
 @register_arg_validator(ReturnTermCommandValidator, ['command'])
 def return_term(message, command_name, command=None):
     """コマンドに登録されている語録をランダムに返す
@@ -194,7 +194,7 @@ def return_term(message, command_name, command=None):
             botsend(message, '`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
 
 
-@respond_to('^(\S+)\s+(.+)')
+@respond_to(r'^(\S+)\s+(.+)')
 @register_arg_validator(RunCommandValidator, ['command'])
 def run_command(message, command_name, params, command=None):
     """登録したコマンドに対して各種操作を行う
@@ -347,7 +347,7 @@ def add_term(message, command, word):
         botsend(message, 'コマンド `${}` に「{}」を追加しました'.format(name, word))
 
 
-@respond_to('^create\s+help$')
+@respond_to(r'^create\s+help$')
 def show_help_create_commands(message):
     """createコマンドのhelpを表示
 

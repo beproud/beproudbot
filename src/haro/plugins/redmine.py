@@ -51,7 +51,7 @@ def project_channel_from_identifier(api_key, identifier, session):
     except (ForbiddenError, ResourceNotFoundError):
         return None, None
 
-    chan = session.query(ProjectChannel).filter(ProjectChannel.project_id == project.id).\
+    chan = session.query(ProjectChannel).filter(ProjectChannel.project_id == project.id). \
         one_or_none()
     return project, chan
 
@@ -66,14 +66,14 @@ def user_from_message(message, session):
     return user
 
 
-@respond_to('^redmine\s+help$')
+@respond_to(r'^redmine\s+help$')
 def show_help_redmine_commands(message):
     """Redmineコマンドのhelpを表示
     """
     botsend(message, HELP)
 
 
-@listen_to('issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')  # NOQA: R701,C901,E501
+@listen_to(r'issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')  # NOQA: R701,C901,E501
 def show_ticket_information(message, *ticket_ids):
     """Redmineのチケット情報を参照する.
 
@@ -109,7 +109,7 @@ def show_ticket_information(message, *ticket_ids):
             return
 
         proj_id = ticket.project.id
-        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id)\
+        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id) \
             .one_or_none()
 
         if not proj_room or channel_id not in proj_room.channels.split(','):
@@ -149,7 +149,7 @@ def show_ticket_information(message, *ticket_ids):
         sc.chat.post_message(channel_id, description, as_user=True, thread_ts=res.body['ts'])
 
 
-@respond_to('^redmine\s+key\s+(\S+)$')
+@respond_to(r'^redmine\s+key\s+(\S+)$')
 def register_key(message, api_key):
     s = Session()
 
@@ -173,7 +173,7 @@ def register_key(message, api_key):
     botsend(message, API_KEY_SET)
 
 
-@respond_to('^redmine\s+add\s+([a-zA-Z0-9_-]+)$')
+@respond_to(r'^redmine\s+add\s+([a-zA-Z0-9_-]+)$')
 def register_room(message, project_identifier):
     """RedmineのプロジェクトとSlackチャンネルを繋ぐ.
 
@@ -207,7 +207,7 @@ def register_room(message, project_identifier):
         botsend(message, CHANNEL_ALREADY_REGISTERED)
 
 
-@respond_to('^redmine\s+remove\s+([a-zA-Z0-9_-]+)$')
+@respond_to(r'^redmine\s+remove\s+([a-zA-Z0-9_-]+)$')
 def unregister_room(message, project_identifier):
     s = Session()
 

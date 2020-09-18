@@ -40,7 +40,7 @@ FORMATTED_CLEANING_TASKS = ('掃除でやることリスト\n' +
 DAY_OF_WEEK = '月火水木金'
 
 
-@respond_to('^cleaning\s+help$')
+@respond_to(r'^cleaning\s+help$')
 def show_help_cleaning_commands(message):
     """Cleaningコマンドのhelpを表示
 
@@ -49,7 +49,7 @@ def show_help_cleaning_commands(message):
     botsend(message, HELP)
 
 
-@respond_to('^cleaning\s+task$')
+@respond_to(r'^cleaning\s+task$')
 def show_cleaning_task(message):
     """掃除作業一覧を表示
 
@@ -58,7 +58,7 @@ def show_cleaning_task(message):
     botsend(message, FORMATTED_CLEANING_TASKS)
 
 
-@respond_to('^cleaning\s+list$')
+@respond_to(r'^cleaning\s+list$')
 def show_cleaning_list(message):
     """掃除当番の一覧を表示する
 
@@ -80,7 +80,7 @@ def show_cleaning_list(message):
     botsend(message, '```{}```'.format(pt))
 
 
-@respond_to('^cleaning\s+today$')
+@respond_to(r'^cleaning\s+today$')
 def show_today_cleaning_list(message):
     """今日の掃除当番を表示する
 
@@ -94,7 +94,7 @@ def show_today_cleaning_list(message):
     botsend(message, '今日の掃除当番は{}です'.format('、'.join(users)))
 
 
-@respond_to('^cleaning\s+add\s+(\S+)\s+(\S+)$')
+@respond_to(r'^cleaning\s+add\s+(\S+)\s+(\S+)$')
 def cleaning_add(message, user_name, day_of_week):
     """指定した曜日の掃除当番にユーザーを追加する
 
@@ -122,7 +122,7 @@ def cleaning_add(message, user_name, day_of_week):
     botsend(message, '{}を{}曜日の掃除当番に登録しました'.format(user_name, day_of_week))
 
 
-@respond_to('^cleaning\s+del\s+(\S+)\s+(\S+)$')
+@respond_to(r'^cleaning\s+del\s+(\S+)\s+(\S+)$')
 def cleaning_del(message, user_name, day_of_week):
     """指定した曜日の掃除当番からユーザーを削除する
 
@@ -153,7 +153,7 @@ def cleaning_del(message, user_name, day_of_week):
         botsend(message, '{}は{}曜日の掃除当番に登録されていません'.format(user_name, day_of_week))
 
 
-@respond_to('^cleaning\s+swap\s+(\S+)\s+(\S+)$')
+@respond_to(r'^cleaning\s+swap\s+(\S+)\s+(\S+)$')
 def cleaning_swap(message, user_name1, user_name2):
     """登録された掃除当番のユーザーの掃除曜日を入れ替える
 
@@ -196,7 +196,7 @@ def cleaning_swap(message, user_name1, user_name2):
     botsend(message, '{}と{}の掃除当番を交換しました'.format(user_name1, user_name2))
 
 
-@respond_to('^cleaning\s+move\s+(\S+)\s+(\S+)$')
+@respond_to(r'^cleaning\s+move\s+(\S+)\s+(\S+)$')
 def cleaning_move(message, user_name, day_of_week):
     """登録された掃除当番のユーザーの掃除曜日を移動させる
 

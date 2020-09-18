@@ -12,7 +12,7 @@ HELP = """
 """
 
 
-@listen_to('^(.*)\s*(?<!\+)\+\+$')
+@listen_to(r'^(.*)\s*(?<!\+)\+\+$')
 def update_kudo(message, names):
     """ 指定された名前に対して ++ する
 
@@ -59,7 +59,7 @@ def update_kudo(message, names):
     botsend(message, '\n'.join(msg))
 
 
-@respond_to('^kudo\s+help$')
+@respond_to(r'^kudo\s+help$')
 def show_help_alias_commands(message):
     """Kudoコマンドのhelpを表示
 
