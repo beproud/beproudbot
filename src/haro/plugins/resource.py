@@ -8,7 +8,6 @@
 import random
 
 from slackbot.bot import respond_to
-
 from db import Session
 from haro.botmessage import botsend
 from haro.plugins.resource_models import Resource

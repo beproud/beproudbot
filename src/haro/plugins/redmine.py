@@ -1,9 +1,7 @@
 from redminelib import Redmine
 from redminelib.exceptions import ForbiddenError, ResourceNotFoundError
-
 from slackbot.bot import listen_to, respond_to
 from slackbot_settings import REDMINE_URL
-
 from db import Session
 from haro.botmessage import botsend
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel

@@ -1,5 +1,4 @@
 from haro.plugins.alias_models import UserAliasName
-
 from haro.slack import get_slack_id_by_name
 
 

@@ -6,7 +6,6 @@ from io import StringIO
 import requests
 from slackbot import settings
 from slackbot.bot import respond_to, listen_to
-
 from db import Session
 from haro.alias import get_slack_id
 from haro.botmessage import botsend

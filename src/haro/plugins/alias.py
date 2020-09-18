@@ -1,6 +1,5 @@
 from prettytable import PrettyTable
 from slackbot.bot import respond_to
-
 from db import Session
 from haro.botmessage import botsend
 from haro.plugins.alias_models import UserAliasName

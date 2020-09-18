@@ -2,7 +2,6 @@ import datetime
 
 import requests
 from slackbot.bot import respond_to
-
 from haro.botmessage import botsend
 
 

@@ -4,7 +4,6 @@ import random
 from slackbot.bot import respond_to
 from slackbot import settings
 import slacker
-
 from haro.botmessage import botsend
 
 
