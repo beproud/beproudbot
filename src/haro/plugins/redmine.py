@@ -71,8 +71,8 @@ def show_help_redmine_commands(message):
     botsend(message, HELP)
 
 
-@listen_to(r'issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')  # NOQA: R701,C901,E501
-def show_ticket_information(message, *ticket_ids):
+@listen_to(r'issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
+def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
     """Redmineのチケット情報を参照する.
 
     :param message: slackbotの各種パラメータを保持したclass
