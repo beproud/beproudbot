@@ -77,13 +77,13 @@ def no_channel_slack_message():
 
 
 def test_invalid_user_response(db, slack_message):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         show_ticket_information(slack_message, "1234567")
         assert slack_message.send.called is False
 
 
 def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             url = urljoin(REDMINE_URL, "issues/%s.json?key=%s" % (ticket_id, redmine_user.api_key))
@@ -94,7 +94,7 @@ def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine
 
 
 def test_no_channel_permissions_response(db, slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             channel_name = slack_message.channel._body['name']
@@ -109,7 +109,7 @@ def test_no_channel_permissions_response(db, slack_message, redmine_user, redmin
 
 
 def test_successful_response(db, slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
 
         client, web_api, chat, post_message, res = Mock(), Mock(), Mock(), Mock(), Mock()
         res.body = {'ts': 123}
@@ -160,7 +160,7 @@ def test_successful_response(db, slack_message, redmine_user, redmine_project):
 
 
 def test_no_channels_no_response(db, no_channel_slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         with requests_mock.mock() as response:
             ticket_id = "1234567"
 
