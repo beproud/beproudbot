@@ -244,7 +244,7 @@ def pop_term(message, command):
     term = (s.query(Term)
             .filter(Term.create_command == command.id)
             .filter(Term.creator == message.body['user'])
-            .order_by('-id')
+            .order_by(Term.id.desc())
             .first())
 
     name = command.name
