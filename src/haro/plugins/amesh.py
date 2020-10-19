@@ -7,7 +7,6 @@ from datetime import datetime
 
 import requests
 from PIL import Image
-
 from haro.botmessage import botsend
 from slackbot.bot import respond_to
 

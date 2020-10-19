@@ -6,6 +6,9 @@
     name: "{{ item }}"
   with_items:
     - python3-pip
+- name: install python that haro works
+  apt:
+    name: "python{{ HARO_PYTHON_VERSION }}"
 - name: update pip
   command: pip3 install -U pip
 - name: install virtualenv
@@ -43,6 +46,7 @@
   pip:
     requirements: "{{ REPOSITORY_PATH }}/src/requirements.txt"
     virtualenv: "{{ VIRTUALENV_PATH }}"
+    virtualenv_python: "python{{ HARO_PYTHON_VERSION }}"
   tags: [deploy]
 
 # マイグレーション

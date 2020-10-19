@@ -1,24 +1,8 @@
 from contextlib import contextmanager
 
-import pytest
 from sqlalchemy.orm import sessionmaker
 
 from db import Base
-
-
-@pytest.fixture(scope='session')
-def test_engine():
-    '''Session-wide test database'''
-    from sqlalchemy import create_engine
-    engine = create_engine("sqlite:///test.sqlite")
-    return engine
-
-
-@pytest.fixture()
-def db():
-    db = DatabaseManager()
-    db.initialize()
-    yield db
 
 
 class DatabaseManager(object):
@@ -28,8 +12,8 @@ class DatabaseManager(object):
     TODO: 本当はget_sql_session()なんかもこちらに寄せた方がよさそう。時間と相談
     """
 
-    def __init__(self):
-        self._engine = test_engine()
+    def __init__(self, test_engine):
+        self._engine = test_engine
         self._session_maker = sessionmaker(bind=self._engine)
 
     def initialize(self):

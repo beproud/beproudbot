@@ -1,12 +1,11 @@
 import re
 import random
+import xml.dom.minidom as md
 
 import requests
-import xml.dom.minidom as md
 import kml2geojson as k2g
 from geopy.distance import vincenty
 from slackbot.bot import respond_to
-
 from haro.botmessage import botsend
 
 KML_SOURCE = 'https://www.google.com/maps/d/u/0/kml?hl=en&mid=1J4U-QXOe1Zi_4Lw5UxaL8AriG6M&lid=zubJL41y6fLI.k8KrINTXzJI4&forcekml=1'  # NOQA
@@ -110,8 +109,8 @@ def lunch(keyword, distance=500):  # NOQA: ignore=C901
 
 
 @respond_to('^lunch$')
-@respond_to('^lunch\s+(\S+)$')
-@respond_to('^lunch\s+(\S+)\s+(\d+)$')
+@respond_to(r'^lunch\s+(\S+)$')
+@respond_to(r'^lunch\s+(\S+)\s+(\d+)$')
 def show_lunch(message, keyword=None, distance=500):
     """Lunchコマンドの結果を表示する
 
@@ -127,7 +126,7 @@ def show_lunch(message, keyword=None, distance=500):
     botsend(message, lunch(keyword, distance))
 
 
-@respond_to('^lunch\s+help$')
+@respond_to(r'^lunch\s+help$')
 def show_help_lunch_commands(message):
     """lunchコマンドのhelpを表示
 

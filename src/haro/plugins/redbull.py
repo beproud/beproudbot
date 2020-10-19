@@ -8,7 +8,6 @@ import requests
 from slackbot import settings
 from slackbot.bot import respond_to
 from sqlalchemy import func
-
 from db import Session
 from haro.botmessage import botsend
 from haro.plugins.redbull_models import RedbullHistory
@@ -26,7 +25,7 @@ HELP = """
 """
 
 
-@respond_to('^redbull\s+count$')
+@respond_to(r'^redbull\s+count$')
 def count_redbull_stock(message):
     """現在のRedBullの在庫本数を返すコマンド
 
@@ -40,7 +39,7 @@ def count_redbull_stock(message):
     botsend(message, 'レッドブル残り {} 本'.format(stock_number))
 
 
-@respond_to('^redbull\s+(-?\d+)$')
+@respond_to(r'^redbull\s+(-?\d+)$')
 def manage_redbull_stock(message, delta):
     """RedBullの本数の増減を行うコマンド
 
@@ -63,7 +62,7 @@ def manage_redbull_stock(message, delta):
         botsend(message, 'レッドブルが{}により{}本消費されました'.format(user_name, -delta))
 
 
-@respond_to('^redbull\s+history$')
+@respond_to(r'^redbull\s+history$')
 def show_user_redbull_history(message):
     """RedBullのUserごとの消費履歴を返すコマンド
 
@@ -87,7 +86,7 @@ def show_user_redbull_history(message):
     botsend(message, '{}の消費したレッドブル:\n{}'.format(user_name, ret))
 
 
-@respond_to('^redbull\s+csv$')
+@respond_to(r'^redbull\s+csv$')
 def show_redbull_history_csv(message):
     """RedBullの月単位の消費履歴をCSVに出力する
 
@@ -122,8 +121,8 @@ def show_redbull_history_csv(message):
                   files={'file': output.getvalue()})
 
 
-@respond_to('^redbull\s+clear$')
-@respond_to('^redbull\s+clear\s+(\w+)$')
+@respond_to(r'^redbull\s+clear$')
+@respond_to(r'^redbull\s+clear\s+(\w+)$')
 def clear_redbull_history(message, token=None):
     """RedBullの履歴データを削除するコマンド
 
@@ -151,7 +150,7 @@ def clear_redbull_history(message, token=None):
         botsend(message, 'コマンドが一致しないため履歴をクリアできませんでした')
 
 
-@respond_to('^redbull\s+help$')
+@respond_to(r'^redbull\s+help$')
 def show_help_redbull_commands(message):
     """RedBullコマンドのhelpを表示
 

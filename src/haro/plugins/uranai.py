@@ -2,7 +2,6 @@ import datetime
 
 import requests
 from slackbot.bot import respond_to
-
 from haro.botmessage import botsend
 
 
@@ -30,7 +29,7 @@ def uranai(birthday):
 {content}""".format(**d)
 
 
-@respond_to('^uranai\s+(\d{4})$')
+@respond_to(r'^uranai\s+(\d{4})$')
 def show_uranai_commands(message, birthday):
     """Uranaiコマンドの結果を表示
 

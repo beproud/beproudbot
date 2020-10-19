@@ -8,7 +8,6 @@
 import random
 
 from slackbot.bot import respond_to
-
 from db import Session
 from haro.botmessage import botsend
 from haro.plugins.resource_models import Resource
@@ -22,7 +21,7 @@ COMMANDS = (
 )
 
 
-@respond_to('^status\s+help$')
+@respond_to(r'^status\s+help$')
 def show_help(message):
     """Statusコマンドのhelpを表示
 
@@ -60,7 +59,7 @@ def show_resources(message):
 respond_to('^status$')(show_resources)
 
 
-@respond_to('^status\s+add\s+(\S+)$')
+@respond_to(r'^status\s+add\s+(\S+)$')
 def add_resource(message, name):
     """リソースの追加
 
@@ -84,7 +83,7 @@ def add_resource(message, name):
     show_resources(message)
 
 
-@respond_to('^status\s+(del|delete|rm|remove)\s+(\S+)$')
+@respond_to(r'^status\s+(del|delete|rm|remove)\s+(\S+)$')
 def remove_resource(message, _, name):
     """リソースの削除
 
@@ -105,7 +104,7 @@ def remove_resource(message, _, name):
     show_resources(message)
 
 
-@respond_to('^status\s+(\S+)$')
+@respond_to(r'^status\s+(\S+)$')
 def unset_resource_status(message, name):
     """リソースの設定を初期値に戻す
 
@@ -129,7 +128,7 @@ def unset_resource_status(message, name):
     show_resources(message)
 
 
-@respond_to('^status\s+(\S+)\s+(\S+)$')
+@respond_to(r'^status\s+(\S+)\s+(\S+)$')
 def set_resource_status(message, name, value):
     """リソースの設定
 

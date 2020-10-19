@@ -12,7 +12,6 @@ from haro.plugins.redmine import (
 )
 
 from tests.factories.redmine import ProjectChannelFactory, RedmineUserFactory
-from tests.db import db
 
 USER_NAME = "Emmanuel Goldstein"
 
@@ -42,7 +41,10 @@ def redmine_project(db, project_id=265, channels="C0AGP8QQH,C0AGP8QQZ"):
 
 
 @pytest.fixture
-def slack_message(channel="C0AGP8QQH", user_id="U023BECGF"):
+def slack_message():
+    channel = "C0AGP8QQH"
+    user_id = "U023BECGF"
+
     channel_mock = Mock()
     channel_mock._body = {"id": channel, "name": "test_channel"}
     configure = {
@@ -58,17 +60,30 @@ def slack_message(channel="C0AGP8QQH", user_id="U023BECGF"):
 
 @pytest.fixture
 def no_channel_slack_message():
-    return slack_message(channel="111111111")
+    channel = "111111111"
+    user_id = "U023BECGF"
+
+    channel_mock = Mock()
+    channel_mock._body = {"id": channel, "name": "test_channel"}
+    configure = {
+        "channel": channel_mock
+    }
+
+    message = MagicMock()
+    message.configure_mock(**configure)
+    message.body = {"user": user_id}
+    message.send = Mock()
+    return message
 
 
 def test_invalid_user_response(db, slack_message):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         show_ticket_information(slack_message, "1234567")
         assert slack_message.send.called is False
 
 
 def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             url = urljoin(REDMINE_URL, "issues/%s.json?key=%s" % (ticket_id, redmine_user.api_key))
@@ -79,7 +94,7 @@ def test_no_ticket_permissions_response(db, slack_message, redmine_user, redmine
 
 
 def test_no_channel_permissions_response(db, slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         with requests_mock.mock() as response:
             ticket_id = "1234567"
             channel_name = slack_message.channel._body['name']
@@ -94,7 +109,7 @@ def test_no_channel_permissions_response(db, slack_message, redmine_user, redmin
 
 
 def test_successful_response(db, slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
 
         client, web_api, chat, post_message, res = Mock(), Mock(), Mock(), Mock(), Mock()
         res.body = {'ts': 123}
@@ -145,7 +160,7 @@ def test_successful_response(db, slack_message, redmine_user, redmine_project):
 
 
 def test_no_channels_no_response(db, no_channel_slack_message, redmine_user, redmine_project):
-    with patch('haro.plugins.redmine.Session', lambda: db.session) as session:
+    with patch('haro.plugins.redmine.Session', lambda: db.session):
         with requests_mock.mock() as response:
             ticket_id = "1234567"
 

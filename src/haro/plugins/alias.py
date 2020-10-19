@@ -1,6 +1,5 @@
 from prettytable import PrettyTable
 from slackbot.bot import respond_to
-
 from db import Session
 from haro.botmessage import botsend
 from haro.plugins.alias_models import UserAliasName
@@ -15,8 +14,8 @@ HELP = """
 """
 
 
-@respond_to('^alias\s+show$')
-@respond_to('^alias\s+show\s+(\S+)$')
+@respond_to(r'^alias\s+show$')
+@respond_to(r'^alias\s+show\s+(\S+)$')
 def show_user_alias_name(message, user_name=None):
     """ユーザーのエイリアス名一覧を表示する
 
@@ -44,8 +43,8 @@ def show_user_alias_name(message, user_name=None):
     botsend(message, '```{}```'.format(pt))
 
 
-@respond_to('^alias\s+add\s+(\S+)$')
-@respond_to('^alias\s+add\s+(\S+)\s+(\S+)$')
+@respond_to(r'^alias\s+add\s+(\S+)$')
+@respond_to(r'^alias\s+add\s+(\S+)\s+(\S+)$')
 def alias_name(message, user_name, alias_name=None):
     """指定したユーザにエイリアス名を紐付ける
 
@@ -85,8 +84,8 @@ def alias_name(message, user_name, alias_name=None):
     botsend(message, '{}のエイリアス名に `{}` を追加しました'.format(user_name, alias_name))
 
 
-@respond_to('^alias\s+del\s+(\S+)$')
-@respond_to('^alias\s+del\s+(\S+)\s+(\S+)$')
+@respond_to(r'^alias\s+del\s+(\S+)$')
+@respond_to(r'^alias\s+del\s+(\S+)\s+(\S+)$')
 def unalias_name(message, user_name, alias_name=None):
     """ユーザーに紐づくエイリアス名を削除する
 
@@ -123,7 +122,7 @@ def unalias_name(message, user_name, alias_name=None):
         botsend(message, '{}のエイリアス名 `{}` は登録されていません'.format(user_name, alias_name))
 
 
-@respond_to('^alias\s+help$')
+@respond_to(r'^alias\s+help$')
 def show_help_alias_commands(message):
     """Userコマンドのhelpを表示
 

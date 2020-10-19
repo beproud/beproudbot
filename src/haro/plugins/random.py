@@ -4,7 +4,6 @@ import random
 from slackbot.bot import respond_to
 from slackbot import settings
 import slacker
-
 from haro.botmessage import botsend
 
 
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @respond_to('^random$')
-@respond_to('^random\s+(active|help)$')
+@respond_to(r'^random\s+(active|help)$')
 def random_command(message, subcommand=None):
     """
     チャンネルにいるメンバーからランダムに一人を選んで返す

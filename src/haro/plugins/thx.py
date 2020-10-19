@@ -6,7 +6,6 @@ from io import StringIO
 import requests
 from slackbot import settings
 from slackbot.bot import respond_to, listen_to
-
 from db import Session
 from haro.alias import get_slack_id
 from haro.botmessage import botsend
@@ -36,7 +35,7 @@ def find_thx(s, text):
     hint_names = []
     not_matched = []
 
-    thx_matcher = re.compile('(?P<user_names>.+)[ \t\f\v]*(?<!\+)\+\+[ \t\f\v]+(?P<word>.+)',
+    thx_matcher = re.compile(r'(?P<user_names>.+)[ \t\f\v]*(?<!\+)\+\+[ \t\f\v]+(?P<word>.+)',
                              re.MULTILINE)
     for thx in thx_matcher.finditer(text):
         user_names = [x for x in thx.group('user_names').split(' ') if x]
@@ -63,7 +62,7 @@ def find_thx(s, text):
     return word_map_names_dict, hint_names, not_matched
 
 
-@listen_to('.*\s*(?<!\+)\+\+\s+.+')
+@listen_to(r'.*\s*(?<!\+)\+\+\s+.+')
 def update_thx(message):
     """指定したSlackのユーザーにGJを行う
 
@@ -123,8 +122,8 @@ def update_thx(message):
     botsend(message, '\n'.join(msg))
 
 
-@respond_to('^thx\s+from$')
-@respond_to('^thx\s+from\s+(\S+)$')
+@respond_to(r'^thx\s+from$')
+@respond_to(r'^thx\s+from\s+(\S+)$')
 def show_thx_from(message, user_name=None):
     """誰からGJされたか表示します
 
@@ -161,8 +160,8 @@ def show_thx_from(message, user_name=None):
                   files={'file': ("%s_thx.csv" % user_name, output.getvalue(), 'text/csv', )})
 
 
-@respond_to('^thx\s+to$')
-@respond_to('^thx\s+to\s+(\S+)$')
+@respond_to(r'^thx\s+to$')
+@respond_to(r'^thx\s+to\s+(\S+)$')
 def show_thx_to(message, user_name=None):
     """誰にGJしたか表示します
 
@@ -198,7 +197,7 @@ def show_thx_to(message, user_name=None):
                   files={'file': ("%s_thx.csv" % user_name, output.getvalue(), 'text/csv',)})
 
 
-@respond_to('^thx\s+help$')
+@respond_to(r'^thx\s+help$')
 def show_help_thx_commands(message):
     """thxコマンドのhelpを表示
 
