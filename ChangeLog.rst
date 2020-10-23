@@ -2,6 +2,10 @@
 Unreleased
 ----------
 
+Release Notes - 2020-10-23
+--------------------------
+- [#207] Redmine Reminderが動いていないバグ
+
 Release Notes - 2020-01-31
 --------------------------
 - [#195] $amesh retry機能
