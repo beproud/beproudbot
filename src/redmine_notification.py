@@ -20,6 +20,7 @@ from textwrap import dedent
 
 from redminelib import Redmine
 from slack import WebClient
+from slack.errors import SlackApiError
 
 from db import (
     init_dbsession,
@@ -184,12 +185,14 @@ def send_slack_message(channel, attachments, message):
     sc = WebClient(API_TOKEN)
     return sc.api_call(
         'chat.postMessage',
-        channel=channel,
-        text=message,
-        as_user="false",
-        icon_emoji=EMOJI,
-        username=BOTNAME,
-        attachments=attachments
+        json={
+            'channel': channel,
+            'text': message,
+            'as_user': "false",
+            'icon_emoji': EMOJI,
+            'username': BOTNAME,
+            'attachments': attachments
+        }
     )
 
 
@@ -199,7 +202,19 @@ def send_slack_message_per_sec(channel, attachments, message):
     :param channel: Slack channel
     :param message:
     """
-    response = send_slack_message(channel, attachments, message)
+    try:
+        response = send_slack_message(channel, attachments, message)
+    except SlackApiError as e:
+        # アーカイブされているチャンネルはスキップ
+        if e.response.data["error"] == "is_archived":
+            return
+        # 通知が失敗なら, responseのrate limit headersをチェック
+        elif e.response.data["ok"] is False and e.response.headers.get("Retry-After"):
+            # Retry-After headerがどのくらいのdelayが必要かの数値を持っている
+            delay = int(e.response.headers["Retry-After"])
+            logger.info("Rate limited. Retrying in {} seconds".format(delay))
+            time.sleep(delay)
+            send_slack_message(channel, attachments, message)
 
     # メッセージが通知されたかをチェックする
     # メッセージ通知が成功なら、response["ok"]がTrue
@@ -212,14 +227,6 @@ def send_slack_message_per_sec(channel, attachments, message):
         logger.info(
             "Message posted successfully: {}".format(time_stamp)
         )
-        # 通知が失敗なら, responseのrate limit headersをチェック
-    elif response["ok"] is False and getattr(response["headers"],
-                                             "Retry-After", None):
-        # Retry-After headerがどのくらいのdelayが必要かの数値を持っている
-        delay = int(response["headers"]["Retry-After"])
-        logger.info("Rate limited. Retrying in {} seconds".format(delay))
-        time.sleep(delay)
-        send_slack_message(channel, attachments, message)
 
 
 def get_argparser():
