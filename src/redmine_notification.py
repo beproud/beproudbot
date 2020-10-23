@@ -19,7 +19,7 @@ from datetime import timedelta, date, datetime, timezone
 from textwrap import dedent
 
 from redminelib import Redmine
-from slackclient import SlackClient
+from slack import WebClient
 
 from db import (
     init_dbsession,
@@ -181,7 +181,7 @@ def send_slack_message(channel, attachments, message):
     :param channel: Slack channel
     :param message: 通知メッセージ
     """
-    sc = SlackClient(API_TOKEN)
+    sc = WebClient(API_TOKEN)
     return sc.api_call(
         'chat.postMessage',
         channel=channel,
@@ -243,8 +243,8 @@ def notify_error(text):
         "color": "#F44336",
         "text": text
     }]
-    # p-bp-beproudbot-devチャンネルに通知
-    send_slack_message('G0291Q891', attachment, message)
+    # bp-bot-dev チャンネルに通知
+    send_slack_message('C0106MV2C4F', attachment, message)
 
 
 def main():
