@@ -31,6 +31,12 @@ $ source /path/env/bin/activate
 (env)$ pip install -r src/requirements.txt
 ```
 
+### Redmine APIキーの取得
+
+ローカル環境では `.env` に`REDMINE_API_KEY` を指定する必要がある。
+
+APIアクセスキーは `BPのRedmine > 個人設定 > APIアクセスキー > 表示` で確認できるので、 `.env` に追記する。
+
 ## 起動方法
 
 ```bash
