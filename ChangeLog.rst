@@ -2,6 +2,10 @@
 Unreleased
 ----------
 
+Release Notes - 2020-10-30
+--------------------------
+- [#210] READMEとenv.sampleにREDMINE_API_KEYについて追記
+
 Release Notes - 2020-10-23
 --------------------------
 - [#207] Redmine Reminderが動いていないバグ
