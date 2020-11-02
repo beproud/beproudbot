@@ -50,9 +50,12 @@ class TestVersion:
     )
     def test_get_version_success(self, target, change_log, expected):
         with mock.patch('haro.plugins.version.read_change_log') as m:
+            # arrange
             m.return_value = change_log
+            # act
             actual = target()
-            assert actual == expected
+        # assert
+        assert actual == expected
 
     def test_get_version_failed(self, target):
         with mock.patch('haro.plugins.version.read_change_log') as m:
