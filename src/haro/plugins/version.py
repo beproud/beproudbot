@@ -47,7 +47,7 @@ def version():
     return message
 
 
-@respond_to(r'version')
+@respond_to(r'^version$')
 def show_version_commands(message):
     botsend(message, version())
 
