@@ -7,40 +7,38 @@ from haro.botmessage import botsend
 from haro.plugins.water_models import WaterHistory
 from slackbot_settings import WATER_EMPTY_TO, WATER_ORDER_NUM
 
-HELP = '''
+HELP = """
 - `$water count`: 現在の残数を返す
 - `$water num`: 水を取り替えた時に使用。指定した数だけ残数を減らす(numが負数の場合、増やす)
 - `$water history <num>`: 指定した件数分の履歴を返す(default=10)
 - `$water help`: このコマンドの使い方を返す
-'''
+"""
 
 
-@respond_to(r'^water\s+count$')
+@respond_to(r"^water\s+count$")
 def count_water_stock(message):
     """現在の水の在庫本数を返すコマンド
 
     :param message: slackbotの各種パラメータを保持したclass
     """
     s = Session()
-    stock_number, latest_ctime = (
-        s.query(func.sum(WaterHistory.delta),
-                func.max(case(whens=((
-                    WaterHistory.delta != 0,
-                    WaterHistory.ctime),), else_=None))).first()
-    )
+    stock_number, latest_ctime = s.query(
+        func.sum(WaterHistory.delta),
+        func.max(
+            case(whens=((WaterHistory.delta != 0, WaterHistory.ctime),), else_=None)
+        ),
+    ).first()
 
     if stock_number:
         # SQLiteの場合文字列で渡ってくるので対応
         if not isinstance(latest_ctime, datetime.datetime):
-            latest_ctime = datetime.datetime.strptime(latest_ctime,
-                                                      '%Y-%m-%d %H:%M:%S')
-        botsend(message, '残数: {}本 ({:%Y年%m月%d日} 追加)'
-                .format(stock_number, latest_ctime))
+            latest_ctime = datetime.datetime.strptime(latest_ctime, "%Y-%m-%d %H:%M:%S")
+        botsend(message, "残数: {}本 ({:%Y年%m月%d日} 追加)".format(stock_number, latest_ctime))
     else:
-        botsend(message, '管理履歴はありません')
+        botsend(message, "管理履歴はありません")
 
 
-@respond_to(r'^water\s+(-?\d+)$')
+@respond_to(r"^water\s+(-?\d+)$")
 def manage_water_stock(message, delta):
     """水の本数の増減を行うコマンド
 
@@ -51,59 +49,56 @@ def manage_water_stock(message, delta):
     """
     delta = -int(delta)
     if not delta:
-        botsend(message, '0は指定できません')
+        botsend(message, "0は指定できません")
         return
 
-    user_id = message.body['user']
+    user_id = message.body["user"]
 
     s = Session()
     s.add(WaterHistory(user_id=user_id, delta=delta))
     s.commit()
 
-    q = s.query(func.sum(WaterHistory.delta).label('stock_number'))
+    q = s.query(func.sum(WaterHistory.delta).label("stock_number"))
     stock_number = q.one().stock_number
 
     if delta < 0:
-        text = 'ウォーターサーバーのボトルを{}本取りかえました。'
+        text = "ウォーターサーバーのボトルを{}本取りかえました。"
         if stock_number <= int(WATER_ORDER_NUM) and WATER_EMPTY_TO:
-            text += '\n <!subteam^' + WATER_EMPTY_TO + '> 残数: {}です。注文お願いします。'
+            text += "\n <!subteam^" + WATER_EMPTY_TO + "> 残数: {}です。注文お願いします。"
         else:
-            text += '(残数: {}本)'
+            text += "(残数: {}本)"
         botsend(message, text.format(-delta, stock_number))
     else:
-        botsend(message, 'ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)'
-                .format(delta, stock_number))
+        botsend(
+            message, "ウォーターサーバーのボトルを{}本追加しました。(残数: {}本)".format(delta, stock_number)
+        )
 
 
-@respond_to(r'^water\s+history$')
-@respond_to(r'^water\s+history\s+(\d+)$')
-def show_water_history(message, limit='10'):
+@respond_to(r"^water\s+history$")
+@respond_to(r"^water\s+history\s+(\d+)$")
+def show_water_history(message, limit="10"):
     """水の管理履歴を返すコマンド
 
     :param message: slackbotの各種パラメータを保持したclass
     """
     s = Session()
-    qs = (s.query(WaterHistory)
-          .order_by(WaterHistory.id.desc())
-          .limit(limit))
+    qs = s.query(WaterHistory).order_by(WaterHistory.id.desc()).limit(limit)
 
     tmp = []
     for line in qs:
         if line.delta > 0:
-            tmp.append('[{:%Y年%m月%d日}]  {}本 追加'
-                       .format(line.ctime, line.delta))
+            tmp.append("[{:%Y年%m月%d日}]  {}本 追加".format(line.ctime, line.delta))
         else:
-            tmp.append('[{:%Y年%m月%d日}]  {}本 取替'
-                       .format(line.ctime, -line.delta))
+            tmp.append("[{:%Y年%m月%d日}]  {}本 取替".format(line.ctime, -line.delta))
 
-    ret = '管理履歴はありません'
+    ret = "管理履歴はありません"
     if tmp:
-        ret = '\n'.join(tmp)
+        ret = "\n".join(tmp)
 
-    botsend(message, '水の管理履歴:\n{}'.format(ret))
+    botsend(message, "水の管理履歴:\n{}".format(ret))
 
 
-@respond_to(r'^water\s+help$')
+@respond_to(r"^water\s+help$")
 def show_help_water_commands(message):
     """waterコマンドのhelpを表示
 

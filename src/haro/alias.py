@@ -14,7 +14,9 @@ def get_slack_id(session, user_name):
     """
     slack_id = get_slack_id_by_name(user_name)
     if not slack_id:
-        slack_id = (session.query(UserAliasName.slack_id)
-                    .filter(UserAliasName.alias_name == user_name)
-                    .scalar())
+        slack_id = (
+            session.query(UserAliasName.slack_id)
+            .filter(UserAliasName.alias_name == user_name)
+            .scalar()
+        )
     return slack_id

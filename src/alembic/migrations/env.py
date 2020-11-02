@@ -17,7 +17,7 @@ from alembic import context
 
 # Baseをimportするのでharoのrootパスを追加
 # NOTE: run.py と統合できない?
-root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.append(root)
 
 # this is the Alembic Config object, which provides
@@ -26,8 +26,9 @@ config = context.config
 
 # ini ファイルに環境変数を渡すことができないため、ここで追加
 from slackbot_settings import SQLALCHEMY_URL, SQLALCHEMY_ECHO
-config.set_main_option('sqlalchemy.url', SQLALCHEMY_URL)
-config.set_main_option('sqlalchemy.echo', SQLALCHEMY_ECHO)
+
+config.set_main_option("sqlalchemy.url", SQLALCHEMY_URL)
+config.set_main_option("sqlalchemy.echo", SQLALCHEMY_ECHO)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -64,8 +65,7 @@ def run_migrations_offline():
 
     """
     url = config.get_main_section["sqlalchemy.url"]
-    context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True)
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -80,17 +80,16 @@ def run_migrations_online():
     """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
-        prefix='sqlalchemy.',
-        poolclass=pool.NullPool)
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

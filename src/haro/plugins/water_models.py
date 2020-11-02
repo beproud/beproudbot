@@ -10,7 +10,8 @@ class WaterHistory(Base):
     :param Base: `sqlalchemy.ext.declarative.api.DeclarativeMeta` を
         継承したclass
     """
-    __tablename__ = 'water_history'
+
+    __tablename__ = "water_history"
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Unicode(100), nullable=False)

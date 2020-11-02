@@ -35,23 +35,24 @@ def find_thx(s, text):
     hint_names = []
     not_matched = []
 
-    thx_matcher = re.compile(r'(?P<user_names>.+)[ \t\f\v]*(?<!\+)\+\+[ \t\f\v]+(?P<word>.+)',
-                             re.MULTILINE)
+    thx_matcher = re.compile(
+        r"(?P<user_names>.+)[ \t\f\v]*(?<!\+)\+\+[ \t\f\v]+(?P<word>.+)", re.MULTILINE
+    )
     for thx in thx_matcher.finditer(text):
-        user_names = [x for x in thx.group('user_names').split(' ') if x]
+        user_names = [x for x in thx.group("user_names").split(" ") if x]
         for name in user_names:
-            if get_user_name(name.lstrip('<@').rstrip('>')):
-                slack_id = name.lstrip('<@').rstrip('>')
+            if get_user_name(name.lstrip("<@").rstrip(">")):
+                slack_id = name.lstrip("<@").rstrip(">")
             else:
                 slack_id = get_slack_id(s, name)
 
             if slack_id:
-                word_map_names_dict.setdefault(
-                    thx.group('word'), []
-                ).append((slack_id, name))
+                word_map_names_dict.setdefault(thx.group("word"), []).append(
+                    (slack_id, name)
+                )
             else:
                 # 一番近いユーザー名を算出
-                names = [profile['name'] for profile in get_users_info().values()]
+                names = [profile["name"] for profile in get_users_info().values()]
                 hint = get_close_matches(name, names)
                 if hint:
                     hint_names.append(hint[0])
@@ -62,7 +63,7 @@ def find_thx(s, text):
     return word_map_names_dict, hint_names, not_matched
 
 
-@listen_to(r'.*\s*(?<!\+)\+\+\s+.+')
+@listen_to(r".*\s*(?<!\+)\+\+\s+.+")
 def update_thx(message):
     """指定したSlackのユーザーにGJを行う
 
@@ -87,9 +88,9 @@ def update_thx(message):
     if "subtype" in message.body and message.body["subtype"] == "file_share":
         return
 
-    from_user_id = message.body['user']
-    channel_id = message.body['channel']
-    text = message.body['text']
+    from_user_id = message.body["user"]
+    channel_id = message.body["channel"]
+    text = message.body["text"]
 
     s = Session()
     user_dict, hint_names, not_matched = find_thx(s, text)
@@ -98,51 +99,58 @@ def update_thx(message):
     if user_dict:
         for word, users in user_dict.items():
             for slack_id, name in users:
-                s.add(ThxHistory(
-                    user_id=slack_id,
-                    from_user_id=from_user_id,
-                    word=word,
-                    channel_id=channel_id))
+                s.add(
+                    ThxHistory(
+                        user_id=slack_id,
+                        from_user_id=from_user_id,
+                        word=word,
+                        channel_id=channel_id,
+                    )
+                )
                 s.commit()
 
-                count = (s.query(ThxHistory)
-                         .filter(ThxHistory.channel_id == channel_id)
-                         .filter(ThxHistory.user_id == slack_id)
-                         .count())
-                msg.append('{}({}: {}GJ)'.format(word, name, count))
+                count = (
+                    s.query(ThxHistory)
+                    .filter(ThxHistory.channel_id == channel_id)
+                    .filter(ThxHistory.user_id == slack_id)
+                    .count()
+                )
+                msg.append("{}({}: {}GJ)".format(word, name, count))
 
     if hint_names:
         for hint_name in hint_names:
-            msg.append('もしかして: `{}`'.format(hint_name))
+            msg.append("もしかして: `{}`".format(hint_name))
 
     if not_matched:
         for name in not_matched:
-            msg.append('{}はSlackのユーザーとして存在しません'.format(name))
+            msg.append("{}はSlackのユーザーとして存在しません".format(name))
 
-    botsend(message, '\n'.join(msg))
+    botsend(message, "\n".join(msg))
 
 
-@respond_to(r'^thx\s+from$')
-@respond_to(r'^thx\s+from\s+(\S+)$')
+@respond_to(r"^thx\s+from$")
+@respond_to(r"^thx\s+from\s+(\S+)$")
 def show_thx_from(message, user_name=None):
     """誰からGJされたか表示します
 
     :param message: slackbot.dispatcher.Message
     :param str user_name: GJされたユーザー名
     """
-    channel_id = message.body['channel']
+    channel_id = message.body["channel"]
     s = Session()
     if not user_name:
-        user_name = get_user_name(message.body['user'])
+        user_name = get_user_name(message.body["user"])
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
-        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name))
+        botsend(message, "{}はSlackのユーザーとして存在しません".format(user_name))
         return
 
-    rows = [['GJしたユーザー', 'GJ内容']]
-    thx = (s.query(ThxHistory)
-            .filter(ThxHistory.user_id == slack_id)
-            .filter(ThxHistory.channel_id == channel_id))
+    rows = [["GJしたユーザー", "GJ内容"]]
+    thx = (
+        s.query(ThxHistory)
+        .filter(ThxHistory.user_id == slack_id)
+        .filter(ThxHistory.channel_id == channel_id)
+    )
 
     for t in thx:
         rows.append([get_user_name(t.from_user_id), t.word])
@@ -151,36 +159,46 @@ def show_thx_from(message, user_name=None):
     w.writerows(rows)
 
     param = {
-        'token': settings.API_TOKEN,
-        'channels': channel_id,
-        'title': '{}にGJした一覧'.format(user_name)
+        "token": settings.API_TOKEN,
+        "channels": channel_id,
+        "title": "{}にGJした一覧".format(user_name),
     }
-    requests.post(settings.FILE_UPLOAD_URL,
-                  params=param,
-                  files={'file': ("%s_thx.csv" % user_name, output.getvalue(), 'text/csv', )})
+    requests.post(
+        settings.FILE_UPLOAD_URL,
+        params=param,
+        files={
+            "file": (
+                "%s_thx.csv" % user_name,
+                output.getvalue(),
+                "text/csv",
+            )
+        },
+    )
 
 
-@respond_to(r'^thx\s+to$')
-@respond_to(r'^thx\s+to\s+(\S+)$')
+@respond_to(r"^thx\s+to$")
+@respond_to(r"^thx\s+to\s+(\S+)$")
 def show_thx_to(message, user_name=None):
     """誰にGJしたか表示します
 
     :param message: slackbot.dispatcher.Message
     :param str user_name:  GJしたユーザー名
     """
-    channel_id = message.body['channel']
+    channel_id = message.body["channel"]
     if not user_name:
-        user_name = get_user_name(message.body['user'])
+        user_name = get_user_name(message.body["user"])
     s = Session()
     slack_id = get_slack_id(s, user_name)
     if not slack_id:
-        botsend(message, '{}はSlackのユーザーとして存在しません'.format(user_name))
+        botsend(message, "{}はSlackのユーザーとして存在しません".format(user_name))
         return
 
-    rows = [['GJされたユーザー', 'GJ内容']]
-    thx = (s.query(ThxHistory)
-            .filter(ThxHistory.from_user_id == slack_id)
-            .filter(ThxHistory.channel_id == channel_id))
+    rows = [["GJされたユーザー", "GJ内容"]]
+    thx = (
+        s.query(ThxHistory)
+        .filter(ThxHistory.from_user_id == slack_id)
+        .filter(ThxHistory.channel_id == channel_id)
+    )
     for t in thx:
         rows.append([get_user_name(t.user_id), t.word])
     output = StringIO()
@@ -188,16 +206,24 @@ def show_thx_to(message, user_name=None):
     w.writerows(rows)
 
     param = {
-        'token': settings.API_TOKEN,
-        'channels': channel_id,
-        'title': '{}がGJした一覧'.format(user_name)
+        "token": settings.API_TOKEN,
+        "channels": channel_id,
+        "title": "{}がGJした一覧".format(user_name),
     }
-    requests.post(settings.FILE_UPLOAD_URL,
-                  params=param,
-                  files={'file': ("%s_thx.csv" % user_name, output.getvalue(), 'text/csv',)})
+    requests.post(
+        settings.FILE_UPLOAD_URL,
+        params=param,
+        files={
+            "file": (
+                "%s_thx.csv" % user_name,
+                output.getvalue(),
+                "text/csv",
+            )
+        },
+    )
 
 
-@respond_to(r'^thx\s+help$')
+@respond_to(r"^thx\s+help$")
 def show_help_thx_commands(message):
     """thxコマンドのhelpを表示
 

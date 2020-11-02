@@ -32,121 +32,110 @@ def command_patterns(message):
     :return list: 実装コマンドの一覧
     """
     commands = set()
-    for deco in ['respond_to', 'listen_to']:
+    for deco in ["respond_to", "listen_to"]:
         for re_compile in message._plugins.commands.get(deco):
-            commands.add(re_compile.pattern.split('\\s')[0].lstrip('^').rstrip('$'))
+            commands.add(re_compile.pattern.split("\\s")[0].lstrip("^").rstrip("$"))
     return commands
 
 
 class BaseCommandValidator(BaseArgValidator):
-    """createコマンドのバリデータの共通クラス
-    """
-    skip_args = ['message', 'params']
+    """createコマンドのバリデータの共通クラス"""
+
+    skip_args = ["message", "params"]
 
     def has_command(self, command_name):
-        """コマンド名が登録済みか返す
-        """
+        """コマンド名が登録済みか返す"""
         s = Session()
-        qs = (s.query(CreateCommand)
-              .filter(CreateCommand.name == command_name))
+        qs = s.query(CreateCommand).filter(CreateCommand.name == command_name)
         return s.query(qs.exists()).scalar()
 
     def get_command(self, command_name):
-        """コマンド名が一致するCommandModelを返す
-        """
+        """コマンド名が一致するCommandModelを返す"""
         s = Session()
-        command = (s.query(CreateCommand)
-                   .filter(CreateCommand.name == command_name)
-                   .one_or_none())
+        command = (
+            s.query(CreateCommand)
+            .filter(CreateCommand.name == command_name)
+            .one_or_none()
+        )
         return command
 
     def handle_errors(self):
         for err_msg in self.errors.values():
-            self.callargs['message'].send(err_msg)
+            self.callargs["message"].send(err_msg)
 
 
 class AddCommandValidator(BaseCommandValidator):
-
     def clean_command_name(self, command_name):
-        """コマンド名に対してValidationを適用する
-        """
+        """コマンド名に対してValidationを適用する"""
         if self.has_command(command_name):
-            raise ValidationError('`${}`コマンドは既に登録されています'.format(command_name))
+            raise ValidationError("`${}`コマンドは既に登録されています".format(command_name))
 
-        if command_name in command_patterns(self.callargs['message']):
-            raise ValidationError('`${}`は予約語です'.format(command_name))
+        if command_name in command_patterns(self.callargs["message"]):
+            raise ValidationError("`${}`は予約語です".format(command_name))
 
         return command_name
 
 
 class DelCommandValidator(BaseCommandValidator):
-
     def clean_command_name(self, command_name):
-        """コマンド名に対してValidationを適用する
-        """
+        """コマンド名に対してValidationを適用する"""
         if not self.has_command(command_name):
-            raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
+            raise ValidationError("`${}`コマンドは登録されていません".format(command_name))
 
-        if command_name in command_patterns(self.callargs['message']):
-            raise ValidationError('`${}`は予約語です'.format(command_name))
+        if command_name in command_patterns(self.callargs["message"]):
+            raise ValidationError("`${}`は予約語です".format(command_name))
 
         return command_name
 
     def clean_command(self):
-        """valid済のcommand名が存在すればCommandModelを返す
-        """
-        command_name = self.cleaned_data.get('command_name')
+        """valid済のcommand名が存在すればCommandModelを返す"""
+        command_name = self.cleaned_data.get("command_name")
         return self.get_command(command_name)
 
 
 class RunCommandValidator(BaseCommandValidator):
-
     def clean_command_name(self, command_name):
-        """コマンド名に対してValidationを適用する
-        """
-        if command_name not in command_patterns(self.callargs['message']):
+        """コマンド名に対してValidationを適用する"""
+        if command_name not in command_patterns(self.callargs["message"]):
             if not self.has_command(command_name):
-                raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
+                raise ValidationError("`${}`コマンドは登録されていません".format(command_name))
 
         return command_name
 
     def clean_command(self):
-        """valid済のcommand名が存在すればCommandModelを返す
-        """
-        command_name = self.cleaned_data.get('command_name')
+        """valid済のcommand名が存在すればCommandModelを返す"""
+        command_name = self.cleaned_data.get("command_name")
         return self.get_command(command_name)
 
 
 class ReturnTermCommandValidator(BaseCommandValidator):
-    EXCEPT_1WORD_COMMANDS = ['random', 'lunch', 'amesh', 'status']
+    EXCEPT_1WORD_COMMANDS = ["random", "lunch", "amesh", "status"]
 
     def clean_command_name(self, command_name):
 
-        """コマンド名に対してValidationを適用する
-        """
+        """コマンド名に対してValidationを適用する"""
 
         # 一文字コマンドをチェックから除外する
         # haroに登録されているコマンドを自動的に除外できるとよさそう
         if command_name in self.EXCEPT_1WORD_COMMANDS:
             return
 
-        if command_name not in command_patterns(self.callargs['message']):
+        if command_name not in command_patterns(self.callargs["message"]):
             if not self.has_command(command_name):
-                raise ValidationError('`${}`コマンドは登録されていません'.format(command_name))
+                raise ValidationError("`${}`コマンドは登録されていません".format(command_name))
 
-        if command_name in command_patterns(self.callargs['message']):
-            raise ValidationError('`${}`は予約語です'.format(command_name))
+        if command_name in command_patterns(self.callargs["message"]):
+            raise ValidationError("`${}`は予約語です".format(command_name))
 
         return command_name
 
     def clean_command(self):
-        """valid済のcommand名が存在すればCommandModelを返す
-        """
-        command_name = self.cleaned_data.get('command_name')
+        """valid済のcommand名が存在すればCommandModelを返す"""
+        command_name = self.cleaned_data.get("command_name")
         return self.get_command(command_name)
 
 
-@respond_to(r'^create\s+add\s+(\S+)$')
+@respond_to(r"^create\s+add\s+(\S+)$")
 @register_arg_validator(AddCommandValidator)
 def add_command(message, command_name):
     """新たにコマンドを作成する
@@ -156,13 +145,13 @@ def add_command(message, command_name):
     """
     s = Session()
 
-    s.add(CreateCommand(name=command_name, creator=message.body['user']))
+    s.add(CreateCommand(name=command_name, creator=message.body["user"]))
     s.commit()
-    botsend(message, '`${}`コマンドを登録しました'.format(command_name))
+    botsend(message, "`${}`コマンドを登録しました".format(command_name))
 
 
-@respond_to(r'^create\s+del\s+(\S+)$')
-@register_arg_validator(DelCommandValidator, ['command'])
+@respond_to(r"^create\s+del\s+(\S+)$")
+@register_arg_validator(DelCommandValidator, ["command"])
 def del_command(message, command_name, command=None):
     """コマンドを削除する
 
@@ -172,11 +161,11 @@ def del_command(message, command_name, command=None):
     s = Session()
     s.query(CreateCommand).filter(CreateCommand.id == command.id).delete()
     s.commit()
-    botsend(message, '`${}`コマンドを削除しました'.format(command_name))
+    botsend(message, "`${}`コマンドを削除しました".format(command_name))
 
 
-@respond_to(r'^(\S+)$')
-@register_arg_validator(ReturnTermCommandValidator, ['command'])
+@respond_to(r"^(\S+)$")
+@register_arg_validator(ReturnTermCommandValidator, ["command"])
 def return_term(message, command_name, command=None):
     """コマンドに登録されている語録をランダムに返す
 
@@ -190,11 +179,11 @@ def return_term(message, command_name, command=None):
             # #116 URLが展開されて欲しいのでpostMessageで返す
             webapisend(message, word)
         else:
-            botsend(message, '`${}`コマンドにはまだ語録が登録されていません'.format(command_name))
+            botsend(message, "`${}`コマンドにはまだ語録が登録されていません".format(command_name))
 
 
-@respond_to(r'^(\S+)\s+(.+)')
-@register_arg_validator(RunCommandValidator, ['command'])
+@respond_to(r"^(\S+)\s+(.+)")
+@register_arg_validator(RunCommandValidator, ["command"])
 def run_command(message, command_name, params, command=None):
     """登録したコマンドに対して各種操作を行う
 
@@ -211,19 +200,19 @@ def run_command(message, command_name, params, command=None):
     subcommand = data[0]
 
     try:
-        if subcommand == 'pop':
+        if subcommand == "pop":
             # 最後に登録された語録を削除
             pop_term(message, command)
-        elif subcommand == 'list':
+        elif subcommand == "list":
             # 語録の一覧を返す
             get_term(message, command)
-        elif subcommand == 'search':
+        elif subcommand == "search":
             # 語録を検索
             search_term(message, command, data[1])
-        elif subcommand in ('del', 'delete', 'rm', 'remove'):
+        elif subcommand in ("del", "delete", "rm", "remove"):
             # 語録を削除
             del_term(message, command, data[1])
-        elif subcommand == 'add':
+        elif subcommand == "add":
             # 語録を追加
             add_term(message, command, data[1])
         else:
@@ -241,20 +230,23 @@ def pop_term(message, command):
     :param str command: 登録済のコマンド名
     """
     s = Session()
-    term = (s.query(Term)
-            .filter(Term.create_command == command.id)
-            .filter(Term.creator == message.body['user'])
-            .order_by(Term.id.desc())
-            .first())
+    term = (
+        s.query(Term)
+        .filter(Term.create_command == command.id)
+        .filter(Term.creator == message.body["user"])
+        .order_by(Term.id.desc())
+        .first()
+    )
 
     name = command.name
     if term:
         s.delete(term)
         s.commit()
-        botsend(message, 'コマンド `${}` から「{}」を削除しました'.format(name, term.word))
+        botsend(message, "コマンド `${}` から「{}」を削除しました".format(name, term.word))
     else:
-        msg = ('コマンド `${0}` にあなたは語録を登録していません\n'
-               '`${0} add (語録)` で語録を登録してください'.format(name))
+        msg = "コマンド `${0}` にあなたは語録を登録していません\n" "`${0} add (語録)` で語録を登録してください".format(
+            name
+        )
         botsend(message, msg)
 
 
@@ -266,14 +258,12 @@ def get_term(message, command):
     """
     name = command.name
     if command.terms:
-        msg = ['コマンド `${}` の語録は {} 件あります'.format(
-            name, len(command.terms))]
+        msg = ["コマンド `${}` の語録は {} 件あります".format(name, len(command.terms))]
         for t in command.terms:
             msg.append(t.word)
-        botsend(message, '\n'.join(msg))
+        botsend(message, "\n".join(msg))
     else:
-        msg = ('コマンド `${0}` には語録が登録されていません\n'
-               '`${0} add (語録)` で語録を登録してください'.format(name))
+        msg = "コマンド `${0}` には語録が登録されていません\n" "`${0} add (語録)` で語録を登録してください".format(name)
         botsend(message, msg)
 
 
@@ -285,20 +275,20 @@ def search_term(message, command, keyword):
     :param str keyword: 登録済み語録から検索するキーワード
     """
     s = Session()
-    terms = (s.query(Term)
-             .filter(Term.create_command == command.id)
-             .filter(Term.word.like('%' + keyword + '%')))
+    terms = (
+        s.query(Term)
+        .filter(Term.create_command == command.id)
+        .filter(Term.word.like("%" + keyword + "%"))
+    )
 
     name = command.name
     if terms.count() > 0:
-        msg = ['コマンド `${}` の `{}` を含む語録は {} 件あります'.format(
-            name, keyword, terms.count())]
+        msg = ["コマンド `${}` の `{}` を含む語録は {} 件あります".format(name, keyword, terms.count())]
         for t in terms:
             msg.append(t.word)
-        botsend(message, '\n'.join(msg))
+        botsend(message, "\n".join(msg))
     else:
-        botsend(message, 'コマンド `${}` に `{}` を含む語録はありません'.format(
-            name, keyword))
+        botsend(message, "コマンド `${}` に `{}` を含む語録はありません".format(name, keyword))
 
 
 def del_term(message, command, word):
@@ -309,18 +299,20 @@ def del_term(message, command, word):
     :param str word: 削除する語録
     """
     s = Session()
-    term = (s.query(Term)
-            .filter(Term.create_command == command.id)
-            .filter(Term.word == word)
-            .one_or_none())
+    term = (
+        s.query(Term)
+        .filter(Term.create_command == command.id)
+        .filter(Term.word == word)
+        .one_or_none()
+    )
 
     name = command.name
     if term:
         s.delete(term)
         s.commit()
-        botsend(message, 'コマンド `${}` から「{}」を削除しました'.format(name, word))
+        botsend(message, "コマンド `${}` から「{}」を削除しました".format(name, word))
     else:
-        botsend(message, 'コマンド `${}` に「{}」は登録されていません'.format(name, word))
+        botsend(message, "コマンド `${}` に「{}」は登録されていません".format(name, word))
 
 
 def add_term(message, command, word):
@@ -331,22 +323,24 @@ def add_term(message, command, word):
     :param str word: 登録する語録
     """
     s = Session()
-    term = (s.query(Term)
-            .select_from(join(Term, CreateCommand))
-            .filter(CreateCommand.id == command.id)
-            .filter(Term.word == word)
-            .one_or_none())
+    term = (
+        s.query(Term)
+        .select_from(join(Term, CreateCommand))
+        .filter(CreateCommand.id == command.id)
+        .filter(Term.word == word)
+        .one_or_none()
+    )
 
     name = command.name
     if term:
-        botsend(message, 'コマンド `${}` に「{}」は登録済みです'.format(name, word))
+        botsend(message, "コマンド `${}` に「{}」は登録済みです".format(name, word))
     else:
-        s.add(Term(create_command=command.id, creator=message.body['user'], word=word))
+        s.add(Term(create_command=command.id, creator=message.body["user"], word=word))
         s.commit()
-        botsend(message, 'コマンド `${}` に「{}」を追加しました'.format(name, word))
+        botsend(message, "コマンド `${}` に「{}」を追加しました".format(name, word))
 
 
-@respond_to(r'^create\s+help$')
+@respond_to(r"^create\s+help$")
 def show_help_create_commands(message):
     """createコマンドのhelpを表示
 

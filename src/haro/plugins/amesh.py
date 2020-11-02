@@ -49,7 +49,9 @@ def amesh(message):
         try:
             # 画像の合成
             # 000 はエリアごとの固定値で050,100,150があるけど決め打ちで
-            with _get_image("http://tokyo-ame.jwa.or.jp/map/msk000.png") as image_msk, _get_image(
+            with _get_image(
+                "http://tokyo-ame.jwa.or.jp/map/msk000.png"
+            ) as image_msk, _get_image(
                 "http://tokyo-ame.jwa.or.jp/map/map000.jpg"
             ) as image_map, _get_image(
                 "http://tokyo-ame.jwa.or.jp/mesh/000/{}{}.gif".format(yyyymmddhh, mm)
@@ -64,8 +66,10 @@ def amesh(message):
                 merged2.save(tmpname)
 
                 # せっかくなので天気もみれるようにしてる
-                comment = "時刻: {:%Y年%m月%d日 %H}:{}\n".format(n, mm) + \
-                          "公式: http://tokyo-ame.jwa.or.jp/\n"
+                comment = (
+                    "時刻: {:%Y年%m月%d日 %H}:{}\n".format(n, mm)
+                    + "公式: http://tokyo-ame.jwa.or.jp/\n"
+                )
 
                 # 外部サイトに投稿してURLを貼る方法(S3とか)だとaccesskey設定等いるのでslackに直接アップロード
                 sc = message._client.webapi

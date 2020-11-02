@@ -40,13 +40,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # file headerを作る
-handler = logging.FileHandler('../logs/redmine_notification.log')
+handler = logging.FileHandler("../logs/redmine_notification.log")
 handler.setLevel(logging.INFO)
 
 # logging formatを作る
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 
 # handlerをloggerに加える
@@ -58,11 +56,10 @@ EMOJI = ":redmine:"  # BOTの絵文字
 
 
 def get_ticket_information():
-    """Redmineのチケット情報とチケットと結びついているSlackチャンネルを取得
-    """
+    """Redmineのチケット情報とチケットと結びついているSlackチャンネルを取得"""
     redmine = Redmine(REDMINE_URL, key=REDMINE_API_KEY)
     # すべてのチケットを取得
-    issues = redmine.issue.filter(status_id='open', sort='due_date')
+    issues = redmine.issue.filter(status_id="open", sort="due_date")
 
     projects_past_due_date = defaultdict(list)
     projects_close_to_due_date = defaultdict(list)
@@ -73,14 +70,14 @@ def get_ticket_information():
     all_proj_channels = s.query(ProjectChannel).all()
     for issue in issues:
         # due_date属性とdue_dateがnoneの場合は除外
-        if not getattr(issue, 'due_date', None):
+        if not getattr(issue, "due_date", None):
             continue
         proj_id = issue.project.id
         # 全てのプロジェクトチャンネルを獲得
         channels = get_proj_channels(proj_id, all_proj_channels)
         if not channels:  # slack channelが設定されていないissueは無視する
             continue
-        elif not getattr(issue, 'assigned_to', None):
+        elif not getattr(issue, "assigned_to", None):
             # 担当者が設定されていないチケットを各プロジェクトごとに抽出
             projects_assigned_to_is_none[issue.project.id].append(issue)
         elif issue.due_date < today:
@@ -91,14 +88,9 @@ def get_ticket_information():
             projects_close_to_due_date[proj_id].append(issue)
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
-    send_ticket_info_to_channels(projects_past_due_date,
-                                 all_proj_channels,
-                                 True)
-    send_ticket_info_to_channels(projects_close_to_due_date,
-                                 all_proj_channels,
-                                 False)
-    send_assigned_to_is_not_set_tickets(projects_assigned_to_is_none,
-                                        all_proj_channels)
+    send_ticket_info_to_channels(projects_past_due_date, all_proj_channels, True)
+    send_ticket_info_to_channels(projects_close_to_due_date, all_proj_channels, False)
+    send_assigned_to_is_not_set_tickets(projects_assigned_to_is_none, all_proj_channels)
 
 
 def display_issue(issues, has_assigned_to=True):
@@ -112,26 +104,27 @@ def display_issue(issues, has_assigned_to=True):
     text = []
     for issue in issues:
         if has_assigned_to:
-            text.append('- {}: <{}|#{}> {} (<@{}>)'.format(issue.due_date,
-                                                           issue.url,
-                                                           issue.id,
-                                                           issue.subject,
-                                                           issue.assigned_to))
+            text.append(
+                "- {}: <{}|#{}> {} (<@{}>)".format(
+                    issue.due_date,
+                    issue.url,
+                    issue.id,
+                    issue.subject,
+                    issue.assigned_to,
+                )
+            )
         else:
-            text.append('- {}: <{}|#{}> {}'.format(issue.due_date,
-                                                   issue.url,
-                                                   issue.id,
-                                                   issue.subject))
+            text.append(
+                "- {}: <{}|#{}> {}".format(
+                    issue.due_date, issue.url, issue.id, issue.subject
+                )
+            )
 
-    attachment = [{
-        "color": "#F44336",
-        "text": "\n".join(text)
-    }]
+    attachment = [{"color": "#F44336", "text": "\n".join(text)}]
     return attachment
 
 
-def send_ticket_info_to_channels(projects, all_proj_channels,
-                                 is_past_due_date):
+def send_ticket_info_to_channels(projects, all_proj_channels, is_past_due_date):
     """チャンネルを取得し、チケット情報を各Slackチャンネルごとに通知する。
 
     :param projects: 期限が切れたプロジェクト、期限が切れそうなプロジェクトのdict
@@ -145,9 +138,9 @@ def send_ticket_info_to_channels(projects, all_proj_channels,
             # プロジェクトごとのチケット数カウントを取得
             issue_count = len(projects[project])
             if is_past_due_date:  # 期限切れチケット
-                message = '期限が切れたチケットは{}件です\n'.format(issue_count)
+                message = "期限が切れたチケットは{}件です\n".format(issue_count)
             else:  # 期限切れそうなチケット
-                message = 'もうすぐ期限が切れそうなチケットは{}件です\n'.format(issue_count)
+                message = "もうすぐ期限が切れそうなチケットは{}件です\n".format(issue_count)
             # 通知メッセージをformat
             attachments = display_issue(projects[project])
         for channel in channels:
@@ -173,7 +166,7 @@ def get_proj_channels(project_id, all_proj_channels):
     """
     for proj_room in all_proj_channels:
         if project_id == proj_room.project_id:
-            return proj_room.channels.split(',') if proj_room.channels else []
+            return proj_room.channels.split(",") if proj_room.channels else []
 
 
 def send_slack_message(channel, attachments, message):
@@ -184,15 +177,15 @@ def send_slack_message(channel, attachments, message):
     """
     sc = WebClient(API_TOKEN)
     return sc.api_call(
-        'chat.postMessage',
+        "chat.postMessage",
         json={
-            'channel': channel,
-            'text': message,
-            'as_user': "false",
-            'icon_emoji': EMOJI,
-            'username': BOTNAME,
-            'attachments': attachments
-        }
+            "channel": channel,
+            "text": message,
+            "as_user": "false",
+            "icon_emoji": EMOJI,
+            "username": BOTNAME,
+            "attachments": attachments,
+        },
     )
 
 
@@ -219,39 +212,37 @@ def send_slack_message_per_sec(channel, attachments, message):
     # メッセージが通知されたかをチェックする
     # メッセージ通知が成功なら、response["ok"]がTrue
     if response["ok"]:
-        JST = timezone(timedelta(hours=+9), 'JST')
-        time_stamp = datetime.fromtimestamp(
-            float(response["message"]["ts"]),
-            JST
-        )
-        logger.info(
-            "Message posted successfully: {}".format(time_stamp)
-        )
+        JST = timezone(timedelta(hours=+9), "JST")
+        time_stamp = datetime.fromtimestamp(float(response["message"]["ts"]), JST)
+        logger.info("Message posted successfully: {}".format(time_stamp))
 
 
 def get_argparser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=dedent('''\
+        description=dedent(
+            """\
             説明:
-            haroの設定ファイルを読み込んだ後にredmine_notification.pyを実行'''))
+            haroの設定ファイルを読み込んだ後にredmine_notification.pyを実行"""
+        ),
+    )
 
-    parser.add_argument('-c', '--config',
-                        type=argparse.FileType('r'),
-                        default='alembic/conf.ini',
-                        help='ini形式のファイルをファイルパスで指定します')
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=argparse.FileType("r"),
+        default="alembic/conf.ini",
+        help="ini形式のファイルをファイルパスで指定します",
+    )
 
     return parser
 
 
 def notify_error(text):
     message = "期限切れチケット通知処理でエラーが発生しました"
-    attachment = [{
-        "color": "#F44336",
-        "text": text
-    }]
+    attachment = [{"color": "#F44336", "text": text}]
     # bp-bot-dev チャンネルに通知
-    send_slack_message('C0106MV2C4F', attachment, message)
+    send_slack_message("C0106MV2C4F", attachment, message)
 
 
 def main():
@@ -267,14 +258,14 @@ def main():
     conf = ConfigParser()
     conf.read_file(args.config)
     # 環境変数で指定したいため ini ファイルでなくここで追記
-    conf["alembic"]['sqlalchemy.url'] = SQLALCHEMY_URL
-    conf["alembic"]['sqlalchemy.echo'] = SQLALCHEMY_ECHO
+    conf["alembic"]["sqlalchemy.url"] = SQLALCHEMY_URL
+    conf["alembic"]["sqlalchemy.echo"] = SQLALCHEMY_ECHO
     if SQLALCHEMY_POOL_SIZE:
-        conf["alembic"]['sqlalchemy.pool_size'] = SQLALCHEMY_POOL_SIZE
-    if not conf.has_section('alembic'):
-        raise NoSectionError('alembic')
+        conf["alembic"]["sqlalchemy.pool_size"] = SQLALCHEMY_POOL_SIZE
+    if not conf.has_section("alembic"):
+        raise NoSectionError("alembic")
 
-    init_dbsession(conf['alembic'])
+    init_dbsession(conf["alembic"])
     get_ticket_information()
 
 

@@ -6,17 +6,17 @@ from db import Session
 from haro.botmessage import botsend
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
-RESPONSE_ERROR = 'Redmineにアクセスできませんでした。'
-NO_CHANNEL_PERMISSIONS = '{}は{}で表示できません。'
-NO_TEXT = '(本文なし)'
+RESPONSE_ERROR = "Redmineにアクセスできませんでした。"
+NO_CHANNEL_PERMISSIONS = "{}は{}で表示できません。"
+NO_TEXT = "(本文なし)"
 
-API_KEY_SET = 'APIキーを保存しました。'
-INVALID_API_KEY = 'APIキーは無効です。'
-CHANNEL_REGISTERED = 'Redmineの{}プロジェクトをチャンネルに追加しました。'
-CHANNEL_UNREGISTERED = 'Redmineの{}プロジェクトをチャンネルから削除しました。'
-CHANNEL_ALREADY_REGISTERED = 'このSlackチャンネルは既に登録されています。'
-CHANNEL_NOT_REGISTERED = 'このSlackチャンネルは{}プロジェクトに登録されていません。'
-PROJECT_NOT_FOUND = 'プロジェクトは見つかりませんでした。'
+API_KEY_SET = "APIキーを保存しました。"
+INVALID_API_KEY = "APIキーは無効です。"
+CHANNEL_REGISTERED = "Redmineの{}プロジェクトをチャンネルに追加しました。"
+CHANNEL_UNREGISTERED = "Redmineの{}プロジェクトをチャンネルから削除しました。"
+CHANNEL_ALREADY_REGISTERED = "このSlackチャンネルは既に登録されています。"
+CHANNEL_NOT_REGISTERED = "このSlackチャンネルは{}プロジェクトに登録されていません。"
+PROJECT_NOT_FOUND = "プロジェクトは見つかりませんでした。"
 
 HELP = """
 - `/msg @haro $redmine key <your_api_key>`: 自分のRedmineのAPIキーを登録する
@@ -49,29 +49,35 @@ def project_channel_from_identifier(api_key, identifier, session):
     except (ForbiddenError, ResourceNotFoundError):
         return None, None
 
-    chan = session.query(ProjectChannel).filter(ProjectChannel.project_id == project.id). \
-        one_or_none()
+    chan = (
+        session.query(ProjectChannel)
+        .filter(ProjectChannel.project_id == project.id)
+        .one_or_none()
+    )
     return project, chan
 
 
 def user_from_message(message, session):
     # message.bodyにuserが含まれている場合のみ反応する
-    if not message.body.get('user'):
+    if not message.body.get("user"):
         return
-    user_id = message.body['user']
+    user_id = message.body["user"]
 
-    user = session.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
+    user = (
+        session.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
+    )
     return user
 
 
-@respond_to(r'^redmine\s+help$')
+@respond_to(r"^redmine\s+help$")
 def show_help_redmine_commands(message):
-    """Redmineコマンドのhelpを表示
-    """
+    """Redmineコマンドのhelpを表示"""
     botsend(message, HELP)
 
 
-@listen_to(r'issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
+@listen_to(
+    r"issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})"
+)
 def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
     """Redmineのチケット情報を参照する.
 
@@ -81,11 +87,13 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
     s = Session()
 
     channel = message.channel
-    channel_id = channel._body['id']
+    channel_id = channel._body["id"]
     user = user_from_message(message, s)
     if not user:
         return
-    channels = s.query(ProjectChannel.id).filter(ProjectChannel.channels.contains(channel_id))
+    channels = s.query(ProjectChannel.id).filter(
+        ProjectChannel.channels.contains(channel_id)
+    )
     if not s.query(channels.exists()).scalar():
         return
 
@@ -96,8 +104,8 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
 
         noteno = None
         note_suffix = ""
-        if '#note-' in ticket_id:
-            ticket_id, noteno = ticket_id.split('#note-')
+        if "#note-" in ticket_id:
+            ticket_id, noteno = ticket_id.split("#note-")
             note_suffix = "#note-{}".format(noteno)
 
         try:
@@ -107,11 +115,16 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
             return
 
         proj_id = ticket.project.id
-        proj_room = s.query(ProjectChannel).filter(ProjectChannel.project_id == proj_id) \
+        proj_room = (
+            s.query(ProjectChannel)
+            .filter(ProjectChannel.project_id == proj_id)
             .one_or_none()
+        )
 
-        if not proj_room or channel_id not in proj_room.channels.split(','):
-            botsend(message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body['name']))
+        if not proj_room or channel_id not in proj_room.channels.split(","):
+            botsend(
+                message, NO_CHANNEL_PERMISSIONS.format(ticket_id, channel._body["name"])
+            )
             return
 
         if noteno:
@@ -119,12 +132,12 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
             # Redmine 側で変更がなければ問題ないけど、
             # values には #note-n に相当するidがはいっていないので
             # id でソートして順番を保証している
-            notes = sorted(ticket.journals.values(), key=lambda d: d['id'])
+            notes = sorted(ticket.journals.values(), key=lambda d: d["id"])
             for i, v in enumerate(notes, start=1):
                 if str(i) == noteno:
                     # コメントの本文があれば取得する
-                    if v.get('notes'):
-                        description = v['notes']
+                    if v.get("notes"):
+                        description = v["notes"]
             # コメント本文がなかったら書き換えられるよう仮文言としている
             if not description:
                 description = NO_TEXT
@@ -132,26 +145,32 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
             # デフォルトでは説明欄の本文を使用する
             description = ticket.description or NO_TEXT
 
-        text = "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
-            ticketno=ticket_id,
-            noteno=note_suffix,
-            assigned_to=getattr(ticket, "assigned_to", "担当者なし"),
-            priority=getattr(ticket, "priority", "-"),
-            status=getattr(ticket, "status", "-"),
-            title=ticket.subject,
+        text = (
+            "#{ticketno}{noteno}: [{assigned_to}][{priority}][{status}] {title}".format(
+                ticketno=ticket_id,
+                noteno=note_suffix,
+                assigned_to=getattr(ticket, "assigned_to", "担当者なし"),
+                priority=getattr(ticket, "priority", "-"),
+                status=getattr(ticket, "status", "-"),
+                title=ticket.subject,
+            )
         )
         url = "{}{}".format(ticket.url, note_suffix)
 
         sc = message._client.webapi
-        res = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
-        sc.chat.post_message(channel_id, description, as_user=True, thread_ts=res.body['ts'])
+        res = sc.chat.post_message(
+            channel_id, "<{}|{}>".format(url, text), as_user=True
+        )
+        sc.chat.post_message(
+            channel_id, description, as_user=True, thread_ts=res.body["ts"]
+        )
 
 
-@respond_to(r'^redmine\s+key\s+(\S+)$')
+@respond_to(r"^redmine\s+key\s+(\S+)$")
 def register_key(message, api_key):
     s = Session()
 
-    if not message.body.get('user'):
+    if not message.body.get("user"):
         return
 
     # APIキーは最大40文字となっている。
@@ -160,7 +179,7 @@ def register_key(message, api_key):
         botsend(message, INVALID_API_KEY)
         return
 
-    user_id = message.body['user']
+    user_id = message.body["user"]
     user = s.query(RedmineUser).filter(RedmineUser.user_id == user_id).one_or_none()
 
     if not user:
@@ -171,7 +190,7 @@ def register_key(message, api_key):
     botsend(message, API_KEY_SET)
 
 
-@respond_to(r'^redmine\s+add\s+([a-zA-Z0-9_-]+)$')
+@respond_to(r"^redmine\s+add\s+([a-zA-Z0-9_-]+)$")
 def register_room(message, project_identifier):
     """RedmineのプロジェクトとSlackチャンネルを繋ぐ.
 
@@ -180,12 +199,14 @@ def register_room(message, project_identifier):
     """
     s = Session()
     channel = message.channel
-    channel_id = channel._body['id']
+    channel_id = channel._body["id"]
 
     user = user_from_message(message, s)
     if not user:
         return
-    project, project_channel = project_channel_from_identifier(user.api_key, project_identifier, s)
+    project, project_channel = project_channel_from_identifier(
+        user.api_key, project_identifier, s
+    )
     if not project:
         botsend(message, PROJECT_NOT_FOUND)
         return
@@ -205,18 +226,20 @@ def register_room(message, project_identifier):
         botsend(message, CHANNEL_ALREADY_REGISTERED)
 
 
-@respond_to(r'^redmine\s+remove\s+([a-zA-Z0-9_-]+)$')
+@respond_to(r"^redmine\s+remove\s+([a-zA-Z0-9_-]+)$")
 def unregister_room(message, project_identifier):
     s = Session()
 
     channel = message.channel
-    channel_id = channel._body['id']
+    channel_id = channel._body["id"]
 
     user = user_from_message(message, s)
     if not user:
         return
 
-    project, project_channel = project_channel_from_identifier(user.api_key, project_identifier, s)
+    project, project_channel = project_channel_from_identifier(
+        user.api_key, project_identifier, s
+    )
     if not project:
         botsend(message, PROJECT_NOT_FOUND)
         return
@@ -225,7 +248,9 @@ def unregister_room(message, project_identifier):
         return
 
     try:
-        channels = project_channel.channels.split(",") if project_channel.channels else []
+        channels = (
+            project_channel.channels.split(",") if project_channel.channels else []
+        )
         channels.remove(channel_id)
         project_channel.channels = ",".join(channels)
         s.commit()

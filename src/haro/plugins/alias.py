@@ -14,8 +14,8 @@ HELP = """
 """
 
 
-@respond_to(r'^alias\s+show$')
-@respond_to(r'^alias\s+show\s+(\S+)$')
+@respond_to(r"^alias\s+show$")
+@respond_to(r"^alias\s+show\s+(\S+)$")
 def show_user_alias_name(message, user_name=None):
     """ユーザーのエイリアス名一覧を表示する
 
@@ -25,26 +25,27 @@ def show_user_alias_name(message, user_name=None):
     if user_name:
         slack_id = get_slack_id_by_name(user_name)
     else:
-        slack_id = message.body['user']
+        slack_id = message.body["user"]
         user_name = get_user_name(slack_id)
 
     if not slack_id:
-        botsend(message, '{}に紐づくSlackのuser_idは存在しません'.format(user_name))
+        botsend(message, "{}に紐づくSlackのuser_idは存在しません".format(user_name))
         return
 
     s = Session()
-    alias_names = [user.alias_name for user in
-                   s.query(UserAliasName)
-                   .filter(UserAliasName.slack_id == slack_id)]
+    alias_names = [
+        user.alias_name
+        for user in s.query(UserAliasName).filter(UserAliasName.slack_id == slack_id)
+    ]
 
-    pt = PrettyTable(['ユーザー名', 'Slack ID', 'エイリアス名'])
-    alias_name = ','.join(alias_names)
+    pt = PrettyTable(["ユーザー名", "Slack ID", "エイリアス名"])
+    alias_name = ",".join(alias_names)
     pt.add_row([user_name, slack_id, alias_name])
-    botsend(message, '```{}```'.format(pt))
+    botsend(message, "```{}```".format(pt))
 
 
-@respond_to(r'^alias\s+add\s+(\S+)$')
-@respond_to(r'^alias\s+add\s+(\S+)\s+(\S+)$')
+@respond_to(r"^alias\s+add\s+(\S+)$")
+@respond_to(r"^alias\s+add\s+(\S+)\s+(\S+)$")
 def alias_name(message, user_name, alias_name=None):
     """指定したユーザにエイリアス名を紐付ける
 
@@ -60,32 +61,33 @@ def alias_name(message, user_name, alias_name=None):
     else:
         # 投稿者のエイリアス名を更新するパターン
         alias_name = user_name
-        slack_id = message.body['user']
+        slack_id = message.body["user"]
         user_name = get_user_name(slack_id)
 
     user = get_slack_id_by_name(alias_name)
     if user:
-        botsend(message, '`{}` はユーザーが存在しているので使用できません'.format(alias_name))
+        botsend(message, "`{}` はユーザーが存在しているので使用できません".format(alias_name))
         return
 
     if not slack_id:
-        botsend(message, '{}に紐づくSlackのuser_idは存在しません'.format(user_name))
+        botsend(message, "{}に紐づくSlackのuser_idは存在しません".format(user_name))
         return
 
     s = Session()
-    alias_user_name = (s.query(UserAliasName)
-                       .filter(UserAliasName.alias_name == alias_name))
+    alias_user_name = s.query(UserAliasName).filter(
+        UserAliasName.alias_name == alias_name
+    )
     if s.query(alias_user_name.exists()).scalar():
-        botsend(message, 'エイリアス名 `{}` は既に登録されています'.format(alias_name))
+        botsend(message, "エイリアス名 `{}` は既に登録されています".format(alias_name))
         return
 
     s.add(UserAliasName(slack_id=slack_id, alias_name=alias_name))
     s.commit()
-    botsend(message, '{}のエイリアス名に `{}` を追加しました'.format(user_name, alias_name))
+    botsend(message, "{}のエイリアス名に `{}` を追加しました".format(user_name, alias_name))
 
 
-@respond_to(r'^alias\s+del\s+(\S+)$')
-@respond_to(r'^alias\s+del\s+(\S+)\s+(\S+)$')
+@respond_to(r"^alias\s+del\s+(\S+)$")
+@respond_to(r"^alias\s+del\s+(\S+)\s+(\S+)$")
 def unalias_name(message, user_name, alias_name=None):
     """ユーザーに紐づくエイリアス名を削除する
 
@@ -101,28 +103,30 @@ def unalias_name(message, user_name, alias_name=None):
     else:
         # 投稿者のエイリアス名を更新するパターン
         alias_name = user_name
-        slack_id = message.body['user']
+        slack_id = message.body["user"]
         user_name = get_user_name(slack_id)
 
     if not slack_id:
-        botsend(message, '{}に紐づくSlackのuser_idは存在しません'.format(user_name))
+        botsend(message, "{}に紐づくSlackのuser_idは存在しません".format(user_name))
         return
 
     s = Session()
-    alias_user_name = (s.query(UserAliasName)
-                       .filter(UserAliasName.slack_id == slack_id)
-                       .filter(UserAliasName.alias_name == alias_name)
-                       .one_or_none())
+    alias_user_name = (
+        s.query(UserAliasName)
+        .filter(UserAliasName.slack_id == slack_id)
+        .filter(UserAliasName.alias_name == alias_name)
+        .one_or_none()
+    )
 
     if alias_user_name:
         s.delete(alias_user_name)
         s.commit()
-        botsend(message, '{}のエイリアス名から `{}` を削除しました'.format(user_name, alias_name))
+        botsend(message, "{}のエイリアス名から `{}` を削除しました".format(user_name, alias_name))
     else:
-        botsend(message, '{}のエイリアス名 `{}` は登録されていません'.format(user_name, alias_name))
+        botsend(message, "{}のエイリアス名 `{}` は登録されていません".format(user_name, alias_name))
 
 
-@respond_to(r'^alias\s+help$')
+@respond_to(r"^alias\s+help$")
 def show_help_alias_commands(message):
     """Userコマンドのhelpを表示
 

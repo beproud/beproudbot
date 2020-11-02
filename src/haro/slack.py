@@ -20,14 +20,14 @@ def get_users_info():
     users = {}
     webapi = slacker.Slacker(settings.API_TOKEN)
     try:
-        for d in webapi.users.list().body['members']:
+        for d in webapi.users.list().body["members"]:
             profile = {
-                'name': d['name'],
-                'display_name': d['profile']['display_name'],
+                "name": d["name"],
+                "display_name": d["profile"]["display_name"],
             }
-            users[d['id']] = profile
+            users[d["id"]] = profile
     except slacker.Error:
-        logger.error('Cannot connect to Slack')
+        logger.error("Cannot connect to Slack")
     return users
 
 
@@ -41,7 +41,7 @@ def get_user_name(user_id):
     profile = users.get(user_id)
     if not profile:
         return
-    return profile['name']
+    return profile["name"]
 
 
 def get_user_display_name(user_id):
@@ -52,10 +52,10 @@ def get_user_display_name(user_id):
     """
     users = get_users_info()
     profile = users.get(user_id)
-    if profile['display_name']:
-        return profile['display_name']
+    if profile["display_name"]:
+        return profile["display_name"]
     # display_nameはoptional、空ならユーザー名を返す
-    return profile['name']
+    return profile["name"]
 
 
 def get_slack_id_by_name(name):
@@ -66,5 +66,5 @@ def get_slack_id_by_name(name):
     """
     users = get_users_info()
     for slack_id, profile in users.items():
-        if profile['name'] == name:
+        if profile["name"] == name:
             return slack_id

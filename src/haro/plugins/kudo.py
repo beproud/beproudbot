@@ -11,9 +11,9 @@ HELP = """
 """
 
 
-@listen_to(r'^(.*)\s*(?<!\+)\+\+$')
+@listen_to(r"^(.*)\s*(?<!\+)\+\+$")
 def update_kudo(message, names):
-    """ 指定された名前に対して ++ する
+    """指定された名前に対して ++ する
 
     OK:
        name++、name ++、name  ++、@name++、name1 name2++
@@ -25,19 +25,21 @@ def update_kudo(message, names):
     :param message: slackbot.dispatcher.Message
     :param name str: ++する対象の名前
     """
-    slack_id = message.body['user']
+    slack_id = message.body["user"]
     name_list = []
-    for name in [x for x in names.split(' ') if x]:
+    for name in [x for x in names.split(" ") if x]:
         # slackのsuggest機能でユーザーを++した場合(例: @wan++)、name引数は
         # `<@{slack_id}>` というstr型で渡ってくるので対応
-        if get_user_name(name.lstrip('<@').rstrip('>')):
-            name = get_user_name(name.lstrip('<@').rstrip('>'))
+        if get_user_name(name.lstrip("<@").rstrip(">")):
+            name = get_user_name(name.lstrip("<@").rstrip(">"))
 
         s = Session()
-        kudo = (s.query(KudoHistory)
-                .filter(KudoHistory.name == name)
-                .filter(KudoHistory.from_user_id == slack_id)
-                .one_or_none())
+        kudo = (
+            s.query(KudoHistory)
+            .filter(KudoHistory.name == name)
+            .filter(KudoHistory.from_user_id == slack_id)
+            .one_or_none()
+        )
 
         if kudo is None:
             # name ×from_user_id の組み合わせが存在していない -> 新規登録
@@ -48,17 +50,17 @@ def update_kudo(message, names):
             kudo.delta = kudo.delta + 1
             s.commit()
 
-        q = (s.query(
-            func.sum(KudoHistory.delta).label('total_count'))
-            .filter(KudoHistory.name == name))
+        q = s.query(func.sum(KudoHistory.delta).label("total_count")).filter(
+            KudoHistory.name == name
+        )
         total_count = q.one().total_count
         name_list.append((name, total_count))
 
-    msg = ['({}: 通算 {})'.format(n, tc) for n, tc in name_list]
-    botsend(message, '\n'.join(msg))
+    msg = ["({}: 通算 {})".format(n, tc) for n, tc in name_list]
+    botsend(message, "\n".join(msg))
 
 
-@respond_to(r'^kudo\s+help$')
+@respond_to(r"^kudo\s+help$")
 def show_help_alias_commands(message):
     """Kudoコマンドのhelpを表示
 
