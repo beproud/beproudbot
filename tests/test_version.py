@@ -37,7 +37,10 @@ class TestVersion:
 
     def test_get_version_failed(self, target):
         with mock.patch('haro.plugins.version.read_change_log') as m:
+            # arrange
             m.side_effect = FileNotFoundError
-            actual = target()
             expected = 'リリースノートが見つかりません'
-            assert actual == expected
+            # act
+            actual = target()
+        # assert
+        assert actual == expected
