@@ -10,6 +10,7 @@ class TestVersion:
     @pytest.mark.parametrize(
         'change_log,expected',
         [
+            # issue番号が数値
             (
                 # ChangeLog.rst
                 'Unreleased\n' + \
@@ -26,6 +27,24 @@ class TestVersion:
                 'Release Notes - 2020-10-30\n' + \
                 '--------------------------\n' + \
                 '- [#210] READMEとenv.sampleにREDMINE_API_KEYについて追記\n'
+            ),
+            # issue番号が数値以外
+                (
+                # ChangeLog.rst
+                'Unreleased\n' + \
+                '----------\n' + \
+                '\n' + \
+                'Release Notes - 2020-10-30\n' + \
+                '--------------------------\n' + \
+                '- [#foo] READMEとenv.sampleにREDMINE_API_KEYについて追記\n' + \
+                '\n' + \
+                'Release Notes - 2020-10-23\n' + \
+                '--------------------------\n' + \
+                '- [#bar] Redmine Reminderが動いていないバグ\n',
+                # expected
+                'Release Notes - 2020-10-30\n' + \
+                '--------------------------\n' + \
+                '- [#foo] READMEとenv.sampleにREDMINE_API_KEYについて追記\n'
             )
         ]
     )
