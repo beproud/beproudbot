@@ -1,20 +1,32 @@
 import re
 
-import requests
 from slackbot.bot import respond_to
 from haro.botmessage import botsend
 
-URL = 'https://raw.githubusercontent.com/beproud/beproudbot/master/ChangeLog.rst'
+PROJECT_ROOT = '/home/haro/beproudbot'
 VERSION_PAT = re.compile(r'Release Notes - [\d-]+')
 LOG_PAT = re.compile(r'-\s[#[\d]+]\s[\w\W]+')
 HELP = """
-`$version`: beproudbot/ChangeLog.rstから最新の更新内容を表示する
+`$version`: デプロイされているChangeLog.rstから最新の更新内容を表示する
 """
 
 
+def read_change_log():
+    change_log_path = '{}/ChangeLog.rst'.format(PROJECT_ROOT)
+    try:
+        with open(change_log_path, 'r', encoding='utf-8') as f:
+            change_log = f.read()
+        return change_log
+    except FileNotFoundError:
+        raise FileNotFoundError
+
+
 def version():
-    res = requests.get(URL)
-    body = res.text
+    try:
+        body = read_change_log()
+    except FileNotFoundError:
+        message = 'リリースノートが見つかりません'
+        return message
 
     release_notes = body.strip().split('\n')
     latest_row = 0
