@@ -5,7 +5,7 @@ from haro.botmessage import botsend
 
 PROJECT_ROOT = '/home/haro/beproudbot'
 VERSION_PAT = re.compile(r'Release Notes - [\d-]+')
-LOG_PAT = re.compile(r'-\s[#[\d]+]\s[\w\W]+')
+LOG_PAT = re.compile(r'-\s[#[\w\W]+]\s[\w\W]+')
 HELP = """
 `$version`: デプロイされているChangeLog.rstから最新の更新内容を表示する
 """
