@@ -308,6 +308,8 @@ def del_term(message, command, word):
     :param str command: 登録済のコマンド名
     :param str word: 削除する語録
     """
+    # ハイパーリンクをコピペした際前後のスペースが\xa0になっているケースがあるため変換
+    word = word.replace('\xa0', ' ')
     s = Session()
     term = (s.query(Term)
             .filter(Term.create_command == command.id)
@@ -330,6 +332,8 @@ def add_term(message, command, word):
     :param str command: 登録済のコマンド名
     :param str word: 登録する語録
     """
+    # ハイパーリンクをコピペした際前後のスペースが\xa0になっているケースがあるため変換
+    word = word.replace('\xa0', ' ')
     s = Session()
     term = (s.query(Term)
             .select_from(join(Term, CreateCommand))
