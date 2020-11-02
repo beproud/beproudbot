@@ -2,6 +2,11 @@
 Unreleased
 ----------
 
+Release Notes - 2020-11-02
+--------------------------
+- [#213] リリースノートの最新バージョンの記述を返すversionコマンドを追加
+
+
 Release Notes - 2020-10-30
 --------------------------
 - [#210] READMEとenv.sampleにREDMINE_API_KEYについて追記

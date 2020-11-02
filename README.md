@@ -268,3 +268,7 @@ http://localhost:9000/redmine/issues/12345
 - `$status <del,delte,rm,remove> <name>`: リソース削除
 - `$status <name>`: リソースのステータスをデフォルトに戻す
 - `$status <name> <value>`: リソースのステータス設定
+
+### version コマンド
+
+- `$version` : リリースノートから最新の更新を取得して表示する
