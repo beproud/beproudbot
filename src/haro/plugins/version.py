@@ -1,9 +1,9 @@
 import re
 
+from slackbot import settings
 from slackbot.bot import respond_to
 from haro.botmessage import botsend
 
-PROJECT_ROOT = '/home/haro/beproudbot'
 VERSION_PAT = re.compile(r'Release Notes - [\d-]+')
 LOG_PAT = re.compile(r'-\s[#[\w\W]+]\s[\w\W]+')
 HELP = """
@@ -12,7 +12,7 @@ HELP = """
 
 
 def read_change_log():
-    change_log_path = '{}/ChangeLog.rst'.format(PROJECT_ROOT)
+    change_log_path = '{}/ChangeLog.rst'.format(settings.PROJECT_ROOT)
     try:
         with open(change_log_path, 'r', encoding='utf-8') as f:
             change_log = f.read()
