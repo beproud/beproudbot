@@ -66,4 +66,5 @@
     state: restarted
     daemon_reload: yes
     name: "{{ APP_NAME }}"
+    enabled: yes
   tags: [deploy]
