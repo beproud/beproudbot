@@ -101,7 +101,6 @@ def upgrade():
     sa.Column('ctime', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['create_command'], ['create_command.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('word')
     )
     ### end Alembic commands ###
 

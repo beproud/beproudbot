@@ -6,4 +6,4 @@ MYSQL:
   PRIVILEGE: "*.*:ALL,GRANT"
   HOSTS: "%"
   PASSWORD: ""
-  ENCODING: utf8
+  ENCODING: utf8mb4
