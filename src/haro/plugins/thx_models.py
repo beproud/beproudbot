@@ -5,9 +5,9 @@ from db import Base
 
 
 class ThxHistory(Base):
-    """thxの管理に使用されるコマンドのModel
-    """
-    __tablename__ = 'thx_history'
+    """thxの管理に使用されるコマンドのModel"""
+
+    __tablename__ = "thx_history"
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Unicode(100), nullable=False)

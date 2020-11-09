@@ -5,9 +5,9 @@ from db import Base
 
 
 class Cleaning(Base):
-    """掃除当番、各掃除の曜日割当の管理に使用されるコマンドのModel
-    """
-    __tablename__ = 'cleaning'
+    """掃除当番、各掃除の曜日割当の管理に使用されるコマンドのModel"""
+
+    __tablename__ = "cleaning"
 
     id = Column(Integer, primary_key=True)
     slack_id = Column(Unicode(11), nullable=False)

@@ -5,7 +5,7 @@ def botsend(message, text):
     :param message: slackbotのmessageオブジェクト
     :param text: 送信するテキストメッセージ
     """
-    if 'thread_ts' in message.body:
+    if "thread_ts" in message.body:
         # スレッド内のメッセージの場合
         message.send(text, thread_ts=message.thread_ts)
     else:
@@ -20,7 +20,7 @@ def botreply(message, text):
     :param message: slackbotのmessageオブジェクト
     :param text: 送信するテキストメッセージ
     """
-    if 'thread_ts' in message.body:
+    if "thread_ts" in message.body:
         # スレッド内のメッセージの場合
         message.reply(text=text, in_thread=True)
     else:
@@ -36,9 +36,14 @@ def webapisend(message, text):
     """
     sc = message._client.webapi
     channel = message.channel
-    channel_id = channel._body['id']
-    if 'thread_ts' in message.body:
-        sc.chat.post_message(channel_id, text=text, as_user=True,
-                             unfurl_links=True, thread_ts=message.thread_ts)
+    channel_id = channel._body["id"]
+    if "thread_ts" in message.body:
+        sc.chat.post_message(
+            channel_id,
+            text=text,
+            as_user=True,
+            unfurl_links=True,
+            thread_ts=message.thread_ts,
+        )
     else:
         sc.chat.post_message(channel_id, text=text, as_user=True, unfurl_links=True)

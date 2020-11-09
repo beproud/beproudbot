@@ -17,7 +17,7 @@ jobs:
             python3 -m venv venv
             source ./venv/bin/activate
             pip install -U pip setuptools tox
-            tox -epy38,flake8_ci
+            tox -e py38,lint_ci
       - save_cache:
           paths:
             - ./venv

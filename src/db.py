@@ -21,7 +21,7 @@ from haro.plugins.redmine_models import RedmineUser, ProjectChannel  # noqa
 from haro.plugins.resource_models import Resource  # noqa
 
 
-def init_dbsession(config, prefix='sqlalchemy.'):
+def init_dbsession(config, prefix="sqlalchemy."):
     """configに設定した値でDBの設定情報を初期化
 
     :param dict config: `alembic/conf.ini` から生成したdictの設定値

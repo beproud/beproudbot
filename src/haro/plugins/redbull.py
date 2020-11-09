@@ -13,7 +13,7 @@ from haro.botmessage import botsend
 from haro.plugins.redbull_models import RedbullHistory
 from haro.slack import get_user_name
 
-_cache = {'token': None}
+_cache = {"token": None}
 
 HELP = """
 - `$redbull count`: RedBullの残り本数を表示する
@@ -25,21 +25,21 @@ HELP = """
 """
 
 
-@respond_to(r'^redbull\s+count$')
+@respond_to(r"^redbull\s+count$")
 def count_redbull_stock(message):
     """現在のRedBullの在庫本数を返すコマンド
 
     :param message: slackbotの各種パラメータを保持したclass
     """
     s = Session()
-    q = s.query(func.sum(RedbullHistory.delta).label('stock_number'))
+    q = s.query(func.sum(RedbullHistory.delta).label("stock_number"))
     stock_number = q.one().stock_number
     if stock_number is None:
         stock_number = 0
-    botsend(message, 'レッドブル残り {} 本'.format(stock_number))
+    botsend(message, "レッドブル残り {} 本".format(stock_number))
 
 
-@respond_to(r'^redbull\s+(-?\d+)$')
+@respond_to(r"^redbull\s+(-?\d+)$")
 def manage_redbull_stock(message, delta):
     """RedBullの本数の増減を行うコマンド
 
@@ -49,7 +49,7 @@ def manage_redbull_stock(message, delta):
         DBは投入の場合正数、消費の場合は負数を記録する
     """
     delta = -int(delta)
-    user_id = message.body['user']
+    user_id = message.body["user"]
     user_name = get_user_name(user_id)
 
     s = Session()
@@ -57,45 +57,48 @@ def manage_redbull_stock(message, delta):
     s.commit()
 
     if delta > 0:
-        botsend(message, 'レッドブルが{}により{}本投入されました'.format(user_name, delta))
+        botsend(message, "レッドブルが{}により{}本投入されました".format(user_name, delta))
     else:
-        botsend(message, 'レッドブルが{}により{}本消費されました'.format(user_name, -delta))
+        botsend(message, "レッドブルが{}により{}本消費されました".format(user_name, -delta))
 
 
-@respond_to(r'^redbull\s+history$')
+@respond_to(r"^redbull\s+history$")
 def show_user_redbull_history(message):
     """RedBullのUserごとの消費履歴を返すコマンド
 
     :param message: slackbotの各種パラメータを保持したclass
     """
-    user_id = message.body['user']
+    user_id = message.body["user"]
     user_name = get_user_name(user_id)
     s = Session()
-    qs = (s.query(RedbullHistory)
-          .filter(RedbullHistory.user_id == user_id,
-                  RedbullHistory.delta < 0)
-          .order_by(RedbullHistory.id.asc()))
+    qs = (
+        s.query(RedbullHistory)
+        .filter(RedbullHistory.user_id == user_id, RedbullHistory.delta < 0)
+        .order_by(RedbullHistory.id.asc())
+    )
     tmp = []
     for line in qs:
-        tmp.append('[{:%Y年%m月%d日}]  {}本'.format(line.ctime, -line.delta))
+        tmp.append("[{:%Y年%m月%d日}]  {}本".format(line.ctime, -line.delta))
 
-    ret = '消費履歴はありません'
+    ret = "消費履歴はありません"
     if tmp:
-        ret = '\n'.join(tmp)
+        ret = "\n".join(tmp)
 
-    botsend(message, '{}の消費したレッドブル:\n{}'.format(user_name, ret))
+    botsend(message, "{}の消費したレッドブル:\n{}".format(user_name, ret))
 
 
-@respond_to(r'^redbull\s+csv$')
+@respond_to(r"^redbull\s+csv$")
 def show_redbull_history_csv(message):
     """RedBullの月単位の消費履歴をCSVに出力する
 
     :param message: slackbotの各種パラメータを保持したclass
     """
     s = Session()
-    consume_hisotry = (s.query(RedbullHistory)
-                       .filter(RedbullHistory.delta < 0)
-                       .order_by(RedbullHistory.id.desc()))
+    consume_hisotry = (
+        s.query(RedbullHistory)
+        .filter(RedbullHistory.delta < 0)
+        .order_by(RedbullHistory.id.desc())
+    )
 
     # func.month関数を使って月ごとでgroupby count書けるが、
     # SQLiteにはMONTH()関数がないので月集計はPythonで処理する
@@ -105,24 +108,24 @@ def show_redbull_history_csv(message):
     ret = []
     for ((year, month), items) in groupby(consume_hisotry, grouper):
         count = -sum(item.delta for item in items)
-        ret.append(['{}/{}'.format(year, month), str(count)])
+        ret.append(["{}/{}".format(year, month), str(count)])
 
     output = StringIO()
     w = csv.writer(output)
     w.writerows(ret)
 
     param = {
-        'token': settings.API_TOKEN,
-        'channels': message.body['channel'],
-        'title': 'RedBull History Check'
+        "token": settings.API_TOKEN,
+        "channels": message.body["channel"],
+        "title": "RedBull History Check",
     }
-    requests.post(settings.FILE_UPLOAD_URL,
-                  params=param,
-                  files={'file': output.getvalue()})
+    requests.post(
+        settings.FILE_UPLOAD_URL, params=param, files={"file": output.getvalue()}
+    )
 
 
-@respond_to(r'^redbull\s+clear$')
-@respond_to(r'^redbull\s+clear\s+(\w+)$')
+@respond_to(r"^redbull\s+clear$")
+@respond_to(r"^redbull\s+clear\s+(\w+)$")
 def clear_redbull_history(message, token=None):
     """RedBullの履歴データを削除するコマンド
 
@@ -134,23 +137,25 @@ def clear_redbull_history(message, token=None):
     :param str token: `$redbull clear` の後に入力されたトークン
     """
     if token is None:
-        _cache['token'] = ''.join(choice(ascii_letters) for i in range(16))
-        botsend(message, '履歴をDBからすべてクリアします。'
-                '続けるには\n`$redbull clear {}`\nと書いてください'
-                .format(_cache['token']))
+        _cache["token"] = "".join(choice(ascii_letters) for i in range(16))
+        botsend(
+            message,
+            "履歴をDBからすべてクリアします。"
+            "続けるには\n`$redbull clear {}`\nと書いてください".format(_cache["token"]),
+        )
         return
 
-    if token == _cache['token']:
-        _cache['token'] = None
+    if token == _cache["token"]:
+        _cache["token"] = None
         s = Session()
         s.query(RedbullHistory).delete()
         s.commit()
-        botsend(message, '履歴をクリアしました')
+        botsend(message, "履歴をクリアしました")
     else:
-        botsend(message, 'コマンドが一致しないため履歴をクリアできませんでした')
+        botsend(message, "コマンドが一致しないため履歴をクリアできませんでした")
 
 
-@respond_to(r'^redbull\s+help$')
+@respond_to(r"^redbull\s+help$")
 def show_help_redbull_commands(message):
     """RedBullコマンドのhelpを表示
 

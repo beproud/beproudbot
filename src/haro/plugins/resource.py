@@ -17,11 +17,14 @@ HELP = __doc__
 COMMANDS = (
     "help",
     "add",
-    "del", "delete", "rm", "remove",
+    "del",
+    "delete",
+    "rm",
+    "remove",
 )
 
 
-@respond_to(r'^status\s+help$')
+@respond_to(r"^status\s+help$")
 def show_help(message):
     """Statusコマンドのhelpを表示
 
@@ -39,9 +42,14 @@ def show_resources(message):
 
     s = Session()
 
-    resources = s.query(Resource).filter(
-        Resource.channel_id == channel_id,
-    ).order_by(Resource.id.asc()).all()
+    resources = (
+        s.query(Resource)
+        .filter(
+            Resource.channel_id == channel_id,
+        )
+        .order_by(Resource.id.asc())
+        .all()
+    )
     statuses = []
     for resource in resources:
         if resource.status is None:
@@ -56,10 +64,10 @@ def show_resources(message):
     botsend(message, "\n".join(statuses))
 
 
-respond_to('^status$')(show_resources)
+respond_to("^status$")(show_resources)
 
 
-@respond_to(r'^status\s+add\s+(\S+)$')
+@respond_to(r"^status\s+add\s+(\S+)$")
 def add_resource(message, name):
     """リソースの追加
 
@@ -68,22 +76,28 @@ def add_resource(message, name):
     channel_id = message.body["channel"]
 
     s = Session()
-    resource = s.query(Resource).filter(
-        Resource.channel_id == channel_id,
-        Resource.name == name,
-    ).one_or_none()
+    resource = (
+        s.query(Resource)
+        .filter(
+            Resource.channel_id == channel_id,
+            Resource.name == name,
+        )
+        .one_or_none()
+    )
     if not resource:
-        s.add(Resource(
-            channel_id=channel_id,
-            name=name,
-            status=None,
-        ))
+        s.add(
+            Resource(
+                channel_id=channel_id,
+                name=name,
+                status=None,
+            )
+        )
         s.commit()
 
     show_resources(message)
 
 
-@respond_to(r'^status\s+(del|delete|rm|remove)\s+(\S+)$')
+@respond_to(r"^status\s+(del|delete|rm|remove)\s+(\S+)$")
 def remove_resource(message, _, name):
     """リソースの削除
 
@@ -93,10 +107,14 @@ def remove_resource(message, _, name):
     channel_id = message.body["channel"]
 
     s = Session()
-    resource = s.query(Resource).filter(
-        Resource.channel_id == channel_id,
-        Resource.name == name,
-    ).one_or_none()
+    resource = (
+        s.query(Resource)
+        .filter(
+            Resource.channel_id == channel_id,
+            Resource.name == name,
+        )
+        .one_or_none()
+    )
     if resource:
         s.delete(resource)
         s.commit()
@@ -104,7 +122,7 @@ def remove_resource(message, _, name):
     show_resources(message)
 
 
-@respond_to(r'^status\s+(\S+)$')
+@respond_to(r"^status\s+(\S+)$")
 def unset_resource_status(message, name):
     """リソースの設定を初期値に戻す
 
@@ -117,10 +135,14 @@ def unset_resource_status(message, name):
     channel_id = message.body["channel"]
 
     s = Session()
-    resource = s.query(Resource).filter(
-        Resource.channel_id == channel_id,
-        Resource.name == name,
-    ).one_or_none()
+    resource = (
+        s.query(Resource)
+        .filter(
+            Resource.channel_id == channel_id,
+            Resource.name == name,
+        )
+        .one_or_none()
+    )
     if resource:
         resource.status = None
         s.commit()
@@ -128,7 +150,7 @@ def unset_resource_status(message, name):
     show_resources(message)
 
 
-@respond_to(r'^status\s+(\S+)\s+(\S+)$')
+@respond_to(r"^status\s+(\S+)\s+(\S+)$")
 def set_resource_status(message, name, value):
     """リソースの設定
 
@@ -142,10 +164,14 @@ def set_resource_status(message, name, value):
     channel_id = message.body["channel"]
 
     s = Session()
-    resource = s.query(Resource).filter(
-        Resource.channel_id == channel_id,
-        Resource.name == name,
-    ).one_or_none()
+    resource = (
+        s.query(Resource)
+        .filter(
+            Resource.channel_id == channel_id,
+            Resource.name == name,
+        )
+        .one_or_none()
+    )
     if resource:
         resource.status = value
         s.commit()

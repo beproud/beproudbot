@@ -76,7 +76,7 @@ class BaseArgValidator(object):
                 continue
 
             # clean_xxx メソッドがある場合は呼び出して検証
-            f = getattr(self, 'clean_{}'.format(name), None)
+            f = getattr(self, "clean_{}".format(name), None)
             if not f or not callable(f):
                 self.cleaned_data[name] = given
                 logger.debug("do not have clean_%s method", name)
@@ -89,7 +89,7 @@ class BaseArgValidator(object):
 
         # 追加フィールドの検証
         for extra_name in self.extras:
-            f = getattr(self, 'clean_{}'.format(extra_name))
+            f = getattr(self, "clean_{}".format(extra_name))
             try:
                 self.cleaned_data[extra_name] = f()
             except ValidationError as e:

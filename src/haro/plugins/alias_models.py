@@ -5,9 +5,9 @@ from db import Base
 
 
 class UserAliasName(Base):
-    """Slackのuser_idに紐づく名前を管理するモデル
-    """
-    __tablename__ = 'user_alias_name'
+    """Slackのuser_idに紐づく名前を管理するモデル"""
+
+    __tablename__ = "user_alias_name"
 
     id = Column(Integer, primary_key=True)
     slack_id = Column(Unicode(100), nullable=False)

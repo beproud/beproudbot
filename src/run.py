@@ -17,14 +17,20 @@ def get_argparser():
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=dedent('''\
+        description=dedent(
+            """\
             説明:
-            haroの設定ファイルを読み込んだ後にslackbotを起動します'''))
+            haroの設定ファイルを読み込んだ後にslackbotを起動します"""
+        ),
+    )
 
-    parser.add_argument('-c', '--config',
-                        type=argparse.FileType('r'),
-                        default='alembic/conf.ini',
-                        help='ini形式のファイルをファイルパスで指定します')
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=argparse.FileType("r"),
+        default="alembic/conf.ini",
+        help="ini形式のファイルをファイルパスで指定します",
+    )
 
     return parser
 
@@ -35,7 +41,7 @@ def haro_default_replay(message):
 
     :param message: slackbot.dispatcher.Message
     """
-    botsend(message, 'コマンドが不明です')
+    botsend(message, "コマンドが不明です")
 
 
 def main():
@@ -53,14 +59,14 @@ def main():
     conf = ConfigParser()
     conf.read_file(args.config)
     # 環境変数で指定したいため ini ファイルでなくここで追記
-    conf["alembic"]['sqlalchemy.url'] = SQLALCHEMY_URL
-    conf["alembic"]['sqlalchemy.echo'] = SQLALCHEMY_ECHO
+    conf["alembic"]["sqlalchemy.url"] = SQLALCHEMY_URL
+    conf["alembic"]["sqlalchemy.echo"] = SQLALCHEMY_ECHO
     if SQLALCHEMY_POOL_SIZE:
-        conf["alembic"]['sqlalchemy.pool_size'] = SQLALCHEMY_POOL_SIZE
-    if not conf.has_section('alembic'):
-        raise NoSectionError('alembic')
+        conf["alembic"]["sqlalchemy.pool_size"] = SQLALCHEMY_POOL_SIZE
+    if not conf.has_section("alembic"):
+        raise NoSectionError("alembic")
 
-    init_dbsession(conf['alembic'])
+    init_dbsession(conf["alembic"])
     bot = Bot()
     bot.run()
 
