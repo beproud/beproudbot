@@ -53,7 +53,7 @@ def show_resources(message):
         example = random.choice(["なにか", "サーバー", "VM", "ひと", "もの", "こと"])
         statuses = ["これから追加しよう: `$status add {}`".format(example)]
 
-    botsend(message, "\n".join(statuses))
+    botsend(message, """```{}```""".format("\n".join(statuses)))
 
 
 respond_to('^status$')(show_resources)
