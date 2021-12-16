@@ -1,6 +1,9 @@
+Release Notes - 2022-10-20
+--------------------------
+- [#222] 新 haro が追加済のチャンネルでは、新 haro に移植済のコマンドが呼ばれないようにする
 
-Unreleased
-----------
+Release Notes - 2022-09-02
+--------------------------
 - [#225] SlackのAPIがrtm.startからrtm.connectに変更される暫定対応
 
 Release Notes - 2020-11-02
