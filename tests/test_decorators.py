@@ -3,16 +3,16 @@ from unittest import mock
 import pytest
 
 
-class TestCallWhenSlsHaroNotAdded:
-    """call_when_sls_haro_not_added デコレータのテスト"""
+class TestCallWhenSlsHaroNotInstalled:
+    """call_when_sls_haro_not_installed デコレータのテスト"""
 
     @pytest.fixture
     def target(self):
-        from src.haro.decorators import call_when_sls_haro_not_added
+        from src.haro.decorators import call_when_sls_haro_not_installed
 
-        return call_when_sls_haro_not_added
+        return call_when_sls_haro_not_installed
 
-    def test_when_sls_haro_not_added(self, target):
+    def test_when_sls_haro_not_installed(self, target):
         """新 haro がチャンネルに追加されていないとき"""
         func = mock.Mock()
         wrapped_func = target(func)
@@ -30,7 +30,7 @@ class TestCallWhenSlsHaroNotAdded:
         }
         message = mock.Mock()
         message.body = {
-            "channel": "U41NH7LFJ",
+            "channel": "CCCCCCCCCCC",
             "text": "$random",
         }
         with mock.patch("slacker.Conversations.members", return_value=members):
@@ -39,7 +39,7 @@ class TestCallWhenSlsHaroNotAdded:
         # メソッドが呼び出されている
         func.assert_called_once_with(message)
 
-    def test_when_sls_haro_added(self, target):
+    def test_when_sls_haro_installed(self, target):
         """新 haro がチャンネルに追加されているとき"""
         func = mock.Mock()
         wrapped_func = target(func)
