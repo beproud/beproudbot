@@ -32,17 +32,27 @@ def call_when_sls_haro_not_installed(func):
         # https://api.slack.com/methods/conversations.members
         channel = message.body['channel']
         webapi = slacker.Slacker(settings.API_TOKEN)
-        try:
-            cinfo = webapi.conversations.members(channel)
-            members = cinfo.body['members']
-        except slacker.Error:
-            logger.exception('An error occurred while fetching members: channel=%s', channel)
-            return
+        cursor = None
+        while True:
+            try:
+                cinfo = webapi.conversations.members(channel, cursor)
+                members = cinfo.body['members']
+            except slacker.Error:
+                logger.exception('An error occurred while fetching members: channel=%s', channel)
+                return
 
-        # チャンネルメンバーに新 haro がいたらメソッドを実行せずに終了
-        if SLS_HARO_USER_ID in members:
-            logger.info("serverless haro is already installed. channel=%s", channel)
-            return
+            # チャンネルメンバーに新 haro がいたらメソッドを実行せずに終了
+            if SLS_HARO_USER_ID in members:
+                logger.info("serverless haro is already installed. channel=%s", channel)
+                return
+
+            # メンバーはデフォルトで100個ずつ取得される
+            # next_cursor がレスポンスに存在しない場合、NULLの場合、空の場合は、以降の結果がないので取得完了
+            metadata = cinfo.body["response_metadata"]
+            if "next_cursor" not in metadata or metadata["next_cursor"] in (None, ""):
+                break
+
+            cursor = metadata["next_cursor"]
 
         return func(message, *args, **kwargs)
 
