@@ -8,6 +8,7 @@ from datetime import datetime
 import requests
 from PIL import Image
 from haro.botmessage import botsend
+from haro.decorators import call_when_sls_haro_not_installed
 from slackbot.bot import respond_to
 
 HELP = """
@@ -32,6 +33,7 @@ def _get_image(url):
 
 
 @respond_to("^amesh$")
+@call_when_sls_haro_not_installed
 def amesh(message):
 
     # ameshでは5分ごとにデータが作成されるため、桁を揃えてからリクエストしたい

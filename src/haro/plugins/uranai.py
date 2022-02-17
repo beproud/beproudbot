@@ -3,6 +3,7 @@ import datetime
 import requests
 from slackbot.bot import respond_to
 from haro.botmessage import botsend
+from haro.decorators import call_when_sls_haro_not_installed
 
 
 def star(n):
@@ -30,6 +31,7 @@ def uranai(birthday):
 
 
 @respond_to(r'^uranai\s+(\d{4})$')
+@call_when_sls_haro_not_installed
 def show_uranai_commands(message, birthday):
     """Uranaiコマンドの結果を表示
 
