@@ -38,7 +38,7 @@ def webapisend(message, text):
     channel = message.channel
     channel_id = channel._body['id']
     if 'thread_ts' in message.body:
-        sc.chat.post_message(channel_id, text=text, as_user=True,
-                             unfurl_links=True, thread_ts=message.thread_ts)
+        sc.chat_postMessage(channel=channel_id, text=text, as_user=True,
+                            unfurl_links=True, thread_ts=message.thread_ts)
     else:
-        sc.chat.post_message(channel_id, text=text, as_user=True, unfurl_links=True)
+        sc.chat_postMessage(channel=channel_id, text=text, as_user=True, unfurl_links=True)

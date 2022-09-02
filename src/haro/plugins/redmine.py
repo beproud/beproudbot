@@ -143,8 +143,8 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
         url = "{}{}".format(ticket.url, note_suffix)
 
         sc = message._client.webapi
-        res = sc.chat.post_message(channel_id, "<{}|{}>".format(url, text), as_user=True)
-        sc.chat.post_message(channel_id, description, as_user=True, thread_ts=res.body['ts'])
+        res = sc.chat_postMessage(channel=channel_id, text="<{}|{}>".format(url, text), as_user=True)
+        sc.chat_postMessage(channel=channel_id, text=description, as_user=True, thread_ts=res.body['ts'])
 
 
 @respond_to(r'^redmine\s+key\s+(\S+)$')

@@ -69,14 +69,15 @@ def amesh(message):
 
                 # 外部サイトに投稿してURLを貼る方法(S3とか)だとaccesskey設定等いるのでslackに直接アップロード
                 sc = message._client.webapi
-                sc.files.upload(
-                    file_=tmpname,
+
+                sc.files_upload(
+                    file=tmpname,
                     initial_comment=comment,
                     title=name,
                     filename=name,
-                    channels=message.channel._body["name"],
+                    channels=message._body["channel"],
                 )
-        except Exception:
+        except Exception:  # NOQA
             logger.exception("amesh exception")
             if i == MAX_RETRY_NUM:
                 botsend(message, "{}回目: だめでした…またためしてね".format(i))
