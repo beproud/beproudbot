@@ -3,6 +3,7 @@ cachetools==2.0.1
 certifi==2017.7.27.1
 chardet==3.0.4
 geopy==1.11.0
+-e git+git@github.com:ebmdatalab/slackbot@develop#egg=slackbot
 idna==2.6
 kml2geojson==4.0.2
 Mako==1.0.7
