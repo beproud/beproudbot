@@ -147,7 +147,7 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
             channel=channel_id, text="<{}|{}>".format(url, text), as_user=True
         )
         sc.chat_postMessage(
-            channel=channel_id, text=description, as_user=True, thread_ts=res.body['ts']
+            channel=channel_id, text=description, as_user=True, thread_ts=res.data['message']['ts']
         )
 
 
