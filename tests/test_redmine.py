@@ -112,7 +112,7 @@ def test_successful_response(db, slack_message, redmine_user, redmine_project):
     with patch('haro.plugins.redmine.Session', lambda: db.session):
 
         client, web_api, chat_postMessage, res = Mock(), Mock(), Mock(), Mock()
-        res.body = {'ts': 123}
+        res.data = {'message': {'ts': 123}}
         chat_postMessage.return_value = res
         web_api.chat_postMessage = chat_postMessage
         client.webapi = web_api
