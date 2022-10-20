@@ -2,6 +2,7 @@ from prettytable import PrettyTable
 from slackbot.bot import respond_to
 from db import Session
 from haro.botmessage import botsend
+from haro.decorators import call_when_sls_haro_not_installed
 from haro.plugins.alias_models import UserAliasName
 from haro.slack import get_user_name, get_slack_id_by_name
 
@@ -16,6 +17,7 @@ HELP = """
 
 @respond_to(r'^alias\s+show$')
 @respond_to(r'^alias\s+show\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def show_user_alias_name(message, user_name=None):
     """ユーザーのエイリアス名一覧を表示する
 
@@ -45,6 +47,7 @@ def show_user_alias_name(message, user_name=None):
 
 @respond_to(r'^alias\s+add\s+(\S+)$')
 @respond_to(r'^alias\s+add\s+(\S+)\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def alias_name(message, user_name, alias_name=None):
     """指定したユーザにエイリアス名を紐付ける
 
@@ -86,6 +89,7 @@ def alias_name(message, user_name, alias_name=None):
 
 @respond_to(r'^alias\s+del\s+(\S+)$')
 @respond_to(r'^alias\s+del\s+(\S+)\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def unalias_name(message, user_name, alias_name=None):
     """ユーザーに紐づくエイリアス名を削除する
 
@@ -123,6 +127,7 @@ def unalias_name(message, user_name, alias_name=None):
 
 
 @respond_to(r'^alias\s+help$')
+@call_when_sls_haro_not_installed
 def show_help_alias_commands(message):
     """Userコマンドのhelpを表示
 

@@ -18,13 +18,6 @@ def call_when_sls_haro_not_installed(func):
 
     新 haro に移植済なコマンドに付けて、旧 haro と新 haro が一緒に追加されているチャンネルでは、
     新 haro 側のコマンドが優先されるように制御します
-
-    NOTE: デコレータは下から順に呼ばれるので、このデコレータは respond_to, listen_to よりも上に配置すること
-
-    @call_when_sls_haro_not_installed
-    @respond_to("〜")
-    def method(message):
-        pass
     """
     @wraps(func)
     def wrapper(message, *args, **kwargs):

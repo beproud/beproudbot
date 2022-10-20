@@ -2,6 +2,7 @@ from slackbot.bot import respond_to, listen_to
 from sqlalchemy import func
 from db import Session
 from haro.botmessage import botsend
+from haro.decorators import call_when_sls_haro_not_installed
 from haro.plugins.kudo_models import KudoHistory
 from haro.slack import get_user_name
 
@@ -12,6 +13,7 @@ HELP = """
 
 
 @listen_to(r'^(.*)\s*(?<!\+)\+\+$')
+@call_when_sls_haro_not_installed
 def update_kudo(message, names):
     """ 指定された名前に対して ++ する
 
@@ -59,6 +61,7 @@ def update_kudo(message, names):
 
 
 @respond_to(r'^kudo\s+help$')
+@call_when_sls_haro_not_installed
 def show_help_alias_commands(message):
     """Kudoコマンドのhelpを表示
 

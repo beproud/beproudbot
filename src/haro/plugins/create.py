@@ -9,6 +9,7 @@ from haro.arg_validator import (
     register_arg_validator,
 )
 from haro.botmessage import botsend, webapisend
+from haro.decorators import call_when_sls_haro_not_installed
 from haro.plugins.create_models import CreateCommand, Term
 
 HELP = """
@@ -147,6 +148,7 @@ class ReturnTermCommandValidator(BaseCommandValidator):
 
 
 @respond_to(r'^create\s+add\s+(\S+)$')
+@call_when_sls_haro_not_installed
 @register_arg_validator(AddCommandValidator)
 def add_command(message, command_name):
     """新たにコマンドを作成する
@@ -162,6 +164,7 @@ def add_command(message, command_name):
 
 
 @respond_to(r'^create\s+del\s+(\S+)$')
+@call_when_sls_haro_not_installed
 @register_arg_validator(DelCommandValidator, ['command'])
 def del_command(message, command_name, command=None):
     """コマンドを削除する
@@ -176,6 +179,7 @@ def del_command(message, command_name, command=None):
 
 
 @respond_to(r'^(\S+)$')
+@call_when_sls_haro_not_installed
 @register_arg_validator(ReturnTermCommandValidator, ['command'])
 def return_term(message, command_name, command=None):
     """コマンドに登録されている語録をランダムに返す
@@ -194,6 +198,7 @@ def return_term(message, command_name, command=None):
 
 
 @respond_to(r'^(\S+)\s+(.+)')
+@call_when_sls_haro_not_installed
 @register_arg_validator(RunCommandValidator, ['command'])
 def run_command(message, command_name, params, command=None):
     """登録したコマンドに対して各種操作を行う
@@ -347,6 +352,7 @@ def add_term(message, command, word):
 
 
 @respond_to(r'^create\s+help$')
+@call_when_sls_haro_not_installed
 def show_help_create_commands(message):
     """createコマンドのhelpを表示
 
