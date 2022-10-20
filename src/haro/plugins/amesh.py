@@ -77,7 +77,7 @@ def amesh(message):
                     filename=name,
                     channels=message._body["channel"],
                 )
-        except Exception:  # NOQA
+        except Exception:  # noqa: B902
             logger.exception("amesh exception")
             if i == MAX_RETRY_NUM:
                 botsend(message, "{}回目: だめでした…またためしてね".format(i))
