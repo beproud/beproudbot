@@ -1,0 +1,74 @@
+{
+	"name": "beproudbot",
+	"image": "python:3.8-buster",
+	"hostRequirements": {"memory": "4gb"},
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:1": {
+			"username": "vscode",
+			"uid": "1000",
+			"gid": "1000",
+			"upgradePackages": "true"
+		},
+        "ghcr.io/devcontainers/features/docker-in-docker:1": {
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/git:1": "latest",
+		"ghcr.io/devcontainers/features/github-cli:1": "latest",
+		"ghcr.io/devcontainers/features/python:1": "none"  // none to install py-utils on base image python
+	},
+	"overrideFeatureInstallOrder": [
+		"ghcr.io/devcontainers/features/common-utils"
+	],
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode",
+
+    "containerEnv": {
+		// BuildKitについて https://qiita.com/tatsurou313/items/ad86da1bb9e8e570b6fa
+		"DOCKER_BUILDKIT": "1",
+		"COMPOSE_DOCKER_CLI_BUILD": "1",
+	},
+
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				// Python
+				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": false,
+				"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
+				"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+				"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+				"python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
+				"python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
+				"python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
+				"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
+				"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
+				"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance"
+			]
+		}
+	},
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [
+		3306 // MySQL
+	],
+	"portsAttributes": {
+		"3306": {"label": "MySQL"}
+	},
+
+	// Use 'onCreateCommand' to prebuild.
+	"onCreateCommand": "bash .devcontainer/on_create_command.sh",
+
+	// Use 'postCreateCommand' to run commands after the container is created with user scope.
+	// "postCreateCommand": "bash .devcontainer/post_create_command.sh",
+
+	"postStartCommand": "bash .devcontainer/post_start_command.sh"
+}
