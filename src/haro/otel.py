@@ -65,18 +65,19 @@ def setup_metric(resource, /, enable_console=False):
     from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader, ConsoleMetricExporter
     from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 
-    metric_readers = [
-        PeriodicExportingMetricReader(OTLPMetricExporter()),
-    ]
+    metric_readers = []
     if enable_console:
         metric_readers.append(
             PeriodicExportingMetricReader(ConsoleMetricExporter())
         )
     if (os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or
             os.environ.get("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT")):
-        metrics.set_meter_provider(
-            MeterProvider(resource=resource, metric_readers=metric_readers)
+        metric_readers.append(
+            PeriodicExportingMetricReader(OTLPMetricExporter()),
         )
+    metrics.set_meter_provider(
+        MeterProvider(resource=resource, metric_readers=metric_readers)
+    )
 
 
 def setup_logger(resource, /, enable_console=False):

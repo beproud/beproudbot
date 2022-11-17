@@ -76,6 +76,7 @@ def setup():
             'redmine_notification': {
                 'handlers': ['redmine_notification', 'otel_log'],
                 'level': 'INFO',
+                'propagate': False,
             },
         },
     }

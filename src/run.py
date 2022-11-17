@@ -15,7 +15,7 @@ from slackbot_settings import (
 )
 
 
-haro.otel.setup("haro-server", "haro")
+haro.otel.setup("haro-server", "haro", enable_console=False)
 haro.log.setup()
 
 
