@@ -38,9 +38,7 @@ REDMINE_API_KEY = os.environ['REDMINE_API_KEY']
 ##### HARO #####
 # デバッグモードにするとログが出るので、開発時には便利
 DEBUG = is_true(os.environ['HARO_DEBUG'])
-if DEBUG:
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
+# logging設定は haro.log.setup() で行う
 
 # haroのプロジェクトルート
 PROJECT_ROOT = os.environ['PROJECT_ROOT']

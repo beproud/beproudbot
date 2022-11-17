@@ -23,6 +23,8 @@ from redminelib.exceptions import ForbiddenError
 from slack import WebClient
 from slack.errors import SlackApiError
 
+import haro.otel
+import haro.log
 from db import (
     init_dbsession,
     Session,
@@ -37,21 +39,12 @@ from slackbot_settings import (
     SQLALCHEMY_POOL_SIZE,
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
-# file headerを作る
-handler = logging.FileHandler('../logs/redmine_notification.log')
-handler.setLevel(logging.INFO)
+haro.otel.setup("redmine_notification", "haro", enable_console=False)
+haro.log.setup()
 
-# logging formatを作る
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-handler.setFormatter(formatter)
+logger = logging.getLogger('redmine_notification')
 
-# handlerをloggerに加える
-logger.addHandler(handler)
 
 LIMIT = 7  # 期限が1週間以内のチケットを分別するために使用
 BOTNAME = "Redmine BOT"  # 通知を送るBOTの名前

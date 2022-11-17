@@ -6,11 +6,17 @@ from slackbot.bot import Bot, default_reply
 
 from db import init_dbsession
 from haro.botmessage import botsend
+import haro.otel
+import haro.log
 from slackbot_settings import (
     SQLALCHEMY_URL,
     SQLALCHEMY_ECHO,
     SQLALCHEMY_POOL_SIZE,
 )
+
+
+haro.otel.setup("haro-server", "haro", enable_console=False)
+haro.log.setup()
 
 
 def get_argparser():
