@@ -8,7 +8,6 @@ from logging.config import dictConfig
 from opentelemetry.util.types import Attributes
 from opentelemetry.sdk._logs import LoggingHandler
 from opentelemetry.semconv.trace import SpanAttributes
-
 from slackbot_settings import DEBUG
 
 ALLOW_TYPES = (bool, str, int, float)

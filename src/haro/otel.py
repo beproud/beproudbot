@@ -11,7 +11,7 @@ def setup(service_name, service_namespace, /, enable_console=False):
     from setuptools_scm import get_version
     import sys
     resource = resources.Resource(attributes={
-        # # https://opentelemetry.io/docs/reference/specification/resource/semantic_conventions/#service
+        # https://opentelemetry.io/docs/reference/specification/resource/semantic_conventions/#service
         resources.SERVICE_NAME: service_name,
         resources.SERVICE_NAMESPACE: service_namespace,
         resources.SERVICE_VERSION: get_version(search_parent_directories=True),
@@ -47,7 +47,7 @@ def setup_tracer(resource, /, enable_console=False):
         tracer_provider.add_span_processor(
             SimpleSpanProcessor(ConsoleSpanExporter())
         )
-    if (os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or
+    if (os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or  # noqa
             os.environ.get("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT")):
         tracer_provider.add_span_processor(
             BatchSpanProcessor(OTLPSpanExporter())
@@ -62,7 +62,9 @@ def setup_metric(resource, /, enable_console=False):
     """
     from opentelemetry import metrics
     from opentelemetry.sdk.metrics import MeterProvider
-    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader, ConsoleMetricExporter
+    from opentelemetry.sdk.metrics.export import (
+        PeriodicExportingMetricReader, ConsoleMetricExporter
+    )
     from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 
     metric_readers = []
@@ -70,7 +72,7 @@ def setup_metric(resource, /, enable_console=False):
         metric_readers.append(
             PeriodicExportingMetricReader(ConsoleMetricExporter())
         )
-    if (os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or
+    if (os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or  # noqa
             os.environ.get("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT")):
         metric_readers.append(
             PeriodicExportingMetricReader(OTLPMetricExporter()),
@@ -84,7 +86,7 @@ def setup_metric(resource, /, enable_console=False):
 def setup_logger(resource, /, enable_console=False):
     """log exporter
 
-    from https://github.com/open-telemetry/opentelemetry-python/blob/69c9e39/docs/examples/logs/example.py
+    https://github.com/open-telemetry/opentelemetry-python/blob/69c9e39/docs/examples/logs/example.py
     """
     from opentelemetry.sdk._logs import LoggerProvider, set_logger_provider
     from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
@@ -96,7 +98,7 @@ def setup_logger(resource, /, enable_console=False):
         logger_provider.add_log_record_processor(
             SimpleLogRecordProcessor(ConsoleLogExporter())
         )
-    if (os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or
+    if (os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT") or  # noqa
             os.environ.get("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT")):
         logger_provider.add_log_record_processor(
             BatchLogRecordProcessor(OTLPLogExporter())
