@@ -75,9 +75,10 @@ def setup_metric(resource, /, enable_console=False):
         metric_readers.append(
             PeriodicExportingMetricReader(OTLPMetricExporter()),
         )
-    metrics.set_meter_provider(
-        MeterProvider(resource=resource, metric_readers=metric_readers)
-    )
+    if metric_readers:
+        metrics.set_meter_provider(
+            MeterProvider(resource=resource, metric_readers=metric_readers)
+        )
 
 
 def setup_logger(resource, /, enable_console=False):
