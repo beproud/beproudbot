@@ -1,5 +1,5 @@
 {
-	"name": "TRACERY",
+	"name": "beproudbot",
 	"image": "python:3.8-buster",
 	"hostRequirements": {"memory": "4gb"},
 	"features": {
