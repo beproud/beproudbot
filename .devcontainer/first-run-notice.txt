@@ -1,0 +1,5 @@
+👋 beproudbot on Codespaces へようこそ!
+🔍 VS Code を最大限に活用するために、コマンドパレット (Cmd/Ctrl + Shift + P) を使って検索してください。
+
+🔌 beproudbotを起動するには、次のコマンドを実行してください:
+    * cd src && python run.py
