@@ -19,6 +19,7 @@ from datetime import timedelta, date, datetime, timezone
 from textwrap import dedent
 
 from redminelib import Redmine
+from redminelib.exceptions import ForbiddenError
 from slack import WebClient
 from slack.errors import SlackApiError
 
@@ -57,12 +58,24 @@ BOTNAME = "Redmine BOT"  # 通知を送るBOTの名前
 EMOJI = ":redmine:"  # BOTの絵文字
 
 
+def get_project_ids_with_slack_notification(redmine: Redmine):
+    # Slack連携しているプロジェクトを取得
+    project_ids = [
+        pj.id for pj in redmine.project.all()
+        if any(
+            True for fv in pj.custom_fields.values()
+            # fv = {'id': 12, 'name': 'Slack Channel', 'value': '#channel_name'}
+            if fv["name"] == "Slack Channel" and fv["value"]
+        )
+    ]
+    return project_ids
+
+
 def get_ticket_information():
     """Redmineのチケット情報とチケットと結びついているSlackチャンネルを取得
     """
     redmine = Redmine(REDMINE_URL, key=REDMINE_API_KEY)
     # すべてのチケットを取得
-    issues = redmine.issue.filter(status_id='open', sort='due_date')
 
     projects_past_due_date = defaultdict(list)
     projects_close_to_due_date = defaultdict(list)
@@ -71,24 +84,39 @@ def get_ticket_information():
     close_to_today = today + timedelta(LIMIT)
     s = Session()
     all_proj_channels = s.query(ProjectChannel).all()
-    for issue in issues:
-        # due_date属性とdue_dateがnoneの場合は除外
-        if not getattr(issue, 'due_date', None):
-            continue
-        proj_id = issue.project.id
+
+    proj_ids = get_project_ids_with_slack_notification(redmine)
+    for proj_id in sorted(proj_ids):
         # 全てのプロジェクトチャンネルを獲得
         channels = get_proj_channels(proj_id, all_proj_channels)
         if not channels:  # slack channelが設定されていないissueは無視する
+            logger.info("Skip project without channel: proj_id=%d", proj_id)
             continue
-        elif not getattr(issue, 'assigned_to', None):
-            # 担当者が設定されていないチケットを各プロジェクトごとに抽出
-            projects_assigned_to_is_none[issue.project.id].append(issue)
-        elif issue.due_date < today:
-            # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
-            projects_past_due_date[proj_id].append(issue)
-        # issueの期限が1週間以内の場合
-        elif issue.due_date < close_to_today:
-            projects_close_to_due_date[proj_id].append(issue)
+
+        # プロジェクトのissues取得
+        try:
+            issues = redmine.issue.filter(
+                project_id=proj_id, status_id='open', sort='due_date'
+            )
+        except ForbiddenError:  # アクセス権がないプロジェクト
+            logger.info("Skip project without access rights: proj_id=%d", proj_id)
+            continue
+
+        for issue in issues:
+            # due_date属性とdue_dateがnoneの場合は除外
+            if not getattr(issue, 'due_date', None):
+                continue
+            elif not getattr(issue, 'assigned_to', None):
+                # 担当者が設定されていないチケットを各プロジェクトごとに抽出
+                projects_assigned_to_is_none[issue.project.id].append(issue)
+            elif issue.due_date < today:
+                # 辞書のkeyと値の例proj_id: ['- 2017-03-31 23872: サーバーセキュリティーの基準を作ろう(@takanory)',]
+                projects_past_due_date[proj_id].append(issue)
+            # issueの期限が1週間以内の場合
+            elif issue.due_date < close_to_today:
+                projects_close_to_due_date[proj_id].append(issue)
+
+        time.sleep(1)  # 負荷軽減
 
     # 各プロジェクトのチケット通知をSlackチャンネルに送る。
     send_ticket_info_to_channels(projects_past_due_date,
