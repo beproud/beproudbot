@@ -16,3 +16,10 @@ geopy
 kml2geojson
 
 pillow
+
+# opentelemetry
+setuptools-scm
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-requests
+opentelemetry-exporter-otlp-proto-grpc
