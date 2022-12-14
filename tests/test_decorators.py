@@ -49,7 +49,7 @@ class TestCallWhenSlsHaroNotInstalled:
             "ok": True,
             "members": [
                 "AAAAAAAAA",
-                "U01V2E7MVLG",  # 新 haro のユーザーID
+                "U033CS84RAR",  # 新 haro のユーザーID
                 "BBBBBBBBB",
             ],
             "response_metadata": {
@@ -89,7 +89,7 @@ class TestCallWhenSlsHaroNotInstalled:
             "members": [
                 "CCCCCCCCC",
                 "DDDDDDDDD",
-                "U01V2E7MVLG",  # 新 haro のユーザーID
+                "U033CS84RAR",  # 新 haro のユーザーID
             ],
             "response_metadata": {
                 "next_cursor": "",
