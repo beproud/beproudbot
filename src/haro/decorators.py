@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 # Serverless 版 haro のユーザーID
-SLS_HARO_USER_ID = "U01V2E7MVLG"
+SLS_HARO_USER_ID = "U033CS84RAR"
 
 
 def call_when_sls_haro_not_installed(func):
