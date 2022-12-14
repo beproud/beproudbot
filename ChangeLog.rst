@@ -1,4 +1,4 @@
-Unreleased
+Release Notes - 2022-12-14
 --------------------------
 - [#233] haro-slsのSlack idを更新する
 
