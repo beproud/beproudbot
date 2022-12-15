@@ -1,3 +1,7 @@
+Release Notes - 2022-12-15
+--------------------------
+- [#235] thxコマンドに call_when_sls_haro_not_installed を適用する
+
 Release Notes - 2022-12-14
 --------------------------
 - [#233] haro-slsのSlack idを更新する
