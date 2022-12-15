@@ -9,6 +9,7 @@ from slackbot.bot import respond_to, listen_to
 from db import Session
 from haro.alias import get_slack_id
 from haro.botmessage import botsend
+from haro.decorators import call_when_sls_haro_not_installed
 from haro.plugins.thx_models import ThxHistory
 from haro.slack import get_user_name, get_users_info
 
@@ -63,6 +64,7 @@ def find_thx(s, text):
 
 
 @listen_to(r'.*\s*(?<!\+)\+\+\s+.+')
+@call_when_sls_haro_not_installed
 def update_thx(message):
     """指定したSlackのユーザーにGJを行う
 
@@ -124,6 +126,7 @@ def update_thx(message):
 
 @respond_to(r'^thx\s+from$')
 @respond_to(r'^thx\s+from\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def show_thx_from(message, user_name=None):
     """誰からGJされたか表示します
 
@@ -162,6 +165,7 @@ def show_thx_from(message, user_name=None):
 
 @respond_to(r'^thx\s+to$')
 @respond_to(r'^thx\s+to\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def show_thx_to(message, user_name=None):
     """誰にGJしたか表示します
 
@@ -198,6 +202,7 @@ def show_thx_to(message, user_name=None):
 
 
 @respond_to(r'^thx\s+help$')
+@call_when_sls_haro_not_installed
 def show_help_thx_commands(message):
     """thxコマンドのhelpを表示
 
