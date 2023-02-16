@@ -1,3 +1,7 @@
+Unreleased
+----------
+- [#238] redmineコマンドに `@call_when_sls_haro_not_installed` デコレータを付加する
+
 Release Notes - 2023-02-16
 --------------------------
 - [#241] haro2で追加したテーブルをdbに反映させる
