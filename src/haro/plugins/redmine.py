@@ -4,6 +4,7 @@ from slackbot.bot import listen_to, respond_to
 from slackbot_settings import REDMINE_URL
 from db import Session
 from haro.botmessage import botsend
+from haro.decorators import call_when_sls_haro_not_installed
 from haro.plugins.redmine_models import RedmineUser, ProjectChannel
 
 RESPONSE_ERROR = 'Redmineにアクセスできませんでした。'
@@ -65,6 +66,7 @@ def user_from_message(message, session):
 
 
 @respond_to(r'^redmine\s+help$')
+@call_when_sls_haro_not_installed
 def show_help_redmine_commands(message):
     """Redmineコマンドのhelpを表示
     """
@@ -72,6 +74,7 @@ def show_help_redmine_commands(message):
 
 
 @listen_to(r'issues\/(\d{2,}\#note\-\d+)|issues\/(\d{2,})|[^a-zA-Z/`\n`][t](\d{2,})|^t(\d{2,})')
+@call_when_sls_haro_not_installed
 def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
     """Redmineのチケット情報を参照する.
 
@@ -152,6 +155,7 @@ def show_ticket_information(message, *ticket_ids):  # NOQA: R701, C901
 
 
 @respond_to(r'^redmine\s+key\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def register_key(message, api_key):
     s = Session()
 
@@ -176,6 +180,7 @@ def register_key(message, api_key):
 
 
 @respond_to(r'^redmine\s+add\s+([a-zA-Z0-9_-]+)$')
+@call_when_sls_haro_not_installed
 def register_room(message, project_identifier):
     """RedmineのプロジェクトとSlackチャンネルを繋ぐ.
 
@@ -210,6 +215,7 @@ def register_room(message, project_identifier):
 
 
 @respond_to(r'^redmine\s+remove\s+([a-zA-Z0-9_-]+)$')
+@call_when_sls_haro_not_installed
 def unregister_room(message, project_identifier):
     s = Session()
 
