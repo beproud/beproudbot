@@ -22,6 +22,7 @@ COMMANDS = (
 
 
 @respond_to(r'^status\s+help$')
+@call_when_sls_haro_not_installed
 def show_help(message):
     """Statusコマンドのhelpを表示
 
@@ -60,6 +61,7 @@ respond_to('^status$')(show_resources)
 
 
 @respond_to(r'^status\s+add\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def add_resource(message, name):
     """リソースの追加
 
@@ -84,6 +86,7 @@ def add_resource(message, name):
 
 
 @respond_to(r'^status\s+(del|delete|rm|remove)\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def remove_resource(message, _, name):
     """リソースの削除
 
@@ -105,6 +108,7 @@ def remove_resource(message, _, name):
 
 
 @respond_to(r'^status\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def unset_resource_status(message, name):
     """リソースの設定を初期値に戻す
 
@@ -129,6 +133,7 @@ def unset_resource_status(message, name):
 
 
 @respond_to(r'^status\s+(\S+)\s+(\S+)$')
+@call_when_sls_haro_not_installed
 def set_resource_status(message, name, value):
     """リソースの設定
 
