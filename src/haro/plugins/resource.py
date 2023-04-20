@@ -10,6 +10,7 @@ import random
 from slackbot.bot import respond_to
 from db import Session
 from haro.botmessage import botsend
+from haro.decorators import call_when_sls_haro_not_installed
 from haro.plugins.resource_models import Resource
 
 
