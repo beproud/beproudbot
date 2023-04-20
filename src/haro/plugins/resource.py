@@ -57,7 +57,7 @@ def show_resources(message):
     botsend(message, "\n".join(statuses))
 
 
-respond_to('^status$')(show_resources)
+respond_to('^status$')(call_when_sls_haro_not_installed(show_resources))
 
 
 @respond_to(r'^status\s+add\s+(\S+)$')
