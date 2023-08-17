@@ -1,4 +1,6 @@
-[![CircleCI](https://circleci.com/gh/beproud/beproudbot.svg?style=svg)](https://circleci.com/gh/beproud/beproudbot)
+# 🚧 Repository update 🚧
+
+The repository updated to be https://github.com/beproud/beproudbot-sls - please raise new issues, discussions and pull requests there 🙏
 
 # Haro
 
